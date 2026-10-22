@@ -78,3 +78,5 @@ tests/e2e/               Playwright 冒烟
 ## 授权
 
 代码 MIT。docstring 来自 LLVM 文档（Apache-2.0 WITH LLVM-exception），wasm 构建来自 [`@wasm-fmt/clang-format`](https://github.com/wasm-fmt/clang-format)（MIT）。
+
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
