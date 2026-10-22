@@ -7,6 +7,8 @@
 
 **在线**：<https://lzh0394.github.io/clang-format-configurator-v3/>
 
+![screenshot](docs/screenshot.png)
+
 当前进度：**M0 已完成**（骨架 + 资源流水线 + 一次真实格式化），CI 与 Pages 发布已跑通。
 
 ## 快速开始
