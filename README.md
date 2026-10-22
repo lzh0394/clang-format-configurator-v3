@@ -9,7 +9,7 @@
 
 ![screenshot](docs/screenshot.png)
 
-当前进度：**M0 已完成**（骨架 + 资源流水线 + 一次真实格式化），CI 与 Pages 发布已跑通。
+当前进度：**M0 已完成**（骨架 + 资源流水线 + 一次真实格式化），CI 与 Pages 发布已跑通。开发状态、命令与坑见 [docs/handoff.md](docs/handoff.md)。
 
 ## 快速开始
 
