@@ -104,7 +104,7 @@ export default function App() {
       await client.init(version);
       if (cancelled) return;
       setSchema(nextSchema);
-      setStatus(nextSchema.build);
+      setStatus(`clang-format ${version} ready`);
       readyRef.current = true;
       void runFormat();
     })().catch((cause: Error) => {
@@ -239,7 +239,7 @@ export default function App() {
       </main>
 
       <footer className={styles.status} data-testid="status">
-        <span>{status}</span>
+        <span title={schema?.build}>{status}</span>
         <span className={styles.dot} aria-hidden="true">
           ·
         </span>

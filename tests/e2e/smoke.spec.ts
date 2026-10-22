@@ -31,7 +31,7 @@ test("switching version loads that wasm build", async ({ page }) => {
 
   await page.getByLabel("Version").selectOption("18.1.8");
   await expect(page.getByTestId("status")).toContainText("163 options");
-  await expect(page.getByTestId("status")).toContainText("clang-format version 18.1.8");
+  await expect(page.getByTestId("status")).toContainText("clang-format 18.1.8");
   await expect(page.getByTestId("output")).toContainText("class Widget {");
 });
 
