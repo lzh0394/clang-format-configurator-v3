@@ -304,6 +304,7 @@ Notes：
 - `playwright.config.ts` 里 `baseURL` 与 `webServer` 都从 `VITE_BASE` 派生（`http://127.0.0.1:4173${VITE_BASE}`），否则 preview 下子路径直接 404。
 - action 版本按 2026-10 的 majors 写；建议 pin 到 commit SHA 并开 Dependabot，第三方 action 是供应链入口。
 - **兜底**：组织策略若禁 `pages: write`，退回 `gh-pages` 分支 + `peaceiris/actions-gh-pages`；再不行换 Cloudflare Pages，构建命令不变。
+- **已落地**：`.github/workflows/ci.yml`（build + e2e，按子路径构建）与 `deploy.yml`（build → deploy → smoke 对真实 URL 再跑一遍）；本地与线上均验证通过。
 
 ## 9. 里程碑
 
@@ -317,7 +318,7 @@ Notes：
 
 **M3 完成即视为 v3 交付**，M4 不阻塞上线。
 
-**M0 状态（2026-10-22，已完成）**：`npm run dev` 与 `npm run build` 均能格式化；Playwright 冒烟 4 条全绿（Edge，含 `/<repo>/` 子路径构建）；3 个版本 schema 生成并通过类型校验；首屏 JS 71 KB gzip。遗留项：16/17 缺 `dump_config`、22/23 dump 值域错位（§3.1）。
+**M0 状态（2026-10-22，已完成）**：`npm run dev` 与 `npm run build` 均能格式化；Playwright 冒烟 4 条全绿（Edge，含 `/<repo>/` 子路径构建）；3 个版本 schema 生成并通过类型校验；首屏 JS 71 KB gzip。**已建仓库并跑通 CI 与 Pages 发布**：<https://github.com/lzh0394/clang-format-configurator-v3>，线上 <https://lzh0394.github.io/clang-format-configurator-v3/>，部署后 smoke 对真实 URL 通过。遗留项：16/17 缺 `dump_config`、22/23 dump 值域错位（§3.1）。
 
 **估时口径**：单人、熟悉 React/TS、无会议，1 天 = 6 h 净编码；不含 review 往返、CI 排队、部署调试。基准不是"写多少行代码"，而是 v2 的可见功能清单——每条标成**照搬 / 重写 / 新增**三档分别加权，漏项比写得慢更容易让工期翻倍。每项拆到 ≤4 h 再估，给"乐观–最可能"区间；悲观情况不摊进区间，而是单列成 §10 的回退路径（平摊出来的 buffer 最后都会被吃掉，还看不出是哪一项超了）。
 

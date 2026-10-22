@@ -1,8 +1,13 @@
 # clang-format configurator v3
 
+[![ci](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/ci.yml/badge.svg)](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/ci.yml)
+[![deploy](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/deploy.yml/badge.svg)](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/deploy.yml)
+
 纯静态的 clang-format 配置器：选版本、选风格、改选项，浏览器内 wasm 实时格式化，导出 `.clang-format`。没有后端，可以离线跑。
 
-当前进度：**M0 已完成**（骨架 + 资源流水线 + 一次真实格式化）。
+**在线**：<https://lzh0394.github.io/clang-format-configurator-v3/>
+
+当前进度：**M0 已完成**（骨架 + 资源流水线 + 一次真实格式化），CI 与 Pages 发布已跑通。
 
 ## 快速开始
 
@@ -66,7 +71,7 @@ tests/e2e/               Playwright 冒烟
 
 ## 部署
 
-推送到 `main` 后由 GitHub Actions 构建并发布到 Pages（`Settings → Pages → Source: GitHub Actions`）。子路径与缓存策略见 plan.md 第 8.1 节。
+推到 `main` 即自动发布到 GitHub Pages（`Settings → Pages → Source: GitHub Actions`）。工作流分三段：build（含 e2e）→ deploy → smoke（对线上 URL 再跑一遍 Playwright，等 Pages 返回 200 后开始）。子路径与缓存策略见 plan.md 第 8.1 节。
 
 ## 授权
 

@@ -58,6 +58,41 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
         uses: actions/deploy-pages@v5
+
+  # The only test that sees the real deployment: base path, asset URLs,
+  # worker and schema fetches all have to work on the live origin.
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Wait for the deployment to serve
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: |
+          for attempt in $(seq 1 12); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$PAGE_URL")
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 5
+          done
+          echo "deployment did not return 200: $code"
+          exit 1
+
+      - run: npm run test:e2e
+        env:
+          PW_CHANNEL: chromium
+          PW_BASE_URL: ${{ needs.deploy.outputs.page_url }}
