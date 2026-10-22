@@ -1,0 +1,11 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch({ channel: "msedge" });
+const page = await browser.newPage();
+page.on("console", (m) => { if (m.type() === "error") console.log("console:", m.text().slice(0, 200)); });
+page.on("pageerror", (e) => console.log("pageerror:", e.message.slice(0, 200)));
+page.on("response", (r) => { if (r.status() >= 400) console.log("HTTP", r.status(), r.url()); });
+await page.goto("https://lzh0394.github.io/clang-format-configurator-v3/");
+await page.waitForTimeout(6000);
+console.log("status:", await page.getByTestId("status").textContent());
+console.log("output head:", (await page.getByTestId("output").textContent())?.slice(0, 80).replace(/\n/g, " | "));
+await browser.close();
