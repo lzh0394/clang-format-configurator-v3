@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.cache/
+tmp/
+
+# wasm binaries are reproducible via `npm run prepare:assets`
+public/wasm/
+
+# test artifacts
+playwright-report/
+test-results/

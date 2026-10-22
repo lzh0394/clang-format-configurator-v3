@@ -1,0 +1,17 @@
+{
+  "default": "21.1.8",
+  "versions": [
+    {
+      "version": "21.1.8",
+      "options": 189
+    },
+    {
+      "version": "20.1.7",
+      "options": 183
+    },
+    {
+      "version": "18.1.8",
+      "options": 163
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      # The schema is committed; only the wasm binaries need downloading.
+      - uses: actions/cache@v6
+        with:
+          path: public/wasm
+          key: wasm-${{ hashFiles('tools/versions.json') }}
+          restore-keys: wasm-
+
+      - run: npm ci
+      - run: npm run prepare:wasm
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          PW_CHANNEL: chromium
