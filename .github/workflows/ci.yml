@@ -11,6 +11,10 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      # Exercise the deployed sub-path on every run: that is where asset and
+      # worker URLs break if BASE_URL is not threaded through.
+      VITE_BASE: /${{ github.event.repository.name }}/
     steps:
       - uses: actions/checkout@v7
 

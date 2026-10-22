@@ -1,0 +1,63 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_BASE: /${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      # The schema is committed; only the wasm binaries need downloading.
+      - uses: actions/cache@v6
+        with:
+          path: public/wasm
+          key: wasm-${{ hashFiles('tools/versions.json') }}
+          restore-keys: wasm-
+
+      - run: npm ci
+      - run: npm run prepare:wasm
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          PW_CHANNEL: chromium
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5
