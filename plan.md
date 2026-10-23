@@ -320,6 +320,8 @@ Notes：
 
 **M0 状态（2026-10-22，已完成）**：`npm run dev` 与 `npm run build` 均能格式化；Playwright 冒烟 4 条全绿（Edge，含 `/<repo>/` 子路径构建）；3 个版本 schema 生成并通过类型校验；首屏 JS 71 KB gzip。**已建仓库并跑通 CI 与 Pages 发布**：<https://github.com/lzh0394/clang-format-configurator-v3>，线上 <https://lzh0394.github.io/clang-format-configurator-v3/>，部署后 smoke 对真实 URL 通过。遗留项：16/17 缺 `dump_config`、22/23 dump 值域错位（§3.1）。
 
+**M1 状态（2026-10-23，已完成）**：选项引擎与 UI 按本节验收落地——schema store（LRU 3 版本 + docs 懒加载，失败可重试）、`modified` 模型（只发改动项；16 个 map 选项存稀疏 patch，显示值 = `modified[key] ?? defaults[style][key]`；版本切换自动剔除目标 schema 不认识的键）、虚拟化选项面板（189 行、动态行高、键名+文档搜索、全部/已修改/已废弃 chips、五种控件、逐项继承值/reset）、Minimal/Full 导出、带 schema 校验与 warning 的导入、legacy `AlignConsecutive*` / `SortIncludes` / `AlignTrailingComments` 转换。验收证据：纯 UI 生成 `.clang-format` 的 e2e 通过；**导出→导入→导出字节相同**（minimal/full，单测 78 条 + e2e 双向覆盖）；`npm run verify` 全绿（typecheck + 100 单测 + build）；Playwright 20 条（4 M0 smoke + 16 M1）在 base `/` 与 `/<repo>/` 子路径构建下全绿；首屏 JS 119.8 KB gzip（预算 250 KB）。新增运行时依赖 `@tanstack/react-virtual`、`yaml`（后者从 devDependencies 移动）。M1 的并行开发契约（接口/测试 id/归属）随完成后删除，实现细节见 `docs/handoff.md`。
+
 **估时口径**：单人、熟悉 React/TS、无会议，1 天 = 6 h 净编码；不含 review 往返、CI 排队、部署调试。基准不是"写多少行代码"，而是 v2 的可见功能清单——每条标成**照搬 / 重写 / 新增**三档分别加权，漏项比写得慢更容易让工期翻倍。每项拆到 ≤4 h 再估，给"乐观–最可能"区间；悲观情况不摊进区间，而是单列成 §10 的回退路径（平摊出来的 buffer 最后都会被吃掉，还看不出是哪一项超了）。
 
 **校准**：按拆解重算，P50 ≈ 6.2 天（M0 1.0 / M1 2.2 / M2 1.3 / M3 1.7），P80 ≈ 8.5 天。上表的 5–6 天是"零返工、零等待"的乐观值，当 P30 看更合适：M1（虚拟列表行高 + 五种控件 + 配置页抽屉）与 M3（a11y + SW + 250 KB 预算）的下界偏紧。日历时间再乘 1.3–1.5；M0 结束后用实测值重估一次 M1–M3。
