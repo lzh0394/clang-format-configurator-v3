@@ -1,7 +1,7 @@
 # 交接文档（M1 完成 → 准备 M2）
 
 > 新会话先读本文件，再读 [`plan.md`](../plan.md)。plan.md 是设计与取舍的唯一事实来源；本文只记状态、命令、坑和待办。
-> 最后更新：2026-10-23，M1 代码/测试提交 `a031305`、`9dc4e44`。
+> 最后更新：2026-10-23，M1 代码/测试提交 `a031305`（选项引擎）、`9dc4e44`（e2e）、`9152bdf`（override 警告）；文档提交 `d1f69fc`、`28f5a8e`。
 
 ## 1. 一句话现状
 
@@ -193,5 +193,6 @@ docs/screenshot.png    线上截图（README 引用）
 | `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ 21 passed |
 | 首屏 JS | 388 KB raw / **120.1 KB gzip**（+CSS 14.3 KB / 3.4 KB gzip） |
 | 单测覆盖 | `config` / `config-state` / `config-io` / `schema-store` / `schema`（`config-io.test.ts` 78 条含 minimal+full 全风格 roundtrip） |
-| CI（GitHub Actions） | 见 push 后的 run（本文件随后续文档提交补充） |
-| 线上 Pages smoke | 见 push 后的 run（同上） |
+| GitHub Actions `ci` | ✅ run [39879650356](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650356)（6m28s）、[39880130760](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130760)（10m1s，playwright 依赖安装慢） |
+| GitHub Actions `deploy` | ✅ run [39879650519](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650519)、[39880130772](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130772)：build → deploy → 对线上 URL 跑整套 e2e，全绿 |
+| 线上 Pages 本地复跑 | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test` → 21 passed（1.8m） |
