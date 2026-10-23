@@ -1,11 +1,13 @@
 # 交接文档（M1 完成 → 准备 M2）
 
 > 新会话先读本文件，再读 [`plan.md`](../plan.md)。plan.md 是设计与取舍的唯一事实来源；本文只记状态、命令、坑和待办。
-> 最后更新：2026-10-23，M1 代码/测试提交 `a031305`（选项引擎）、`9dc4e44`（e2e）、`9152bdf`（override 警告）；文档提交 `d1f69fc`、`28f5a8e`。
+> 最后更新：2026-10-23 09:15，HEAD `8baec55`（工作区干净，已推送）。
+> M1 提交：`a031305`（选项引擎）、`9dc4e44`（e2e）、`9152bdf`（override 警告）；文档：`d1f69fc`、`28f5a8e`、`7ba1164`；M1 后 CI 提速：`8baec55`（PR #1，已合并）。
 
 ## 1. 一句话现状
 
-**M1 已完成**：选项引擎（schema store / `modified` 模型 / 虚拟列表 / 五种控件）、`.clang-format` 的 Minimal/Full 导出与带校验的导入都已在线上；纯 UI 能生成可用的配置文件，**导出 → 再导入 → 再导出字节相同**。M0 的骨架、资源流水线、CI 与 Pages 发布保持可用。
+**M1 已完成并上线**：选项引擎（schema store / `modified` 模型 / 虚拟列表 / 五种控件 / override 警告）、`.clang-format` 的 Minimal/Full 导出与带校验的导入都可用；纯 UI 能生成可用的配置文件，**导出 → 再导入 → 再导出字节相同**。M0 的骨架、资源流水线、CI 与 Pages 发布保持可用。
+**M1 之后顺手做了 CI 提速**（缓存 Playwright Chromium、去掉 `--with-deps`、并发取消 + 超时，见 §4/§12），现在一次 ci 的耗时瓶颈只剩 e2e 本身。
 **M2（CM6 编辑器 / diff / 错误面板）尚未开始。**
 
 ## 2. 链接
@@ -15,27 +17,32 @@
 | 仓库（public） | <https://github.com/lzh0394/clang-format-configurator-v3> |
 | Actions | <https://github.com/lzh0394/clang-format-configurator-v3/actions> |
 | 线上 | <https://lzh0394.github.io/clang-format-configurator-v3/> |
+| CI 提速 PR | <https://github.com/lzh0394/clang-format-configurator-v3/pull/1> |
 | 本地路径 | `C:\workspaces\clang-format-configurator-v3` |
 
 ## 3. 本地怎么跑 / 怎么验
 
 ```powershell
 npm install
-npm run prepare:assets   # 首次：下载 wasm + 生成 schema（需联网）
-npm run dev              # http://localhost:5173
+npm run prepare:assets   # 仅首次：下载 wasm + 生成 schema（需联网；之后 public/schema 已在仓库里）
+npm run dev              # http://127.0.0.1:5173
 ```
 
-验证三件套（提交前跑）：
+手动试玩：浏览器打开 <http://127.0.0.1:5173/>，等右栏出现格式化结果后，左栏搜索选项、改值，Export/Import 试用。若 5173 被占，用 `npm run dev -- --host 127.0.0.1 --port 5173 --strictPort` 前先清掉残留进程。
+
+验证三件套（提交前跑，不需要外网）：
 
 ```powershell
 npm run verify           # typecheck + vitest + build
-npx playwright test      # 本地用 Edge（channel=msedge），20 条
+npx playwright test      # 本地用 Edge（channel=msedge），21 条
 ```
 
-只跑 M1 那组：
+只跑 M1 那组 / 有头观察：
 
 ```powershell
 npx playwright test tests/e2e/m1.spec.ts
+npx playwright test --headed
+npx playwright test -g "roundtrip"
 ```
 
 子路径构建（模拟 Pages）：
@@ -54,20 +61,27 @@ $env:PW_BASE_URL='https://lzh0394.github.io/clang-format-configurator-v3/'
 npx playwright test
 ```
 
-单测 100 条（5 个文件）、e2e 21 条（4 smoke + 17 m1），全部应绿。
+单测 100 条（5 个文件）、e2e 21 条（4 smoke + 17 m1），全部应绿。**最终验收必须对 production build 跑**（`npm run build` + `npx playwright test` 自动起 `vite preview`），dev server 只用于日常迭代。
 
 ## 4. 环境事实与坑（踩过的）
 
 - 本机 **Windows + PowerShell**；Node **v26.12.0**、npm **11.20.0**。CI 用 Node **22**。
 - 本地 npm 配了腾讯镜像，但 `tools/fetch-wasm.mjs` 默认直接访问 `registry.npmjs.org`；可用 `NPM_REGISTRY` 覆盖。
-- 本地 Playwright 用 **Edge**（`channel: "msedge"`，无需下载浏览器）；CI 用 `PW_CHANNEL=chromium` + `npx playwright install`。
+- 本地 Playwright 用 **Edge**（`channel: "msedge"`，无需下载浏览器）；CI 用 `PW_CHANNEL=chromium`。
 - **`vite preview` 必须 `--host 127.0.0.1`**：runner 上 `localhost` 解析到 `::1`，Playwright 连 `127.0.0.1` 会 60s 超时。
 - **e2e 里必须 `page.goto("./")`，不能 `page.goto("/")`**：`/` 会丢掉 baseURL 的 `/<repo>/` 前缀。
-- **e2e 迭代技巧**：`npm run dev`（5173）+ `$env:PW_BASE_URL='http://127.0.0.1:5173/'` 跑 Playwright，不用反复 build；但**最终验收必须对 production build 跑**（`vite preview` + 无 `PW_BASE_URL`）。
+- **e2e 迭代技巧**：`npm run dev`（5173）+ `$env:PW_BASE_URL='http://127.0.0.1:5173/'` 跑 Playwright，不用反复 build；但**最终验收必须对 production build 跑**。
 - **端口冲突会挂住 Playwright**：若 4173 上已有 preview（例如截图脚本留下的），再起 webServer 会卡到超时。跑 e2e 前确认 4173/5173 没有残留进程（`Get-NetTCPConnection -LocalPort 4173`），或先清掉后台任务。
 - **Windows 剪贴板会把换行归一成 CRLF**：e2e 里复制 `.clang-format` 后比较文本要 `replace(/\r\n/g,"\n")`。
 - TypeScript **7.0.2**：对重复的索引访问（`isPlainObject(modified[option.key]) ? {...modified[option.key]} : {}`）不做持续窄化，会报 TS2698；先取局部变量再窄化（`const existing = ...`）。
-- 网络偶发 DNS/TLS 抖动（`github.com`、`api.github.com`）；`git push` / `gh` 重试即可。
+- **CI 时长 / Playwright 缓存（2026-10-23 优化）**：
+  - 旧问题是 `npx playwright install --with-deps chromium` 里的 apt 步骤：正常 31s，偶发卡到 **560s**（一次 ci 总耗时 10m4s），而 e2e 本身只要 23–28s。
+  - 现在 ci/deploy 的 `build`、`smoke` job 都缓存 `~/.cache/ms-playwright`（key = `hashFiles('package-lock.json')`），并用 **`npx playwright install chromium`（不带 `--with-deps`）**。ubuntu-latest 已自带 Chrome 与 Chromium 所需系统库；实测 PR 冷缓存整轮 **1m2s**（install 10s），warm 预计 ~50–55s。
+  - **不要随手恢复 `--with-deps`**。若将来 runner 镜像缺库，e2e 会快速报 `Host system is missing dependencies`，那时再加 `npx playwright install-deps chromium`（或仅对缺库的镜像加），不要把 apt 放回每次运行。
+  - 改 `package-lock.json` 会让浏览器缓存 key 失效 → 下一次运行多 ~10s 冷安装，属正常。
+  - GitHub 缓存是**分支作用域**的：PR 分支里生成的缓存 main 用不到（实测合并后 main 首跑仍是冷缓存 +~10s），后续 main 运行即 warm。
+  - ci 已加 `concurrency.cancel-in-progress`（新 push 取消旧 run，之前两次 push 会并行跑两套完整套件，是 10 分钟尾巴的一部分）与各 job 的 `timeout-minutes`。
+- **网络**：`github.com` / `api.github.com` 偶发 DNS/TLS 抖动，甚至 `api.github.com` 解析失败而 `github.com` 正常（此时 `gh` 全挂、网页能开、`git push` 也可能失败）。**不要在循环里疯狂重试**：等几分钟或换到 Actions 网页确认；`gh run watch` 刷得太密也容易被 DNS 抖动打断。
 - gh 已登录账号 **lzh0394**，仓库 public；Pages 已设为 `build_type: workflow`。
 
 ## 5. 代码地图
@@ -87,7 +101,7 @@ src/
   main.tsx / styles.css
   components/
     OptionPanel.tsx    虚拟列表 + 搜索 + 过滤 chips + 面板头（count/reset all）
-    OptionRow.tsx      单行：key/徽标/控件/docs 开关/继承值/reset，map/list 的展开体
+    OptionRow.tsx      单行：key/徽标/控件/docs 开关/继承值/reset/override 警告，map/list 的展开体
     controls.tsx       五种控件：标量（bool/int/uint/string）、enum、map、list<string>、list<struct>
     useDocs.ts         docs 懒加载 hook（search 首次触发 / 首次展开触发，失败可 retry）
     ConfigDialog.tsx   导入/导出模态框（tabs、Minimal/Full、YAML 预览、复制/下载、文件选择、Apply）
@@ -102,11 +116,13 @@ src/
   worker/formatter.worker.ts  持有唯一 wasm 实例，import(entry.js) → format()
 tests/e2e/
   smoke.spec.ts        M0 冒烟 4 条（格式化/换风格/换版本/改源码）
-  m1.spec.ts           M1 16 条（详见 §6）
+  m1.spec.ts           M1 17 条（详见 §8）
 public/
   schema/<ver>/        已提交（core.json + docs.json），index.json 驱动版本下拉
   wasm/<ver>/          不提交（.gitignore），由 prepare:assets 生成
-.github/workflows/     ci.yml（verify + e2e）、deploy.yml（build → deploy → 对真实 URL smoke）
+.github/workflows/
+  ci.yml               verify：typecheck + unit + build + e2e；Playwright 浏览器缓存 + 并发取消
+  deploy.yml           build（含 e2e）→ deploy → 对线上 URL 跑整套 e2e（smoke）
 docs/screenshot.png    线上截图（README 引用）
 ```
 
@@ -159,7 +175,7 @@ docs/screenshot.png    线上截图（README 引用）
 
 顺序建议（每步可单独提交、可验证）：
 
-1. **CodeMirror 6**：左栏可编辑源码、右栏只读结果；按需组装语言包（C/C++/C#/Java/Proto，非常用语言懒加载）；替换现在的 textarea/pre。
+1. **CodeMirror 6**：左栏可编辑源码、右栏只读结果；按需组装语言包（C/C++/C#/Java/Proto，非常用语言懒加载）；替换现在的 textarea/pre。注意首屏预算（当前 120 KB gzip，预算 250 KB），CM6 语言包一律懒加载。
 2. **split diff**：`@codemirror/merge` 的 split 视图做真实行级 diff（v2 的 "Diff mode" 只是并排）。
 3. **请求协议升级**（`src/worker/protocol.ts` + `formatter-client.ts`）：请求串行化、新请求丢弃过期 id；格式化期间拦截 `console.error` 收集 LLVM 诊断进 `detail`（M0 发现 message 已含诊断，这里以实测为准，不重复采集）。
 4. **错误面板**：结构化错误 = 首行摘要 + 可展开的 LLVM 诊断；保留 `role="alert"`。
@@ -180,19 +196,41 @@ docs/screenshot.png    线上截图（README 引用）
 - `plan.md` 是设计与取舍的唯一事实来源；实现偏离时先改 plan 再改代码。
 - 提交信息用 `area: summary`（`ci:` / `test:` / `docs:` / `feat:`），一次提交一件事。
 - 加版本：`tools/versions.json` 加一行 → `npm run prepare:assets -- --only=<ver>` → 提交 `public/schema/<ver>` 与 lock → push。CI 不重跑 schema 生成（只 `prepare:wasm`）。
-- 改 UI 文案/行为时顺手更新 README 的支持版本表与截图（`docs/screenshot.png`）。
+- 改 UI 文案/行为时顺手更新 README 的支持版本表与截图（`docs/screenshot.png`；截图用 Edge 打开 built app 手截或用 Playwright 脚本，1440×900、2x）。
 - 改导出/导入格式时**必须**跑 `src/lib/config-io.test.ts` 的 roundtrip 与 e2e 的 3/4 两条；破坏字节幂等是最容易漏的回归。
 - 提交前至少跑 `npm run verify`；动到 UI/base 路径时再跑 `npx playwright test`（base `/` 与子路径各一遍）。
+- 改 `.github/workflows/*.yml`：保持 Playwright 浏览器缓存 + `npx playwright install chromium`（无 `--with-deps`）；不要引入每次运行的 apt 步骤（见 §4）。改 workflow 会同时触发 ci 与 deploy，注意 workflow 文件本身也会让 deploy 重新构建一次（app 内容不变）。
+- 网络抖动时不要写重试循环：`gh` 依赖 `api.github.com`，DNS 挂时直接看 Actions 网页或等几分钟。
 
-## 12. 最近验证记录（2026-10-23，本地）
+## 12. 最近验证记录
+
+### 本地（2026-10-23 09:13，HEAD `8baec55`，无外网依赖）
 
 | 项 | 结果 |
 |---|---|
-| `npm run verify` | ✅ typecheck + 100 unit（5 文件）+ build |
-| `npx playwright test`（base `/`，production build） | ✅ 21 passed（4 smoke + 17 m1） |
-| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ 21 passed |
-| 首屏 JS | 388 KB raw / **120.1 KB gzip**（+CSS 14.3 KB / 3.4 KB gzip） |
+| `npm run verify` | ✅ typecheck 0 错 + **100 unit（5 文件）** + build |
+| `npx playwright test`（base `/`，production build） | ✅ **21 passed**（4 smoke + 17 m1，22.2s） |
+| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **21 passed**（22.2s） |
+| 首屏 JS | 388 KB raw / **120.1 KB gzip**（+CSS 14.3 KB / 3.4 KB gzip，预算 250 KB） |
 | 单测覆盖 | `config` / `config-state` / `config-io` / `schema-store` / `schema`（`config-io.test.ts` 78 条含 minimal+full 全风格 roundtrip） |
-| GitHub Actions `ci` | ✅ run [39879650356](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650356)（6m28s）、[39880130760](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130760)（10m1s，playwright 依赖安装慢） |
-| GitHub Actions `deploy` | ✅ run [39879650519](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650519)、[39880130772](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130772)：build → deploy → 对线上 URL 跑整套 e2e，全绿 |
+
+### CI / 部署（GitHub Actions）
+
+| 项 | 结果 |
+|---|---|
+| ci（M1 代码） | ✅ [39879650356](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650356)（6m28s）、[39880130760](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130760)（**10m4s**，playwright apt 卡顿 560s） |
+| ci（文档/验证记录） | ✅ [39881165860](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881165860)（1m14s） |
+| deploy（M1 线上） | ✅ [39879650519](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650519)、[39880130772](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130772)：build → deploy → 对线上 URL 跑整套 e2e，全绿 |
 | 线上 Pages 本地复跑 | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test` → 21 passed（1.8m） |
+| ci（提速后，PR #1 冷缓存） | ✅ [39881523699](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881523699)（**1m2s**：install 10s + e2e 27s） |
+| ci / deploy（提速合并后 main） | ⏳ [39881836639](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881836639) / [39881836601](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881836601)：合并时本机 DNS 断（`api.github.com` 无法解析），**当时未能确认**；同一 workflow 已在 PR run 验证通过，网络恢复后补看一眼 |
+
+### CI 时长对比（同仓库、同 e2e 套件）
+
+| 场景 | 优化前 | 优化后 |
+|---|---|---|
+| ci warm | 1m14s | 预计 ~50–55s（PR 冷缓存实测 1m2s） |
+| ci 最坏 | 10m4s（apt 卡 560s） | 无 apt 步骤，冷缓存 ~1m10s |
+| deploy build job | 1m11s | 预计 ~40–50s |
+| deploy smoke job | 56s | 预计 ~35–45s |
+| 剩余瓶颈 | `playwright install --with-deps`（apt） | e2e 本身 27s + runner 固定开销 |
