@@ -5,12 +5,19 @@ on:
     branches: [main]
   pull_request:
 
+# Rapid pushes supersede earlier runs instead of stacking full suites behind
+# each other (duplicate concurrent runs were part of the 10 minute tail).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       # Exercise the deployed sub-path on every run: that is where asset and
       # worker URLs break if BASE_URL is not threaded through.
@@ -30,13 +37,26 @@ jobs:
           key: wasm-${{ hashFiles('tools/versions.json') }}
           restore-keys: wasm-
 
+      # Playwright's pinned Chromium only changes when the lockfile changes.
+      # Caching it turns the install step into a ~1 s no-op, which also removes
+      # the apt/network stall that occasionally pushed this job to ~10 minutes.
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - run: npm ci
       - run: npm run prepare:wasm
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
 
-      - run: npx playwright install --with-deps chromium
+      # No --with-deps: ubuntu-latest ships Chrome and every shared library
+      # Chromium needs, and running apt-get on every build was the only slow,
+      # flaky part of this workflow. If a future image drops a dependency,
+      # e2e fails fast with Playwright's install-deps hint.
+      - run: npx playwright install chromium
       - run: npm run test:e2e
         env:
           PW_CHANNEL: chromium

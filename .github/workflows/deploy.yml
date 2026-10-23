@@ -20,6 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       VITE_BASE: /${{ github.event.repository.name }}/
     steps:
@@ -37,13 +38,21 @@ jobs:
           key: wasm-${{ hashFiles('tools/versions.json') }}
           restore-keys: wasm-
 
+      # See ci.yml: a cached Playwright Chromium and no apt step keep this job
+      # deterministic (~1 min) instead of occasionally stalling for minutes.
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - run: npm ci
       - run: npm run prepare:wasm
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
 
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: npm run test:e2e
         env:
           PW_CHANNEL: chromium
@@ -69,6 +78,7 @@ jobs:
   smoke:
     needs: deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -77,8 +87,14 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-${{ runner.os }}-
+
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
 
       - name: Wait for the deployment to serve
         env:
