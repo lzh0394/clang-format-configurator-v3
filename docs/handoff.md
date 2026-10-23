@@ -17,6 +17,7 @@
 | Actions | <https://github.com/lzh0394/clang-format-configurator-v3/actions> |
 | 线上 | <https://lzh0394.github.io/clang-format-configurator-v3/> |
 | CI 提速 PR | <https://github.com/lzh0394/clang-format-configurator-v3/pull/1> |
+| 待办清单 | [`docs/todo.md`](todo.md) |
 | 本地路径 | `C:\workspaces\clang-format-configurator-v3` |
 
 ## 3. 本地怎么跑 / 怎么验
@@ -181,6 +182,7 @@ docs/screenshot.png    线上截图（README 引用）
 5. **快捷键与语言切换**：Ctrl/Cmd+Enter 立即格式化；`auto-format` 开关；语言选择影响 worker 的 filename/语言包。
 6. **配置页抽屉**：CM6 YAML 编辑器 + 基于 schema 的实时校验 + 上传/下载 + Apply/Close + 底部"相对当前风格会新增/删除哪些键"预览（可复用 `config-io.ts` 的 parse/serialize）。
 7. 防抖 250ms（现在是 300ms，M2 一并调）；>2MB 输入与 worker trap/OOM 的失败路径（plan §7）。
+8. **字体大小调节**（已登记在产品待办 [`todo.md`](todo.md)，非 M2 阻塞项）：编辑器字号随 CM6 接入直接读 CSS 变量；界面字号与持久化归 M3 的主题/可访问性。
 
 验收（plan §9 M2）：输入代码即时看到格式化与差异；故意写错选项能读到 LLVM 原文。
 
