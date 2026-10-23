@@ -11,7 +11,7 @@ import {
   isPlainObject,
   type Modified,
 } from "../lib/config";
-import type { OptionDef, SchemaDocs, StyleName } from "../lib/schema";
+import type { OptionDef, SchemaCore, SchemaDocs, StyleName } from "../lib/schema";
 import {
   FieldValueControl,
   LinesControl,
@@ -22,6 +22,7 @@ import type { DocsStatus } from "./useDocs";
 import styles from "./OptionPanel.module.css";
 
 export type OptionRowProps = {
+  schema: SchemaCore;
   option: OptionDef;
   style: StyleName;
   modified: Modified;
@@ -37,6 +38,17 @@ export type OptionRowProps = {
   onChildChange: (option: OptionDef, childKey: string, value: unknown) => void;
 };
 
+/**
+ * Options that only take effect when a sibling option selects `Custom` (plan §5
+ * "override 警告"). Editing them while the parent still holds another value is
+ * legal but silently ignored by clang-format, so the row warns and offers a
+ * one-click fix.
+ */
+const OVERRIDE_GUARDS: Readonly<Record<string, { option: string; required: string }>> = {
+  BraceWrapping: { option: "BreakBeforeBraces", required: "Custom" },
+  SpaceBeforeParensOptions: { option: "SpaceBeforeParens", required: "Custom" },
+};
+
 /** Short status shown in front of the expand button for map/list options. */
 function summarize(option: OptionDef, modified: Modified, value: unknown): string {
   if (option.type.kind === "map") {
@@ -50,6 +62,7 @@ function summarize(option: OptionDef, modified: Modified, value: unknown): strin
 }
 
 export default function OptionRow({
+  schema,
   option,
   style,
   modified,
@@ -71,6 +84,12 @@ export default function OptionRow({
   const preset = option.defaults[style];
   const collapsible = type.kind === "map" || type.kind === "list";
   const docsHtml = docs === null ? undefined : docs[key];
+
+  const guard = OVERRIDE_GUARDS[key];
+  const guardOption = guard === undefined ? undefined : schema.options.find((entry) => entry.key === guard.option);
+  const guardValue = guard !== undefined && guardOption !== undefined ? effectiveValue(guardOption, style, modified) : undefined;
+  const showOverrideWarning =
+    overridden && guard !== undefined && guardOption !== undefined && guardValue !== guard.required;
 
   let control: JSX.Element | null;
   if (type.kind === "map") {
@@ -177,6 +196,24 @@ export default function OptionRow({
       {overridden && (
         <div className={styles.inherited} data-testid={`inherited-${key}`}>
           {`Inherited: ${formatValue(preset)}`}
+        </div>
+      )}
+
+      {showOverrideWarning && guard !== undefined && guardOption !== undefined && (
+        <div className={styles.overrideWarning} data-testid={`override-warning-${key}`} role="status">
+          <span>
+            {`${key} only takes effect when ${guard.option} is ${guard.required}; the current value is ${formatValue(
+              guardValue,
+            )}.`}
+          </span>
+          <button
+            type="button"
+            className={styles.iconButton}
+            data-testid={`apply-guard-${key}`}
+            onClick={() => onOptionChange(guard.option, guard.required)}
+          >
+            {`Set ${guard.option}: ${guard.required}`}
+          </button>
         </div>
       )}
 

@@ -235,6 +235,7 @@ export default function OptionPanel({
                   style={{ transform: `translateY(${virtualItem.start}px)` }}
                 >
                   <OptionRow
+                    schema={schema}
                     option={option}
                     style={style}
                     modified={modified}

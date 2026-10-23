@@ -496,3 +496,31 @@ test("enum and boolean controls edit options", async ({ page }) => {
   expect(yaml).toContain("AlignAfterOpenBracket: AlwaysBreak");
   expect(yaml).toContain("Cpp11BracedListStyle: false");
 });
+
+// ---------------------------------------------------------------------------
+// Dependent options: override warning when the parent is not Custom
+// ---------------------------------------------------------------------------
+
+test("dependent options warn and offer the Custom fix", async ({ page }) => {
+  await openApp(page);
+
+  await searchOption(page, "BraceWrapping");
+  await page.getByTestId("expand-BraceWrapping").click();
+  await page.getByTestId("value-BraceWrapping.AfterClass").check();
+
+  const warning = page.getByTestId("override-warning-BraceWrapping");
+  await expect(warning).toBeVisible();
+  await expect(warning).toContainText("BreakBeforeBraces");
+  await page.getByTestId("apply-guard-BraceWrapping").click();
+  await expect(warning).toBeHidden();
+
+  const yaml = await readExportYaml(page);
+  expect(yaml).toContain("BreakBeforeBraces: Custom");
+  expect(yaml).toContain("AfterClass: true");
+  await closeDialog(page);
+
+  await searchOption(page, "SpaceBeforeParensOptions");
+  await page.getByTestId("expand-SpaceBeforeParensOptions").click();
+  await page.getByTestId("value-SpaceBeforeParensOptions.AfterControlStatements").uncheck();
+  await expect(page.getByTestId("override-warning-SpaceBeforeParensOptions")).toBeVisible();
+});
