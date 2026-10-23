@@ -29,6 +29,7 @@ npm run dev              # http://localhost:5173
 - **五种控件**：bool / int / uint / string 标量、enum 下拉、map（结构体，稀疏修改）、`List of Strings`、`List of Structs`（增删条目、逐字段编辑）。
 - **只发送改动项**：内部状态是 `{version, style, modified}`，格式化 payload 是 `{BasedOnStyle, ...modified}`；默认值只用于显示，不会再像 v2 那样把 190 个默认值全量物化。
 - **导出/导入**：Minimal（默认，只含 `BasedOnStyle` + 改动项）/ Full（全部写死，供锁版本）；导入按当前版本 schema 校验，未知键与非法值收集为 warning（不硬失败），legacy `AlignConsecutive*` / `SortIncludes` / `AlignTrailingComments` 自动转换成嵌套形式；YAML 语法错误带行列号。**导出 → 再导入 → 再导出字节幂等**（minimal 与 full 都有单测与 e2e）。
+- **依赖项 override 警告**：`BraceWrapping` 只在 `BreakBeforeBraces: Custom` 时生效、`SpaceBeforeParensOptions` 只在 `SpaceBeforeParens: Custom` 时生效——改错父项时行内提示，并可一键把父项切成 `Custom`。
 - **文档懒加载**：`docs.json` 首次搜索或首次展开某选项帮助时才拉取（~23 KB gzip），用构建期生成好的 HTML 渲染。
 - **wasm 在 Worker 里跑**：主线程不阻塞，一个版本一个实例，换版本 terminate 旧 worker。
 - **首屏 JS 119.8 KB gzip**（预算 250 KB），单版本 wasm ~0.95 MB gzip。

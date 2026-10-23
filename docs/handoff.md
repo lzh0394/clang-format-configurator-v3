@@ -54,7 +54,7 @@ $env:PW_BASE_URL='https://lzh0394.github.io/clang-format-configurator-v3/'
 npx playwright test
 ```
 
-单测 100 条（5 个文件）、e2e 20 条（4 smoke + 16 m1），全部应绿。
+单测 100 条（5 个文件）、e2e 21 条（4 smoke + 17 m1），全部应绿。
 
 ## 4. 环境事实与坑（踩过的）
 
@@ -122,6 +122,7 @@ docs/screenshot.png    线上截图（README 引用）
 8. **选项面板**：`OptionPanel` 是纯展示组件，所有编辑通过 `onOptionChange(key, value)` / `onChildChange(option, childKey, value)`（value=undefined 表示恢复继承）交给 reducer。虚拟列表用 `@tanstack/react-virtual`，行高动态测量；搜索 120ms 防抖；docs 搜索时用去标签后的纯文本。**e2e 找行必须滚动 `data-testid="options-scroll"`**：虚拟列表里不可见的行不在 DOM 中。
 9. **错误信息**：wasm 抛的 `Error.message` 里已含 LLVM 诊断（多行），worker 按首行/其余拆成 `message`/`detail` 显示。M2 要做结构化错误面板和请求串行化/只保留最新。
 10. **入口/子路径**：统一入口 `entry.js`（fetch-wasm 生成，兼容 22+ 的拆包形态）；运行期所有 URL 用 `import.meta.env.BASE_URL` 拼，构建期 `base` 来自 `VITE_BASE`。
+11. **依赖项 override 警告**：`BraceWrapping` 仅在 `BreakBeforeBraces: Custom` 时生效，`SpaceBeforeParensOptions` 仅在 `SpaceBeforeParens: Custom` 时生效（RST 原文 "Otherwise, this is ignored"）。`OptionRow` 里的 `OVERRIDE_GUARDS` 在用户改了这类 map 而父选项不是 `Custom` 时显示黄条，并提供一键把父项设为 `Custom` 的按钮；父项改回来时警告会重新出现。
 
 ## 7. 已知缺陷 / 有意为之
 
@@ -134,7 +135,7 @@ docs/screenshot.png    线上截图（README 引用）
 - M1 没有持久化 / 主题切换 / 移动端 tabs / 完整 a11y（M3）。
 - 无 per-PR 预览环境。
 
-## 8. M1 e2e 覆盖清单（`tests/e2e/m1.spec.ts`，16 条）
+## 8. M1 e2e 覆盖清单（`tests/e2e/m1.spec.ts`，17 条）
 
 1. 纯 UI 生成配置（搜索 → 改 IndentWidth/ColumnLimit → 输出缩进变化 → Minimal 导出内容正确）
 2. reset 恢复继承（modified 计数与输出一起回退，导出不再含该键）
@@ -152,6 +153,7 @@ docs/screenshot.png    线上截图（README 引用）
 14. Copy 到剪贴板内容与 YAML 一致
 15. docs 展开触发懒加载并渲染 LLVM 文档（无 4xx）
 16. 顶层 enum + bool 控件编辑并导出
+17. 依赖项 override 警告：改 `BraceWrapping` child 后出现 `BreakBeforeBraces` 警告 → 一键切 `Custom` 后消失且导出包含 `BreakBeforeBraces: Custom`；`SpaceBeforeParensOptions` 同理
 
 ## 9. 下一步：M2（按 plan §9）
 
@@ -187,9 +189,9 @@ docs/screenshot.png    线上截图（README 引用）
 | 项 | 结果 |
 |---|---|
 | `npm run verify` | ✅ typecheck + 100 unit（5 文件）+ build |
-| `npx playwright test`（base `/`，production build） | ✅ 20 passed（4 smoke + 16 m1） |
-| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ 20 passed |
-| 首屏 JS | 387 KB raw / **119.8 KB gzip**（+CSS 14.1 KB / 3.3 KB gzip） |
+| `npx playwright test`（base `/`，production build） | ✅ 21 passed（4 smoke + 17 m1） |
+| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ 21 passed |
+| 首屏 JS | 388 KB raw / **120.1 KB gzip**（+CSS 14.3 KB / 3.4 KB gzip） |
 | 单测覆盖 | `config` / `config-state` / `config-io` / `schema-store` / `schema`（`config-io.test.ts` 78 条含 minimal+full 全风格 roundtrip） |
 | CI（GitHub Actions） | 见 push 后的 run（本文件随后续文档提交补充） |
 | 线上 Pages smoke | 见 push 后的 run（同上） |
