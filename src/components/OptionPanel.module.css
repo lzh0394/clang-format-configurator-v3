@@ -1,0 +1,435 @@
+/* Options panel (contract §4.4). Only scoped module classes; colors come from
+   the CSS variables declared in src/styles.css. The panel fills a flex column
+   and owns its own scroll area so the virtualizer can measure it. */
+
+.panel {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+
+/* --- toolbar: count / reset all / search / filter chips ------------------ */
+
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.resetAll {
+  margin-left: auto;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 3px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.resetAll:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search {
+  width: 100%;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 9px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip,
+.chipActive {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  padding: 2px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--text);
+}
+
+.chipActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* --- virtualized scroll area -------------------------------------------- */
+
+.scroll {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.virtualCanvas {
+  position: relative;
+  width: 100%;
+}
+
+.virtualRow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  will-change: transform;
+}
+
+.empty {
+  margin: 0;
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* --- one option row ------------------------------------------------------ */
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.key {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.badgeDeprecated,
+.badgeModified {
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.badgeDeprecated {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+.badgeModified {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--accent-contrast);
+}
+
+.actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconButton {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--muted);
+  padding: 2px 7px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.controlRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.summary {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.inherited {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* --- controls ------------------------------------------------------------ */
+
+.input,
+.select,
+.textarea {
+  min-width: 0;
+  max-width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.input {
+  width: 100%;
+}
+
+.select {
+  width: 100%;
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* --- expanded map / struct-list bodies ----------------------------------- */
+
+.children {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--border);
+}
+
+.childRow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.childHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.childKey {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.childControl {
+  display: flex;
+  min-width: 0;
+}
+
+.itemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.itemHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.itemTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.addButton {
+  align-self: flex-start;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+/* --- expanded docs ------------------------------------------------------- */
+
+.docs {
+  border-top: 1px dashed var(--border);
+  padding-top: 6px;
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.docsStatus {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.docsError {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--danger-text);
+}
+
+.docsContent {
+  line-height: 1.5;
+}
+
+.docsContent p {
+  margin: 0 0 6px;
+}
+
+.docsContent ul,
+.docsContent ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.docsContent pre {
+  margin: 6px 0;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.docsContent code {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.docsContent a {
+  color: var(--accent);
+}
+
+/* Enum tables generated by tools/gen-schema.mjs: the first column is the value
+   name (`table-layout` on a narrow panel would otherwise break words per
+   character). */
+.docsContent table {
+  width: 100%;
+  margin: 6px 0;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.docsContent th,
+.docsContent td {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.docsContent th {
+  background: var(--bg);
+  font-weight: 600;
+}
+
+.docsContent td:first-child,
+.docsContent th:first-child {
+  width: 1%;
+  white-space: nowrap;
+}

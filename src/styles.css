@@ -10,6 +10,9 @@
   --danger-bg: #fdecec;
   --danger-border: #f0b4b4;
   --danger-text: #8a1f1f;
+  --notice-bg: #fff8e6;
+  --notice-border: #f0d48a;
+  --notice-text: #6b4c00;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -26,6 +29,9 @@
     --danger-bg: #2a1517;
     --danger-border: #5c2a2d;
     --danger-text: #ffb4b4;
+    --notice-bg: #2a2312;
+    --notice-border: #5c4a1a;
+    --notice-text: #ffd98a;
   }
 }
 
