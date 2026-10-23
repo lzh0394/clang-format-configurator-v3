@@ -1,8 +1,7 @@
 # 交接文档（M1 完成 → 准备 M2）
 
 > 新会话先读本文件，再读 [`plan.md`](../plan.md)。plan.md 是设计与取舍的唯一事实来源；本文只记状态、命令、坑和待办。
-> 最后更新：2026-10-23 09:15，HEAD `8baec55`（工作区干净，已推送）。
-> M1 提交：`a031305`（选项引擎）、`9dc4e44`（e2e）、`9152bdf`（override 警告）；文档：`d1f69fc`、`28f5a8e`、`7ba1164`；M1 后 CI 提速：`8baec55`（PR #1，已合并）。
+> 最后更新：2026-10-23 09:20。M1 提交：`a031305`（选项引擎）、`9dc4e44`（e2e）、`9152bdf`（override 警告）；文档：`d1f69fc`、`28f5a8e`、`7ba1164`；M1 后 CI 提速：`8baec55`（PR #1，已合并）；交接文档的后续小修以 `git log docs/handoff.md` 为准。
 
 ## 1. 一句话现状
 
@@ -76,7 +75,7 @@ npx playwright test
 - TypeScript **7.0.2**：对重复的索引访问（`isPlainObject(modified[option.key]) ? {...modified[option.key]} : {}`）不做持续窄化，会报 TS2698；先取局部变量再窄化（`const existing = ...`）。
 - **CI 时长 / Playwright 缓存（2026-10-23 优化）**：
   - 旧问题是 `npx playwright install --with-deps chromium` 里的 apt 步骤：正常 31s，偶发卡到 **560s**（一次 ci 总耗时 10m4s），而 e2e 本身只要 23–28s。
-  - 现在 ci/deploy 的 `build`、`smoke` job 都缓存 `~/.cache/ms-playwright`（key = `hashFiles('package-lock.json')`），并用 **`npx playwright install chromium`（不带 `--with-deps`）**。ubuntu-latest 已自带 Chrome 与 Chromium 所需系统库；实测 PR 冷缓存整轮 **1m2s**（install 10s），warm 预计 ~50–55s。
+  - 现在 ci/deploy 的 `build`、`smoke` job 都缓存 `~/.cache/ms-playwright`（key = `hashFiles('package-lock.json')`），并用 **`npx playwright install chromium`（不带 `--with-deps`）**。ubuntu-latest 已自带 Chrome 与 Chromium 所需系统库。实测：PR 冷缓存整轮 **1m2s**、main 合并（缓存未命中）**54s**、warm 缓存 **41s**（install 9–10s，e2e 27s）；deploy 整轮从 2m27s 降到 **1m54s**（build 57s / deploy 11s / smoke 37s）。
   - **不要随手恢复 `--with-deps`**。若将来 runner 镜像缺库，e2e 会快速报 `Host system is missing dependencies`，那时再加 `npx playwright install-deps chromium`（或仅对缺库的镜像加），不要把 apt 放回每次运行。
   - 改 `package-lock.json` 会让浏览器缓存 key 失效 → 下一次运行多 ~10s 冷安装，属正常。
   - GitHub 缓存是**分支作用域**的：PR 分支里生成的缓存 main 用不到（实测合并后 main 首跑仍是冷缓存 +~10s），后续 main 运行即 warm。
@@ -223,14 +222,18 @@ docs/screenshot.png    线上截图（README 引用）
 | deploy（M1 线上） | ✅ [39879650519](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39879650519)、[39880130772](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39880130772)：build → deploy → 对线上 URL 跑整套 e2e，全绿 |
 | 线上 Pages 本地复跑 | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test` → 21 passed（1.8m） |
 | ci（提速后，PR #1 冷缓存） | ✅ [39881523699](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881523699)（**1m2s**：install 10s + e2e 27s） |
-| ci / deploy（提速合并后 main） | ⏳ [39881836639](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881836639) / [39881836601](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881836601)：合并时本机 DNS 断（`api.github.com` 无法解析），**当时未能确认**；同一 workflow 已在 PR run 验证通过，网络恢复后补看一眼 |
+| ci（提速合并后 main，缓存未命中） | ✅ [39881836639](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881836639)（**54s**；当时本机 DNS 断未读到，事后确认） |
+| deploy（提速合并后 main） | ✅ [39881836601](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39881836601)（**1m54s**：build 57s / deploy 11s / 线上 smoke 37s） |
+| ci（warm 缓存） | ✅ [39883031440](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/39883031440)（**41s**：install 1s + e2e 27s） |
 
 ### CI 时长对比（同仓库、同 e2e 套件）
 
-| 场景 | 优化前 | 优化后 |
+| 场景 | 优化前 | 优化后（实测） |
 |---|---|---|
-| ci warm | 1m14s | 预计 ~50–55s（PR 冷缓存实测 1m2s） |
-| ci 最坏 | 10m4s（apt 卡 560s） | 无 apt 步骤，冷缓存 ~1m10s |
-| deploy build job | 1m11s | 预计 ~40–50s |
-| deploy smoke job | 56s | 预计 ~35–45s |
-| 剩余瓶颈 | `playwright install --with-deps`（apt） | e2e 本身 27s + runner 固定开销 |
+| ci warm | 1m14s | **41s**（39883031440） |
+| ci 缓存未命中 | 1m14s–6m28s | **54s**（39881836639） |
+| ci 最坏 | **10m4s**（apt 卡 560s） | 无 apt 步骤；冷缓存 PR run 1m2s，最坏也只剩下载浏览器的十秒级抖动 |
+| deploy 整轮 | 2m27s | **1m54s**（build 57s / deploy 11s / smoke 37s） |
+| 剩余瓶颈 | `playwright install --with-deps`（apt） | e2e 本身 27s + runner 固定开销（setup/checkout/npm ci 等 ~15s） |
+
+> 结论：**ci 从 1m14s（warm）~ 10m4s（最坏）降到 41s（warm）~ 1m2s（冷缓存）**；deploy 从 2m27s 降到 1m54s。再往下压的收益主要来自 e2e 并行/分片（27s 是最大头，但要多 runner），性价比不高，保持现状即可。
