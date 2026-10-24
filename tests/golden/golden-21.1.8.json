@@ -1,0 +1,317 @@
+{
+  "clangFormatVersion": "21.1.8",
+  "generatedAt": "2026-10-24T02:18:30.817Z",
+  "fixtures": [
+    {
+      "name": "cpp-basic-llvm",
+      "filename": "main.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM",
+        "ColumnLimit": 80
+      },
+      "code": "#include <string>\n#include <vector>\nint main(){std::vector<int> values{1,2,3};for(int i=0;i<values.size();++i){std::string text=\"value \"+std::to_string(values[i]);if(text.size()>3){printf(\"%s\\n\",text.c_str());}}return 0;}\n",
+      "expected": "#include <string>\n#include <vector>\nint main() {\n  std::vector<int> values{1, 2, 3};\n  for (int i = 0; i < values.size(); ++i) {\n    std::string text = \"value \" + std::to_string(values[i]);\n    if (text.size() > 3) {\n      printf(\"%s\\n\", text.c_str());\n    }\n  }\n  return 0;\n}\n"
+    },
+    {
+      "name": "cpp-includes-sorted-llvm",
+      "filename": "sort.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM",
+        "SortIncludes": true,
+        "IncludeBlocks": "Regroup",
+        "IncludeCategories": [
+          {
+            "Regex": "^\"internal/",
+            "Priority": 1,
+            "SortPriority": 1
+          },
+          {
+            "Regex": "^<",
+            "Priority": 2
+          },
+          {
+            "Regex": "^\"",
+            "Priority": 3
+          }
+        ]
+      },
+      "code": "#include \"zebra.h\"\n#include <vector>\n#include \"alpha.h\"\n#include \"internal/zebra.h\"\n#include <algorithm>\n#include \"internal/alpha.h\"\n#include <cstddef>\n",
+      "expected": "#include \"internal/alpha.h\"\n#include \"internal/zebra.h\"\n\n#include <algorithm>\n#include <cstddef>\n#include <vector>\n\n#include \"alpha.h\"\n#include \"zebra.h\"\n"
+    },
+    {
+      "name": "cpp-includes-main-header-google",
+      "filename": "main.cpp",
+      "style": {
+        "BasedOnStyle": "Google",
+        "SortIncludes": true
+      },
+      "code": "#include \"main.h\"\n#include <vector>\n#include <string>\n#include \"util.h\"\n#include \"detail/helper.h\"\n",
+      "expected": "#include \"main.h\"\n\n#include <string>\n#include <vector>\n\n#include \"detail/helper.h\"\n#include \"util.h\"\n"
+    },
+    {
+      "name": "cpp-alignment-llvm",
+      "filename": "align.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM",
+        "AlignConsecutiveAssignments": {
+          "Enabled": true,
+          "AcrossEmptyLines": false,
+          "AcrossComments": true
+        },
+        "AlignConsecutiveDeclarations": {
+          "Enabled": true
+        }
+      },
+      "code": "int small = 1;\nlong longer_name = 22;\ndouble x = 3.0;\n// a comment between declarations\nunsigned long long very_long = 4;\nvoid f(int a, int b) {\n  int short_name = a;\n  unsigned long long very_long_local = b;\n}\n",
+      "expected": "int    small                 = 1;\nlong   longer_name           = 22;\ndouble x                     = 3.0;\n// a comment between declarations\nunsigned long long very_long = 4;\nvoid               f(int a, int b) {\n  int                short_name      = a;\n  unsigned long long very_long_local = b;\n}\n"
+    },
+    {
+      "name": "cpp-macros-mozilla",
+      "filename": "walk.cpp",
+      "style": {
+        "BasedOnStyle": "Mozilla",
+        "ForEachMacros": [
+          "LIST_FOREACH"
+        ],
+        "AlignConsecutiveMacros": {
+          "Enabled": true,
+          "AcrossEmptyLines": true
+        }
+      },
+      "code": "#define CHECK(cond) do { if (!(cond)) { abort(); } } while (0)\n#define SHORT 1\n#define MUCH_LONGER_NAME 2\n#define LIST_FOREACH(var, list) for (Node* var = list->head; var; var = var->next)\nvoid walk(List* list) { LIST_FOREACH(node, list) { use(node); } }\n",
+      "expected": "#define CHECK(cond)                                                            \\\n  do {                                                                         \\\n    if (!(cond)) {                                                             \\\n      abort();                                                                 \\\n    }                                                                          \\\n  } while (0)\n#define SHORT            1\n#define MUCH_LONGER_NAME 2\n#define LIST_FOREACH(var, list)                                                \\\n  for (Node* var = list->head; var; var = var->next)\nvoid\nwalk(List* list)\n{\n  LIST_FOREACH (node, list) {\n    use(node);\n  }\n}\n"
+    },
+    {
+      "name": "cpp-raw-strings-llvm",
+      "filename": "raw.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "const char* query = R\"sql(SELECT * FROM users\nWHERE id = 1;)sql\";\nstd::string multi = R\"(\nline one\n  line two\n)\";\nconst char* json = R\"json({\"key\":  \"value\"})json\";\n",
+      "expected": "const char *query = R\"sql(SELECT * FROM users\nWHERE id = 1;)sql\";\nstd::string multi = R\"(\nline one\n  line two\n)\";\nconst char *json = R\"json({\"key\":  \"value\"})json\";\n"
+    },
+    {
+      "name": "cpp-comments-google",
+      "filename": "comments.cpp",
+      "style": {
+        "BasedOnStyle": "Google",
+        "ColumnLimit": 80
+      },
+      "code": "// This is a deliberately long comment line that should be reflowed by clang-format because it exceeds the column limit of the Google style preset.\n/// \\brief Brief description of f.\n/// \\param a first parameter\nint f(int a) {\n  // A trailing line comment which is also far too long to fit on a single line at eighty columns in this style.\n  return a;  // short trailing comment\n}\n",
+      "expected": "// This is a deliberately long comment line that should be reflowed by\n// clang-format because it exceeds the column limit of the Google style preset.\n/// \\brief Brief description of f.\n/// \\param a first parameter\nint f(int a) {\n  // A trailing line comment which is also far too long to fit on a single line\n  // at eighty columns in this style.\n  return a;  // short trailing comment\n}\n"
+    },
+    {
+      "name": "cpp-unicode-llvm",
+      "filename": "unicode.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM",
+        "ColumnLimit": 80
+      },
+      "code": "// 中文注释：验证 UTF-8 源码的列宽计算与注释重排。\n#include <string>\nint 计算(int 输入值) { return 输入值 * 2; }\nconst char* 问候 = \"你好，世界 😀\";\n// 混合 ASCII and 中文 on the same line, 用于检查 alignment。\n",
+      "expected": "// 中文注释：验证 UTF-8 源码的列宽计算与注释重排。\n#include <string>\nint 计算(int 输入值) { return 输入值 * 2; }\nconst char *问候 = \"你好，世界 😀\";\n// 混合 ASCII and 中文 on the same line, 用于检查 alignment。\n"
+    },
+    {
+      "name": "cpp-crlf-llvm",
+      "filename": "crlf.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "#include <cstdio>\r\nint main(){\r\nprintf(\"hello, crlf\\n\");\r\nreturn 0;\r\n}\r\n",
+      "expected": "#include <cstdio>\r\nint main() {\r\n  printf(\"hello, crlf\\n\");\r\n  return 0;\r\n}\r\n"
+    },
+    {
+      "name": "cpp-line-ending-crlf-google",
+      "filename": "ending.cpp",
+      "style": {
+        "BasedOnStyle": "Google",
+        "LineEnding": "CRLF"
+      },
+      "code": "int main() {\n  return 0;\n}\n",
+      "expected": "int main() { return 0; }\r\n"
+    },
+    {
+      "name": "cpp-no-trailing-newline-webkit",
+      "filename": "widget.cpp",
+      "style": {
+        "BasedOnStyle": "WebKit"
+      },
+      "code": "class Widget{public:\nWidget();\n~Widget();\nprivate:\nint width;\nint height;\n};",
+      "expected": "class Widget {\npublic:\n    Widget();\n    ~Widget();\n\nprivate:\n    int width;\n    int height;\n};"
+    },
+    {
+      "name": "cpp-empty-llvm",
+      "filename": "empty.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "",
+      "expected": ""
+    },
+    {
+      "name": "cpp-long-lines-llvm",
+      "filename": "long.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM",
+        "ColumnLimit": 60
+      },
+      "code": "bool result = first_condition && second_condition && third_condition && fourth_condition;\nsome_function_with_a_long_name(first_argument, second_argument, third_argument, \"a string literal that is longer than sixty columns\");\nconst char* text = \"https://example.com/a/very/long/url/that/cannot/be/broken/because/string/literals/are/atomic\";\n",
+      "expected": "bool result = first_condition && second_condition &&\n              third_condition && fourth_condition;\nsome_function_with_a_long_name(\n    first_argument, second_argument, third_argument,\n    \"a string literal that is longer than sixty columns\");\nconst char *text =\n    \"https://example.com/a/very/long/url/that/cannot/be/\"\n    \"broken/because/string/literals/are/atomic\";\n"
+    },
+    {
+      "name": "cpp-tabs-chromium",
+      "filename": "tabs.cpp",
+      "style": {
+        "BasedOnStyle": "Chromium",
+        "UseTab": "ForIndentation",
+        "TabWidth": 4,
+        "IndentWidth": 4
+      },
+      "code": "void f() {\n\tif (true) {\n\t\tfor (int i = 0; i < 3; ++i) {\n\t\t\tuse(i);\n\t\t}\n\t}\n}\n",
+      "expected": "void f() {\n\tif (true) {\n\t\tfor (int i = 0; i < 3; ++i) {\n\t\t\tuse(i);\n\t\t}\n\t}\n}\n"
+    },
+    {
+      "name": "cpp-braces-gnu",
+      "filename": "gnu.cpp",
+      "style": {
+        "BasedOnStyle": "GNU"
+      },
+      "code": "#include <iostream>\nclass Widget {\npublic:\n  Widget();\n  void render() const;\nprivate:\n  int width;\n};\nvoid Widget::render() const {\n  if (width > 0) {\n    std::cout << width << std::endl;\n  } else {\n    std::cout << \"empty\" << std::endl;\n  }\n}\nint main() { return 0; }\n",
+      "expected": "#include <iostream>\nclass Widget\n{\npublic:\n  Widget ();\n  void render () const;\n\nprivate:\n  int width;\n};\nvoid\nWidget::render () const\n{\n  if (width > 0)\n    {\n      std::cout << width << std::endl;\n    }\n  else\n    {\n      std::cout << \"empty\" << std::endl;\n    }\n}\nint\nmain ()\n{\n  return 0;\n}\n"
+    },
+    {
+      "name": "cpp-braces-microsoft",
+      "filename": "microsoft.cpp",
+      "style": {
+        "BasedOnStyle": "Microsoft",
+        "IndentWidth": 4
+      },
+      "code": "namespace demo {\nclass Widget {\npublic:\n  explicit Widget(int width) : width_(width) {}\n  int width() const { return width_; }\nprivate:\n  int width_;\n};\n}\n",
+      "expected": "namespace demo\n{\nclass Widget\n{\n  public:\n    explicit Widget(int width) : width_(width)\n    {\n    }\n    int width() const\n    {\n        return width_;\n    }\n\n  private:\n    int width_;\n};\n} // namespace demo\n"
+    },
+    {
+      "name": "cpp-braces-webkit",
+      "filename": "impl.cpp",
+      "style": {
+        "BasedOnStyle": "WebKit"
+      },
+      "code": "class Base { public: virtual ~Base() {} virtual void run() = 0; };\nclass Impl : public Base {\npublic:\n  explicit Impl(int mode) : mode_(mode), ready_(false) {}\n  void run() override {\n    switch (mode_) {\n    case 0: ready_ = true; break;\n    default: ready_ = false; break;\n    }\n  }\nprivate:\n  int mode_;\n  bool ready_;\n};\n",
+      "expected": "class Base {\npublic:\n    virtual ~Base() { }\n    virtual void run() = 0;\n};\nclass Impl : public Base {\npublic:\n    explicit Impl(int mode)\n        : mode_(mode)\n        , ready_(false)\n    {\n    }\n    void run() override\n    {\n        switch (mode_) {\n        case 0:\n            ready_ = true;\n            break;\n        default:\n            ready_ = false;\n            break;\n        }\n    }\n\nprivate:\n    int mode_;\n    bool ready_;\n};\n"
+    },
+    {
+      "name": "cpp-templates-llvm",
+      "filename": "templates.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "template <typename T, typename U>\nauto add(T a, U b) -> decltype(a + b) { return a + b; }\nint main() {\n  std::map<std::string, int> counts{{\"a\", 1}, {\"b\", 2}};\n  for (const auto& [key, value] : counts) { std::cout << key << value; }\n  auto square = [](int x) { return x * x; };\n  return square(3);\n}\n",
+      "expected": "template <typename T, typename U> auto add(T a, U b) -> decltype(a + b) {\n  return a + b;\n}\nint main() {\n  std::map<std::string, int> counts{{\"a\", 1}, {\"b\", 2}};\n  for (const auto &[key, value] : counts) {\n    std::cout << key << value;\n  }\n  auto square = [](int x) { return x * x; };\n  return square(3);\n}\n"
+    },
+    {
+      "name": "cpp-pointer-alignment-google",
+      "filename": "pointer.cpp",
+      "style": {
+        "BasedOnStyle": "Google",
+        "PointerAlignment": "Left"
+      },
+      "code": "struct Widget { void render(); };\nconst std::string& name(const std::string* value, int& out) {\n  char* buffer = nullptr;\n  const char* const kText = \"text\";\n  auto method = &Widget::render;\n  (void)buffer;\n  (void)kText;\n  (void)method;\n  return *value;\n}\n",
+      "expected": "struct Widget {\n  void render();\n};\nconst std::string& name(const std::string* value, int& out) {\n  char* buffer = nullptr;\n  const char* const kText = \"text\";\n  auto method = &Widget::render;\n  (void)buffer;\n  (void)kText;\n  (void)method;\n  return *value;\n}\n"
+    },
+    {
+      "name": "cpp-enum-chromium",
+      "filename": "enum.cpp",
+      "style": {
+        "BasedOnStyle": "Chromium"
+      },
+      "code": "enum class Color : unsigned char { kRed = 1, kGreen = 2, kBlue = 3 };\nstruct [[nodiscard]] Result { bool ok; };\nvoid f() noexcept { [[maybe_unused]] int value = 0; }\n",
+      "expected": "enum class Color : unsigned char { kRed = 1, kGreen = 2, kBlue = 3 };\nstruct [[nodiscard]] Result {\n  bool ok;\n};\nvoid f() noexcept {\n  [[maybe_unused]] int value = 0;\n}\n"
+    },
+    {
+      "name": "cpp-style-overrides-llvm",
+      "filename": "overrides.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM",
+        "IndentWidth": 3,
+        "ColumnLimit": 100,
+        "BreakBeforeBraces": "Allman",
+        "PointerAlignment": "Right",
+        "AllowShortFunctionsOnASingleLine": "None"
+      },
+      "code": "struct Point { int x; int y; };\nint compute(Point* point, int scale) { return (point->x + point->y) * scale; }\n",
+      "expected": "struct Point\n{\n   int x;\n   int y;\n};\nint compute(Point *point, int scale)\n{\n   return (point->x + point->y) * scale;\n}\n"
+    },
+    {
+      "name": "cpp-format-off-llvm",
+      "filename": "off.cpp",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "// clang-format off\nint    untouched   =   1;\n// clang-format on\nint    formatted = 2;\n",
+      "expected": "// clang-format off\nint    untouched   =   1;\n// clang-format on\nint formatted = 2;\n"
+    },
+    {
+      "name": "java-google",
+      "filename": "Main.java",
+      "style": {
+        "BasedOnStyle": "Google"
+      },
+      "code": "package com.example.demo;\nimport java.util.List;\nimport java.util.ArrayList;\npublic class Main{private static final int LIMIT=10;public static void main(String[] args){List<String> names=new ArrayList<>();for(int i=0;i<LIMIT;i++){names.add(\"name-\"+i);}System.out.println(names);}private String describe(int value){return value>LIMIT?\"large\":\"small\";}}\n",
+      "expected": "package com.example.demo;\nimport java.util.ArrayList;\nimport java.util.List;\npublic class Main {\n  private static final int LIMIT = 10;\n  public static void main(String[] args) {\n    List<String> names = new ArrayList<>();\n    for (int i = 0; i < LIMIT; i++) {\n      names.add(\"name-\" + i);\n    }\n    System.out.println(names);\n  }\n  private String describe(int value) {\n    return value > LIMIT ? \"large\" : \"small\";\n  }\n}\n"
+    },
+    {
+      "name": "java-llvm",
+      "filename": "Service.java",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "public class Service {\n  private State state = State.STOPPED;\n  public synchronized void start(int port) throws Exception { if (state == State.RUNNING) { throw new IllegalStateException(\"already running\"); } state = State.RUNNING; }\n  private enum State { STOPPED, RUNNING }\n}\n",
+      "expected": "public class Service {\n  private State state = State.STOPPED;\n  public synchronized void start(int port) throws Exception {\n    if (state == State.RUNNING) {\n      throw new IllegalStateException(\"already running\");\n    }\n    state = State.RUNNING;\n  }\n  private enum State { STOPPED, RUNNING }\n}\n"
+    },
+    {
+      "name": "java-chromium-overrides",
+      "filename": "Repository.java",
+      "style": {
+        "BasedOnStyle": "Chromium",
+        "IndentWidth": 4,
+        "ColumnLimit": 100
+      },
+      "code": "@Deprecated\npublic final class Repository<T extends Comparable<T>> {\n  private final java.util.Map<String, T> entries = new java.util.HashMap<>();\n  public T find(String key) { return entries.getOrDefault(key, null); }\n  @Override public String toString() { return \"Repository(size=\" + entries.size() + \")\"; }\n}\n",
+      "expected": "@Deprecated\npublic final class Repository<T extends Comparable<T>> {\n    private final java.util.Map<String, T> entries = new java.util.HashMap<>();\n    public T find(String key) {\n        return entries.getOrDefault(key, null);\n    }\n    @Override\n    public String toString() {\n        return \"Repository(size=\" + entries.size() + \")\";\n    }\n}\n"
+    },
+    {
+      "name": "cs-microsoft",
+      "filename": "Program.cs",
+      "style": {
+        "BasedOnStyle": "Microsoft"
+      },
+      "code": "using System;\nnamespace Demo\n{\n  [Serializable]\n  public sealed class Program\n  {\n    private readonly int value;\n    public Program(int value) { this.value = value; }\n    public static void Main(string[] args) { var program = new Program(args.Length); Console.WriteLine(program.value); }\n  }\n}\n",
+      "expected": "using System;\nnamespace Demo\n{\n[Serializable]\npublic sealed class Program\n{\n    private readonly int value;\n    public Program(int value)\n    {\n        this.value = value;\n    }\n    public static void Main(string[] args)\n    {\n        var program = new Program(args.Length);\n        Console.WriteLine(program.value);\n    }\n}\n}\n"
+    },
+    {
+      "name": "cs-google",
+      "filename": "Order.cs",
+      "style": {
+        "BasedOnStyle": "Google"
+      },
+      "code": "namespace Shop { public record Order(int Id, string Customer); public class Factory { public Order Create(int id, string customer) { return new Order(id, customer); } } }\n",
+      "expected": "namespace Shop {\n  public record Order(int Id, string Customer);\n  public class Factory {\n    public Order Create(int id, string customer) {\n      return new Order(id, customer);\n    }\n  }\n}\n"
+    },
+    {
+      "name": "proto-google",
+      "filename": "service.proto",
+      "style": {
+        "BasedOnStyle": "Google"
+      },
+      "code": "syntax = \"proto3\";\npackage demo.v1;\nimport \"google/protobuf/timestamp.proto\";\nmessage User { string name = 1; int64 id = 2; repeated string tags = 3; google.protobuf.Timestamp created_at = 4; }\nenum Role { ROLE_UNSPECIFIED = 0; ROLE_ADMIN = 1; }\nservice UserService {\n  rpc GetUser(GetUserRequest) returns (User);\n}\nmessage GetUserRequest { int64 id = 1; }\n",
+      "expected": "syntax = \"proto3\";\npackage demo.v1;\nimport \"google/protobuf/timestamp.proto\";\nmessage User {\n  string name = 1;\n  int64 id = 2;\n  repeated string tags = 3;\n  google.protobuf.Timestamp created_at = 4;\n}\nenum Role {\n  ROLE_UNSPECIFIED = 0;\n  ROLE_ADMIN = 1;\n}\nservice UserService {\n  rpc GetUser(GetUserRequest) returns (User);\n}\nmessage GetUserRequest {\n  int64 id = 1;\n}\n"
+    },
+    {
+      "name": "proto-llvm",
+      "filename": "config.proto",
+      "style": {
+        "BasedOnStyle": "LLVM"
+      },
+      "code": "syntax = \"proto2\";\npackage demo;\nmessage Config { optional string name = 1; optional int32 retries = 2 [default = 3]; oneof source { string path = 3; bytes blob = 4; } map<string, string> labels = 5; }\n",
+      "expected": "syntax = \"proto2\";\npackage demo;\nmessage Config {\n  optional string name = 1;\n  optional int32 retries = 2 [ default = 3 ];\n  oneof source {\n    string path = 3;\n    bytes blob = 4;\n  }\n  map<string, string> labels = 5;\n}\n"
+    }
+  ]
+}

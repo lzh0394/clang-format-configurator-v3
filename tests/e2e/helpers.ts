@@ -87,6 +87,22 @@ export async function setEditorText(page: Page, testId: string, text: string): P
  */
 export async function openApp(page: Page): Promise<void> {
   await page.goto("./");
-  await expect(page.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+  // The options panel is only mounted once the schema has loaded. It is merely
+  // attached (not visible) on the mobile layout, where the Code tab is default,
+  // so wait for attachment rather than visibility to stay layout-agnostic.
+  await expect(page.getByTestId("options-panel")).toBeAttached({ timeout: APP_READY_TIMEOUT });
   await expectEditorTextContains(page, "output", "class Widget {", APP_READY_TIMEOUT);
+}
+
+/**
+ * Open the header settings popover (M3). Theme and editor font size live in the
+ * popover, so tests must open it before touching `editor-font-size` or
+ * `theme-*`. Safe to call when it is already open.
+ */
+export async function openSettings(page: Page): Promise<void> {
+  const toggle = page.getByTestId("settings-toggle");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") {
+    await toggle.click();
+  }
+  await expect(page.getByTestId("settings-menu")).toBeVisible();
 }

@@ -5,6 +5,7 @@ import {
   expectEditorTextContains,
   expectEditorTextToMatch,
   openApp,
+  openSettings,
   readEditorText,
   setEditorText,
 } from "./helpers";
@@ -113,6 +114,8 @@ test("editor font-size select changes the editor font size", async ({ page }) =>
   const sourceFontSize = () => source.evaluate((element) => getComputedStyle(element).fontSize);
 
   expect(await sourceFontSize()).toBe("13px");
+  // M3 moved the font-size select into the header settings popover.
+  await openSettings(page);
   await page.getByTestId("editor-font-size").selectOption("18");
   await expect.poll(sourceFontSize).toBe("18px");
   const outputFontSize = await page
