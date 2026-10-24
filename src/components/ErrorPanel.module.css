@@ -1,0 +1,68 @@
+/* Structured error panel. Colors come from the danger tokens in src/styles.css
+   (same palette as the pre-M2 `.error` block in App.module.css); this file only
+   defines layout and the module's own classes. */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--danger-bg);
+  border-bottom: 1px solid var(--danger-border);
+  color: var(--danger-text);
+  font-size: 13px;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dismiss {
+  flex: none;
+  padding: 0 6px;
+  font-size: 18px;
+  line-height: 1.1;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  opacity: 0.75;
+}
+
+.dismiss:hover {
+  opacity: 1;
+}
+
+.details {
+  font-size: 12px;
+}
+
+.detailsSummary {
+  width: fit-content;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.85;
+  user-select: none;
+}
+
+.detailsSummary:hover {
+  opacity: 1;
+}
+
+.pre {
+  margin: 6px 0 0;
+  max-height: 9rem;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}

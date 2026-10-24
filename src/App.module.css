@@ -248,6 +248,36 @@
   white-space: pre;
 }
 
+.editorHost {
+  flex: 1;
+  min-height: 0;
+}
+
+.editorHost :global(.cm-editor) {
+  height: 100%;
+}
+
+.largeInput {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 16px;
+  background: var(--notice-bg);
+  border-bottom: 1px solid var(--notice-border);
+  color: var(--notice-text);
+  font-size: 12px;
+}
+
+.crashRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .status {
   display: flex;
   align-items: center;

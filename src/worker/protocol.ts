@@ -1,7 +1,10 @@
 // Messages exchanged with the formatter worker.
 //
-// The worker owns exactly one wasm instance at a time. Requests are correlated
-// by `id`; the main thread drops responses for superseded ids.
+// The worker owns exactly one wasm instance at a time and serializes request
+// handling. While a request is running, at most one format request is kept
+// queued; a newer format request replaces the queued one (latest-wins) so fast
+// typing never builds a backlog. The main thread correlates responses by `id`
+// and ignores ids it has already settled.
 
 export type InitRequest = {
   t: "init";
@@ -35,9 +38,17 @@ export type OkResponse = {
   ms: number;
 };
 
+/**
+ * `format`: clang-format rejected the code or style; the worker stays usable.
+ * `fatal`: the worker can no longer serve requests (wasm failed to load,
+ * crashed, ...); the client marks it dead and rebuilds it on the next init.
+ */
+export type ErrorKind = "format" | "fatal";
+
 export type ErrorResponse = {
   t: "err";
   id: number;
+  kind: ErrorKind;
   message: string;
   detail: string;
 };

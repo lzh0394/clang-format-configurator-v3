@@ -1,0 +1,50 @@
+/* Split diff layout (src/components/DiffPane.tsx).
+ *
+ * @codemirror/merge renders a single scroll container (`.cm-mergeView`) so that
+ * both editors scroll together; everything below only makes that container fill
+ * the React host and matches the app's surface/border tokens. Do not set a
+ * per-editor height here: the merge view overrides `.cm-editor`/`.cm-scroller`
+ * heights with `!important` to keep its line alignment working.
+ */
+
+.root {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.root :global(.cm-mergeView) {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.root :global(.cm-mergeViewEditors) {
+  min-width: 0;
+}
+
+.root :global(.cm-mergeViewEditor) {
+  min-width: 0;
+}
+
+/* Divider between the source and the formatted side. No revert-control column
+ * is rendered, so the two editor wrappers are adjacent siblings. */
+.root :global(.cm-mergeViewEditor + .cm-mergeViewEditor) {
+  border-left: 1px solid var(--border);
+}
+
+/* Collapsed unchanged stretches follow the app theme instead of the package's
+ * light/dark defaults (our CodeMirror theme is driven by CSS variables). */
+.root :global(.cm-mergeView .cm-collapsedLines) {
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 88%, var(--border));
+}
+
+.root :global(.cm-mergeView .cm-collapsedLines:hover) {
+  color: var(--text);
+}

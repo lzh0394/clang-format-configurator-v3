@@ -15,6 +15,15 @@
   --notice-text: #6b4c00;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-editor: 13px;
+  --syntax-keyword: #7c3aed;
+  --syntax-operator: #374151;
+  --syntax-string: #0f766e;
+  --syntax-comment: #6b7280;
+  --syntax-number: #b45309;
+  --syntax-type: #1d4ed8;
+  --syntax-function: #9a3412;
+  --syntax-property: #0369a1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,6 +41,14 @@
     --notice-bg: #2a2312;
     --notice-border: #5c4a1a;
     --notice-text: #ffd98a;
+    --syntax-keyword: #c4b5fd;
+    --syntax-operator: #cbd5e1;
+    --syntax-string: #6ee7b7;
+    --syntax-comment: #8b949e;
+    --syntax-number: #fbbf24;
+    --syntax-type: #93c5fd;
+    --syntax-function: #fdba74;
+    --syntax-property: #7dd3fc;
   }
 }
 
