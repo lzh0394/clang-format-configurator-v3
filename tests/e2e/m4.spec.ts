@@ -306,6 +306,49 @@ test("interface size scales the UI (not the editor) and persists", async ({ page
 });
 
 // ---------------------------------------------------------------------------
+// Desktop layout: the options panel fills its column, no horizontal overflow
+// ---------------------------------------------------------------------------
+
+test("desktop columns fill their tracks without horizontal page overflow", async ({ page }) => {
+  // CodeMirror's content is as wide as its longest line; before the grid tracks
+  // used minmax(0, 1fr) that min-content size widened the page and left an
+  // unpainted strip next to the options panel.
+  await openApp(page);
+
+  for (const width of [1600, 1360, 1280, 1100]) {
+    await page.setViewportSize({ width, height: 900 });
+    const layout = await page.evaluate(() => {
+      const main = document.querySelector("main");
+      if (main === null) throw new Error("main is missing");
+      const optionsArea = main.firstElementChild as HTMLElement | null;
+      const workbench = main.lastElementChild as HTMLElement | null;
+      const panel = document.querySelector<HTMLElement>('[data-testid="options-panel"]');
+      if (optionsArea === null || workbench === null || panel === null) throw new Error("layout nodes are missing");
+      return {
+        optionsAreaWidth: optionsArea.getBoundingClientRect().width,
+        panelWidth: panel.getBoundingClientRect().width,
+        workbenchRight: workbench.getBoundingClientRect().right,
+        mainRight: main.getBoundingClientRect().right,
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      };
+    });
+
+    // The panel stretches to the whole track (no gray strip to its right)...
+    expect(
+      Math.abs(layout.panelWidth - layout.optionsAreaWidth),
+      `options panel should fill its column at ${width}px`,
+    ).toBeLessThanOrEqual(1);
+    // ...and the editor track stays inside the viewport (long lines scroll
+    // inside CodeMirror instead of widening the page).
+    expect(layout.workbenchRight, `workbench should stay inside main at ${width}px`).toBeLessThanOrEqual(
+      layout.mainRight + 1,
+    );
+    expect(layout.scrollWidth, `no page overflow at ${width}px`).toBeLessThanOrEqual(layout.clientWidth + 1);
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Language switching example snippets (M4, plan §9 "C#/proto 代码示例")
 // ---------------------------------------------------------------------------
 
