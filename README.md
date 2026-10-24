@@ -10,7 +10,7 @@
 
 ![screenshot](docs/screenshot.png)
 
-当前进度：**M2 已完成**（CM6 编辑器 + 真实 split diff + 结构化错误面板 + 配置页抽屉），M0 的骨架、资源流水线、CI 与 GitHub Pages 与 M1 的选项引擎/导入导出都保持可用。开发状态、命令与踩过的坑见 [docs/handoff.md](docs/handoff.md)；设计与取舍的唯一事实来源是 [plan.md](plan.md)。
+当前进度：**M3 已完成**（持久化、主题切换、移动端选项卡、Service Worker 离线、a11y、首屏预算与黄金对拍闸门），M0–M2 的骨架、资源流水线、选项引擎、编辑器/diff 与配置抽屉都保持可用。开发状态、命令与踩过的坑见 [docs/handoff.md](docs/handoff.md)；设计与取舍的唯一事实来源是 [plan.md](plan.md)。
 
 ## 快速开始
 
@@ -22,7 +22,7 @@ npm run dev              # http://localhost:5173
 
 `public/schema/` 已提交进仓库；`public/wasm/` 不提交，由 `prepare:assets` 按 `tools/wasm.lock.json` 复现。
 
-## 已实现（M0 + M1 + M2）
+## 已实现（M0 + M1 + M2 + M3）
 
 - **3 个版本**（21.1.8 默认 / 20.1.7 / 18.1.8）× **7 种风格**，版本列表由生成的 `schema/index.json` 驱动，加版本不用改代码。
 - **选项面板**：189 个选项的虚拟列表（动态行高）、搜索（键名 + 文档全文，120 ms 防抖）、过滤 chips（全部 / 已修改 / 已废弃）、逐项显示「继承值 vs 修改值」与单行 reset。
@@ -38,7 +38,12 @@ npm run dev              # http://localhost:5173
 - **文档懒加载**：`docs.json` 首次搜索或首次展开某选项帮助时才拉取（~23 KB gzip），用构建期生成好的 HTML 渲染。
 - **wasm 在 Worker 里跑**：主线程不阻塞，一个版本一个实例，换版本 terminate 旧 worker。
 - **大输入保护**：>2 MB 源码先提示并需确认才格式化。
-- **首屏 JS 222.9 KB gzip**（预算 250 KB，不含 wasm glue；CM6 之前 M1 为 120.1 KB），单版本 wasm ~0.95 MB gzip。
+- **会话持久化**：`{version, style, modified, code, theme, editorFontSize}` 存在 localStorage（带状态版本号），刷新/重开自动恢复；不兼容或损坏的存档会被丢弃并提示，存储不可用/写满只告警不阻塞。
+- **主题与响应式**：跟随系统 / 浅色 / 深色三档（`data-theme` + 无闪白预置脚本），选择持久化；<768 px 时双栏变为「Options / Code」选项卡，键盘左右方向键可切换。
+- **离线可用**：手写 Service Worker（`public/sw.js`，子路径安全）缓存 app shell 与已用版本 wasm/schema，断网后刷新仍能格式化；命中新版本时提示重载。
+- **可访问性**：跳过导航链接、中文文档/英文 UI 的 `lang`、控件都有可访问名称、chips `aria-pressed`、文档展开 `aria-expanded`、对话框 `aria-labelledby`、错误 `role="alert"`、格式化结果 polite live region、`prefers-reduced-motion` 生效、控件边框对比度按 WCAG 1.4.11 处理。
+- **质量闸门**：`npm run check:size` 按 plan §1 检查首屏 JS/wasm/schema gzip 预算；`tests/golden/golden-21.1.8.json` 29 组由 **native clang-format 21.1.8** 生成，e2e 用 wasm 逐字节对拍（CI 再跑 `golden:gen --check` 防漂移），另有一条 p95 ≤ 80 ms 的格式化性能用例。
+- **首屏 JS 219.4 KB gzip**（`check:size` 口径，预算 250 KB；上屏实际还要加 ~7.5 KB 的 clike 语言 chunk），单版本 wasm ~0.95 MB gzip。
 
 ## 脚本
 
@@ -53,6 +58,8 @@ npm run dev              # http://localhost:5173
 | `npm test` | Vitest 单测 |
 | `npm run test:e2e` | Playwright（本地用 Edge：`channel=msedge`；CI 里 `PW_CHANNEL=chromium`） |
 | `npm run verify` | typecheck + test + build |
+| `npm run check:size` | 按 plan §1 检查构建产物的 gzip 预算（需先 `npm run build`） |
+| `npm run golden:gen` | 用 native clang-format 21.1.8 重新生成黄金标准输出（`-- --check` 只校验） |
 
 GitHub Pages 子路径构建：
 
@@ -67,12 +74,15 @@ tools/
   versions.json          版本清单（唯一事实来源）
   fetch-wasm.mjs         从 npm 拉 wasm，校验 sha512，生成统一 entry.js
   gen-schema.mjs         dump_config + LLVM RST → public/schema/<ver>/
+  gen-golden.mjs         用 native 21.1.8 生成/校验 tests/golden 的期望输出
+  check-size.mjs         按 plan §1 检查 dist 的 gzip 预算（CI 闸门）
   lib/rst.mjs            RST 解析 + 子集渲染成 HTML
 src/
-  App.tsx                版本/风格/文件名 + 选项面板 + 编辑器/diff + 状态栏
+  App.tsx                版本/风格/文件名 + 选项面板 + 编辑器/diff + 持久化/主题/移动端 tabs + 状态栏
   editor/                CodeEditor（受控 CM6）、语言懒加载、共享主题与字号变量
   components/            OptionPanel / OptionRow / controls（五种控件）/ ConfigDialog（快速导入导出）
-                         ConfigDrawer（配置页抽屉）/ DiffPane（真实 split diff）/ ErrorPanel / useDocs
+                         ConfigDrawer（配置页抽屉）/ DiffPane（真实 split diff）/ ErrorPanel /
+                         SettingsMenu（主题与字号）/ useDocs
   lib/
     schema.ts            schema 类型、资源加载、buildStylePayload
     schema-store.ts      版本 schema 与 docs 的 LRU 缓存（3 版本，失败不缓存）
@@ -82,11 +92,17 @@ src/
     config-diff.ts       配置抽屉的增删改键预览（纯逻辑）
     diagnostics.ts       LLVM 诊断拆分/去重（纯逻辑）
     formatter-client.ts  worker 封装：串行化、latest-wins、超时、fatal 重建
+    persisted-state.ts   localStorage 会话持久化（带状态版本号，失败降级）
+    theme.ts             system/light/dark 偏好解析与 data-theme 应用
+    service-worker.ts    SW 注册、更新提示、在线/离线事件（prod-only）
   worker/                formatter.worker.ts（唯一 wasm 实例、console 诊断捕获）+ 协议
-tests/e2e/               smoke（M0）+ m1（选项引擎 / 导入导出）+ m2（编辑器 / diff / 抽屉 / 错误）
+tests/
+  golden/                29 组 native clang-format 21.1.8 黄金输出（提交入库）
+  e2e/                   smoke（M0）+ m1 + m2 + m3 + golden（wasm vs native）+ perf（p95）
 public/
   schema/<ver>/          core.json（选项 + 默认值）、docs.json（文档），已提交
   schema/index.json      版本下拉的数据源
+  sw.js                  手写的离线 Service Worker（Vite 原样拷进 dist）
   wasm/<ver>/            不提交，由 prepare:assets 生成
 ```
 
@@ -116,4 +132,4 @@ public/
 
 ## 授权
 
-代码 MIT。docstring 来自 LLVM 文档（Apache-2.0 WITH LLVM-exception），wasm 构建来自 [`@wasm-fmt/clang-format`](https://github.com/wasm-fmt/clang-format)（MIT）。
+代码 MIT，第三方材料与文档来源见 [NOTICE](NOTICE)。docstring 来自 LLVM 文档（Apache-2.0 WITH LLVM-exception），wasm 构建来自 [`@wasm-fmt/clang-format`](https://github.com/wasm-fmt/clang-format)（MIT）。

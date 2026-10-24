@@ -332,6 +332,16 @@ Notes：
 - **验收证据**：`npm run verify` 全绿（typecheck + **146 单测**（+46：worker client/diagnostics/config-diff/languages）+ build）；Playwright **33 条**（4 smoke + 17 M1 + 12 M2）在 base `/` 与 `/<repo>/` 子路径构建下各全绿；首屏 JS **222.9 KB gzip**（不含 wasm glue；预算 250 KB，其中 CM6 约 +103 KB）；"故意写错选项能读到 LLVM 原文"通过配置抽屉写入 schema 合法但 clang-format 非法的值（如 `ColumnLimit: 1e21`）达成——未知键在 schema 层就被降级为 warning（§6 取舍），不会发到 wasm。
 - **M2 遗留**：>2 MB 输入与 worker 崩溃横幅没有 e2e（前者需要 2 MB 级键盘输入太慢，后者无自然触发路径，仅有单测覆盖队列/超时/重建）；抽屉的"从文件加载"仅由 M1 对话框的同类用例覆盖。docs 里 RST code-block 渲染仍是 M1 的老问题。
 
+**M3 状态（2026-10-24，已完成）**：打磨与上线按本节验收落地，**M3 完成即 v3 交付**。
+- **持久化**：localStorage（key `clang-format-configurator:v3`，带 `stateVersion`）保存 `{version, style, modified, code, theme, editorFontSize}`，400 ms 防抖 + `pagehide` 落盘；刷新/重开恢复；`index.html` 里 5 行预置脚本先应用主题避免闪白；损坏或状态版本不兼容的存档整体丢弃并在界面提示，个别字段非法则降级为默认值；存储不可用/写满只告警一次、不阻塞使用。
+- **主题**：跟随系统 / 浅色 / 深色（`html[data-theme]` + 内联 `color-scheme`，system 时移除属性交给 `prefers-color-scheme`），三档都在 Settings 菜单里，选择持久化；颜色仍是 CSS 变量，两套调色板由 `styles.css` 统一定义。
+- **响应式**：<768 px 时双栏变为「Options / Code」选项卡（默认 Code），键盘 ←/→ 可切换；桌面仍为选项面板 + 双栏编辑器。
+- **可访问性**：跳过导航链接；控件都有可访问名称；chips `aria-pressed`、文档展开/收起 `aria-expanded` + `aria-controls`、对话框 `aria-labelledby` 指向可见标题、错误 `role="alert"`、格式化结果用 visually-hidden 的 polite live region 播报（避免每 250 ms 抖动）；可滚动 `<pre>` 可聚焦；`prefers-reduced-motion` 全局生效；新增 `--border-control` 修 WCAG 1.4.11 的控件边框对比（`--border` 仍只做装饰分隔线），`--syntax-comment` 提到 5.27:1。
+- **离线**：手写 `public/sw.js`（Vite 原样拷进 dist，scope 全由 `registration.scope` 推导，子路径安全）；install 预缓存 shell，activate 清旧 `cfc-*` 缓存并 claim；导航 network-first → 缓存 shell → 离线页；同源静态资源 stale-while-revalidate；`{type:"SKIP_WAITING"}` 交给 UI 触发更新，更新提示与离线提示各有横幅。注册模块 prod + 安全上下文才启用，dev 下完全惰性。
+- **质量闸门**：`tools/check-size.mjs`（`npm run check:size`）按 §1 检查首屏 JS ≤250 KB、每版 wasm ≤1.0 MB、core ≤25 KB、docs ≤45 KB；`tests/golden/golden-21.1.8.json` **29 组**（覆盖 7 种风格、C++/Java/C#/Proto 与空文件/CRLF/tabs/unicode/raw string/include 排序等边界）由 **native clang-format 21.1.8** 生成，e2e 用 wasm 逐字节对拍，CI 还用 pip 装 native 跑 `gen-golden --check` 防漂移；`tools/gen-golden.mjs` 可重新生成。
+- **验收证据**：`npm run verify` 全绿（typecheck + **197 单测 / 12 文件** + build）；Playwright **47 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf）在 base `/` 与 `/<repo>/` 子路径构建下各全绿（约 26–27 s，需独占 4173 端口/`test-results` 运行）；`check:size` 10 项全过（首屏 JS **219.4 KB gzip**；wasm 941.9 / 984.6 / 990.3 KB；core 6.8–7.7 KB；docs 21.5–23.2 KB）；黄金对拍 **29/29** 与 native 21.1.8 逐字节相同；性能实测 **p95 18.6–22.7 ms**（20 KB 代码，预算 80 ms），版本切换**冷 99–116 ms（偶发 214 ms）/ 已缓存 86–144 ms**（预算 1.2 s / 200 ms）；离线（断网刷新后仍能格式化）、主题持久化、损坏存档降级都有 e2e。
+- **M3 遗留**：SW 更新横幅没有 e2e（需要两次部署间换 sw.js 才能触发；更新生命周期有 20 条单测）；持久化失败横幅（quota/unavailable）无 e2e（单测覆盖）；虚拟列表仍无 roving 键盘模型（Tab 只能到已渲染行，需滚动），ConfigDialog 未加焦点陷阱（ConfigDrawer 有）；docs HTML 的 code-block 渲染仍是老问题；界面字号整体缩放留到 M4；M2 的 >2 MB 与崩溃横幅 e2e 缺口照旧。
+
 **估时口径**：单人、熟悉 React/TS、无会议，1 天 = 6 h 净编码；不含 review 往返、CI 排队、部署调试。基准不是"写多少行代码"，而是 v2 的可见功能清单——每条标成**照搬 / 重写 / 新增**三档分别加权，漏项比写得慢更容易让工期翻倍。每项拆到 ≤4 h 再估，给"乐观–最可能"区间；悲观情况不摊进区间，而是单列成 §10 的回退路径（平摊出来的 buffer 最后都会被吃掉，还看不出是哪一项超了）。
 
 **校准**：按拆解重算，P50 ≈ 6.2 天（M0 1.0 / M1 2.2 / M2 1.3 / M3 1.7），P80 ≈ 8.5 天。上表的 5–6 天是"零返工、零等待"的乐观值，当 P30 看更合适：M1（虚拟列表行高 + 五种控件 + 配置页抽屉）与 M3（a11y + SW + 250 KB 预算）的下界偏紧。日历时间再乘 1.3–1.5；M0 结束后用实测值重估一次 M1–M3。
