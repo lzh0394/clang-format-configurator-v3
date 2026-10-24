@@ -20,7 +20,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # See ci.yml: 52 wasm builds raise the cold build/upload cost.
+    timeout-minutes: 30
     env:
       VITE_BASE: /${{ github.event.repository.name }}/
     steps:

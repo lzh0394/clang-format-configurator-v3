@@ -1,0 +1,69 @@
+name: nightly
+
+# Upstream drift check (plan §8.1.3). Regenerates the committed option schema
+# from upstream sources (the wasm dump_config exports plus the matching LLVM
+# ClangFormatStyleOptions.rst at each tag) into .cache/schema-check and fails
+# when it no longer matches public/schema. A failure never blocks a release:
+# the job only opens (or comments on) a tracking issue.
+#
+# `--allow-missing-native` covers the versions whose committed defaults come
+# from a native clang-format binary that is not installed on the runner
+# (16.x/17.x/18.1.0–18.1.7/22.x/23.x). For those it still regenerates and
+# compares docs.json and the option structure from the RST, so docstring and
+# type drift is caught; only the native-only default values are skipped.
+# Running the fully strict gate locally requires `tools/prepare-native` assets.
+
+on:
+  schedule:
+    # 03:17 UTC daily (off the top of the hour to avoid the busy cron window).
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  schema-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      # Same cache key as ci.yml/deploy.yml: the wasm binaries feed dump_config.
+      - uses: actions/cache@v6
+        with:
+          path: public/wasm
+          key: wasm-${{ hashFiles('tools/versions.json') }}
+          restore-keys: wasm-
+
+      - run: npm ci
+      - run: npm run prepare:wasm
+
+      - name: Regenerate the schema and compare with the committed copy
+        id: drift
+        run: npm run schema:check -- --allow-missing-native
+
+      - name: Open or update the drift issue
+        if: failure() && steps.drift.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list --search 'nightly schema drift in:title' --state open --json number --jq '.[0].number // empty')
+          body=$(printf 'The nightly schema drift check failed.\n\n- Run: %s\n- Workflow: %s\n\nReproduce locally with `npm run prepare:wasm && npm run schema:check -- --allow-missing-native`.\nIf the drift is expected (e.g. a new upstream tag or option), regenerate the schema and commit it.\n' "$RUN_URL" "$GITHUB_WORKFLOW")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "nightly schema drift" --body "$body"
+          fi

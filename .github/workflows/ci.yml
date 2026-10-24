@@ -17,7 +17,10 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 52 published versions: a cold `prepare:wasm` downloads ~120 MB and the
+    # size gate gzips every wasm; cached runs stay well under the old 15 min,
+    # but the first run after a versions.json change needs headroom.
+    timeout-minutes: 30
     env:
       # Exercise the deployed sub-path on every run: that is where asset and
       # worker URLs break if BASE_URL is not threaded through.
