@@ -239,4 +239,8 @@ docs/screenshot.png    线上截图（README 引用，M2 更新为 diff 模式�
 
 ### CI / 部署（GitHub Actions）
 
-M2 的代码与文档提交推送后由 `ci.yml` / `deploy.yml` 验证；发布成功后的 run 链接与线上 smoke 结果补记在这里（按 §4 的网络注意事项，DNS 抖动时直接看 Actions 网页）。
+| 项 | 结果 |
+|---|---|
+| ci（M2 提交 `267f1de`） | ✅ [40051244202](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40051244202) |
+| deploy（M2 线上） | ✅ [40051244118](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40051244118)：build（含 33 条 e2e）→ deploy → 对线上 URL 再跑整套 e2e，全绿 |
+| 线上复跑 M2 组（本地执行） | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test tests/e2e/m2.spec.ts` → **12 passed**（40.2 s）；线上页面 200，入口与 CSS 资产 200 |
