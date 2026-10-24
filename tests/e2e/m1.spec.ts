@@ -1,6 +1,8 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { parse as parseYaml } from "yaml";
 
+import { expectEditorTextToMatch, openApp as openReadyApp } from "./helpers";
+
 // M1 acceptance (plan §9, contract §5.2): a usable `.clang-format` can be built
 // through the UI alone, export -> import -> export is byte-identical, and every
 // control type renders correctly.
@@ -9,17 +11,13 @@ import { parse as parseYaml } from "yaml";
 // suite works locally at `/` and on GitHub Pages at `/<repo>/`. Tests never read
 // from disk: all state travels through the page.
 
-const APP_READY_TIMEOUT = 30_000;
-
 // ---------------------------------------------------------------------------
 // Page helpers
 // ---------------------------------------------------------------------------
 
 async function openApp(page: Page): Promise<void> {
-  await page.goto("./");
-  // The wasm formatter must finish once before any UI interaction (contract §5.2).
-  await expect(page.getByTestId("output")).toContainText("class Widget {", { timeout: APP_READY_TIMEOUT });
-  await expect(page.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+  // The shared helper waits for the wasm formatter's first result (contract §5.2).
+  await openReadyApp(page);
   await warmDocs(page);
 }
 
@@ -91,10 +89,8 @@ async function expectModifiedCount(page: Page, count: number): Promise<void> {
 
 /** Assert the formatted output indents the class member by exactly `spaces`. */
 async function expectIndent(page: Page, spaces: number): Promise<void> {
-  const output = page.getByTestId("output");
-  await expect
-    .poll(async () => (await output.textContent()) ?? "", { timeout: 15_000 })
-    .toMatch(new RegExp(`^ {${spaces}}int id_;$`, "m"));
+  // Read the CodeMirror logical text; its `.cm-line` divs carry the newlines.
+  await expectEditorTextToMatch(page, "output", new RegExp(`^ {${spaces}}int id_;$`, "m"));
 }
 
 function dialogLocator(page: Page): Locator {
