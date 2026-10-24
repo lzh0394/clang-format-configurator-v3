@@ -322,6 +322,16 @@ Notes：
 
 **M1 状态（2026-10-23，已完成）**：选项引擎与 UI 按本节验收落地——schema store（LRU 3 版本 + docs 懒加载，失败可重试）、`modified` 模型（只发改动项；16 个 map 选项存稀疏 patch，显示值 = `modified[key] ?? defaults[style][key]`；版本切换自动剔除目标 schema 不认识的键）、虚拟化选项面板（189 行、动态行高、键名+文档搜索、全部/已修改/已废弃 chips、五种控件、逐项继承值/reset、`BraceWrapping`/`SpaceBeforeParensOptions` 的 override 警告与一键修正）、Minimal/Full 导出、带 schema 校验与 warning 的导入、legacy `AlignConsecutive*` / `SortIncludes` / `AlignTrailingComments` 转换。验收证据：纯 UI 生成 `.clang-format` 的 e2e 通过；**导出→导入→导出字节相同**（minimal/full，单测 78 条 + e2e 双向覆盖）；`npm run verify` 全绿（typecheck + 100 单测 + build）；Playwright 21 条（4 M0 smoke + 17 M1）在 base `/` 与 `/<repo>/` 子路径构建下全绿；首屏 JS 120.1 KB gzip（预算 250 KB）。新增运行时依赖 `@tanstack/react-virtual`、`yaml`（后者从 devDependencies 移动）。M1 的并行开发契约（接口/测试 id/归属）随完成后删除，实现细节见 `docs/handoff.md`。
 
+**M2 状态（2026-10-24，已完成）**：编辑器 / diff / 错误 / 配置页按本节验收落地。
+- **CM6 双栏编辑器**：左可编辑、右只读；语言随文件名（C/C++、Java、C#、Proto，`.clang-format`/`.yaml` 为 YAML），代码语言用 CM6 legacy stream modes（clike/protobuf）按需加载；Ctrl/Cmd+Enter 立即格式化、auto-format 保留、防抖 300→**250 ms**；编辑器字号 12–20 px（CSS 变量 `--font-size-editor`，写死的 13 px 改为变量派生）。
+- **真实 split diff**：`@codemirror/merge` 的 MergeView（变更行/变更片段高亮、两侧滚动同步、未变更区可折叠），**按需懒加载**（Diff 开关）；首屏因此不含 merge 代码。
+- **Worker 协议升级**：请求串行化 + latest-wins（新请求替换尚未开始的排队请求，主线程侧 `FormatterSupersededError` 静默丢弃）、格式化期间接管 `console.error/warn` 把 LLVM 诊断并入 `detail`、20 s 格式化超时与 `fatal` 错误分类、worker `onerror`/`onmessageerror` 后自动重建 + 顶部横幅（自动重试一次，之后手动 Restart formatter）。
+- **结构化错误面板**：首行摘要（`role="alert"`）+ 可展开的 LLVM 诊断原文（`<details>`）；错误可 dismiss，且不再阻塞后续格式化。
+- **配置页抽屉**：CM6 YAML 编辑器、基于 schema 的 150 ms 实时校验（致命语法错误带行列号；未知键/非法值降级为 warning）、Minimal/Full 模式、上传/下载 `.clang-format`、Apply/Close，以及底部"相对当前配置新增/删除/修改了哪些键 + BasedOnStyle 变更"的预览。M1 的 Import/Export 对话框保留为快速入口（两者共用同一解析/序列化路径）。
+- **失败路径**：>2 MB 输入先警告并要求确认（Format anyway）；worker trap/OOM/超时通过 fatal 分类 + 重建处理，用户状态保留。
+- **验收证据**：`npm run verify` 全绿（typecheck + **146 单测**（+46：worker client/diagnostics/config-diff/languages）+ build）；Playwright **33 条**（4 smoke + 17 M1 + 12 M2）在 base `/` 与 `/<repo>/` 子路径构建下各全绿；首屏 JS **222.9 KB gzip**（不含 wasm glue；预算 250 KB，其中 CM6 约 +103 KB）；"故意写错选项能读到 LLVM 原文"通过配置抽屉写入 schema 合法但 clang-format 非法的值（如 `ColumnLimit: 1e21`）达成——未知键在 schema 层就被降级为 warning（§6 取舍），不会发到 wasm。
+- **M2 遗留**：>2 MB 输入与 worker 崩溃横幅没有 e2e（前者需要 2 MB 级键盘输入太慢，后者无自然触发路径，仅有单测覆盖队列/超时/重建）；抽屉的"从文件加载"仅由 M1 对话框的同类用例覆盖。docs 里 RST code-block 渲染仍是 M1 的老问题。
+
 **估时口径**：单人、熟悉 React/TS、无会议，1 天 = 6 h 净编码；不含 review 往返、CI 排队、部署调试。基准不是"写多少行代码"，而是 v2 的可见功能清单——每条标成**照搬 / 重写 / 新增**三档分别加权，漏项比写得慢更容易让工期翻倍。每项拆到 ≤4 h 再估，给"乐观–最可能"区间；悲观情况不摊进区间，而是单列成 §10 的回退路径（平摊出来的 buffer 最后都会被吃掉，还看不出是哪一项超了）。
 
 **校准**：按拆解重算，P50 ≈ 6.2 天（M0 1.0 / M1 2.2 / M2 1.3 / M3 1.7），P80 ≈ 8.5 天。上表的 5–6 天是"零返工、零等待"的乐观值，当 P30 看更合适：M1（虚拟列表行高 + 五种控件 + 配置页抽屉）与 M3（a11y + SW + 250 KB 预算）的下界偏紧。日历时间再乘 1.3–1.5；M0 结束后用实测值重估一次 M1–M3。

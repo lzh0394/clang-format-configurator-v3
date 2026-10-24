@@ -10,7 +10,7 @@
 
 ![screenshot](docs/screenshot.png)
 
-当前进度：**M1 已完成**（选项引擎 + 面板 + 配置导入/导出），M0 的骨架、资源流水线、CI 与 GitHub Pages 已在线上跑通。开发状态、命令与踩过的坑见 [docs/handoff.md](docs/handoff.md)；设计与取舍的唯一事实来源是 [plan.md](plan.md)。
+当前进度：**M2 已完成**（CM6 编辑器 + 真实 split diff + 结构化错误面板 + 配置页抽屉），M0 的骨架、资源流水线、CI 与 GitHub Pages 与 M1 的选项引擎/导入导出都保持可用。开发状态、命令与踩过的坑见 [docs/handoff.md](docs/handoff.md)；设计与取舍的唯一事实来源是 [plan.md](plan.md)。
 
 ## 快速开始
 
@@ -22,17 +22,23 @@ npm run dev              # http://localhost:5173
 
 `public/schema/` 已提交进仓库；`public/wasm/` 不提交，由 `prepare:assets` 按 `tools/wasm.lock.json` 复现。
 
-## 已实现（M0 + M1）
+## 已实现（M0 + M1 + M2）
 
 - **3 个版本**（21.1.8 默认 / 20.1.7 / 18.1.8）× **7 种风格**，版本列表由生成的 `schema/index.json` 驱动，加版本不用改代码。
 - **选项面板**：189 个选项的虚拟列表（动态行高）、搜索（键名 + 文档全文，120 ms 防抖）、过滤 chips（全部 / 已修改 / 已废弃）、逐项显示「继承值 vs 修改值」与单行 reset。
 - **五种控件**：bool / int / uint / string 标量、enum 下拉、map（结构体，稀疏修改）、`List of Strings`、`List of Structs`（增删条目、逐字段编辑）。
 - **只发送改动项**：内部状态是 `{version, style, modified}`，格式化 payload 是 `{BasedOnStyle, ...modified}`；默认值只用于显示，不会再像 v2 那样把 190 个默认值全量物化。
+- **CodeMirror 6 编辑器**：左栏可编辑源码、右栏只读格式化结果；语言随文件名（C/C++、Java、C#、Proto，`.clang-format` 为 YAML），Ctrl/Cmd+Enter 立即格式化，250 ms 防抖，编辑器字号 12–20 px 可调。
+- **真实行级 diff**：`@codemirror/merge` 的 split 视图（不是 v2 的"左右并排"），变更行/片段高亮、两侧滚动同步、未变更区可折叠；按需加载，不进首屏。
+- **Worker 协议**：请求串行化 + latest-wins（过期请求静默丢弃）、格式化期间捕获 LLVM 诊断、20 s 超时与 fatal 分类；worker 崩溃后自动重建并提示，状态不丢。
+- **结构化错误面板**：一行摘要 + 可展开的 LLVM 诊断原文；如把 `ColumnLimit` 写成 schema 合法但 clang-format 不接受的值，就能看到原始报错。
+- **配置页抽屉**：CM6 YAML 编辑器 + 基于 schema 的 150 ms 实时校验（语法错误带行列号、未知键/非法值降级为 warning）、Minimal/Full 模式、上传/下载 `.clang-format`、Apply/Close，以及相对当前配置的增删改键预览。
 - **导出/导入**：Minimal（默认，只含 `BasedOnStyle` + 改动项）/ Full（全部写死，供锁版本）；导入按当前版本 schema 校验，未知键与非法值收集为 warning（不硬失败），legacy `AlignConsecutive*` / `SortIncludes` / `AlignTrailingComments` 自动转换成嵌套形式；YAML 语法错误带行列号。**导出 → 再导入 → 再导出字节幂等**（minimal 与 full 都有单测与 e2e）。
 - **依赖项 override 警告**：`BraceWrapping` 只在 `BreakBeforeBraces: Custom` 时生效、`SpaceBeforeParensOptions` 只在 `SpaceBeforeParens: Custom` 时生效——改错父项时行内提示，并可一键把父项切成 `Custom`。
 - **文档懒加载**：`docs.json` 首次搜索或首次展开某选项帮助时才拉取（~23 KB gzip），用构建期生成好的 HTML 渲染。
 - **wasm 在 Worker 里跑**：主线程不阻塞，一个版本一个实例，换版本 terminate 旧 worker。
-- **首屏 JS 119.8 KB gzip**（预算 250 KB），单版本 wasm ~0.95 MB gzip。
+- **大输入保护**：>2 MB 源码先提示并需确认才格式化。
+- **首屏 JS 222.9 KB gzip**（预算 250 KB，不含 wasm glue；CM6 之前 M1 为 120.1 KB），单版本 wasm ~0.95 MB gzip。
 
 ## 脚本
 
@@ -63,17 +69,21 @@ tools/
   gen-schema.mjs         dump_config + LLVM RST → public/schema/<ver>/
   lib/rst.mjs            RST 解析 + 子集渲染成 HTML
 src/
-  App.tsx                版本/风格/文件名 + 选项面板 + 双栏编辑 + 状态栏
-  components/            OptionPanel / OptionRow / controls（五种控件）/ ConfigDialog / useDocs
+  App.tsx                版本/风格/文件名 + 选项面板 + 编辑器/diff + 状态栏
+  editor/                CodeEditor（受控 CM6）、语言懒加载、共享主题与字号变量
+  components/            OptionPanel / OptionRow / controls（五种控件）/ ConfigDialog（快速导入导出）
+                         ConfigDrawer（配置页抽屉）/ DiffPane（真实 split diff）/ ErrorPanel / useDocs
   lib/
     schema.ts            schema 类型、资源加载、buildStylePayload
     schema-store.ts      版本 schema 与 docs 的 LRU 缓存（3 版本，失败不缓存）
     config.ts            modified 模型：继承值、稀疏 map、set/reset
     config-state.ts      ConfigState + useReducer reducer + 版本切换归一
     config-io.ts         .clang-format YAML 导出/导入（纯逻辑）
-    formatter-client.ts  worker 封装，换版本 terminate
-  worker/                formatter.worker.ts（持有唯一 wasm 实例）+ 协议
-tests/e2e/               smoke（M0）+ m1（选项引擎 / 导入导出 roundtrip）
+    config-diff.ts       配置抽屉的增删改键预览（纯逻辑）
+    diagnostics.ts       LLVM 诊断拆分/去重（纯逻辑）
+    formatter-client.ts  worker 封装：串行化、latest-wins、超时、fatal 重建
+  worker/                formatter.worker.ts（唯一 wasm 实例、console 诊断捕获）+ 协议
+tests/e2e/               smoke（M0）+ m1（选项引擎 / 导入导出）+ m2（编辑器 / diff / 抽屉 / 错误）
 public/
   schema/<ver>/          core.json（选项 + 默认值）、docs.json（文档），已提交
   schema/index.json      版本下拉的数据源
