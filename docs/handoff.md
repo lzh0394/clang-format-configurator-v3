@@ -1,13 +1,13 @@
-# 交接文档（M3 完成 → v3 交付，M4 可选）
+# 交接文档（M0–M4 完成，v3 完整交付）
 
 > 新会话先读本文件，再读 [`plan.md`](../plan.md)。plan.md 是设计与取舍的唯一事实来源；本文只记状态、命令、坑和待办。
-> 最后更新：2026-10-24 10:45。M3 的代码范围：`src/App.tsx`、`src/App.module.css`、`src/styles.css`、`index.html`、`src/components/{SettingsMenu,OptionPanel,OptionRow,controls,ConfigDialog,ConfigDrawer,DiffPane,ErrorPanel}.*`、`src/lib/{persisted-state,theme,service-worker}.*`、`public/sw.js`、`tools/{gen-golden,check-size}.mjs`、`tests/golden/golden-21.1.8.json`、`tests/e2e/{m3,golden,perf}.spec.ts`、`.github/workflows/{ci,deploy}.yml`、`NOTICE`；具体提交以 `git log` 为准。
+> 最后更新：2026-10-24 12:10。M4 的代码范围：`src/lib/share-link.ts`、`src/pwa/**`、`src/editor/{languages,examples}.ts`、`src/components/{OptionPanel,OptionRow,ConfigDialog,ConfigDrawer,useDocs,roving,focus-trap}.*`、`src/lib/persisted-state.ts`、`src/(App|main).tsx`、`src/styles.css` 与全站 CSS 的 px→rem、`public/manifest.json`、`public/icons/**`、`public/sw.js`、`public/schema/**`（52 版本）、`tools/{versions.json,wasm.lock.json,gen-schema,fetch-wasm,check-size,prepare-assets}.mjs`、`tests/e2e/{m4,m4-pwa,m4-a11y}.spec.ts`、`.github/workflows/nightly.yml`、`plan.md`/`README.md`/本文件；具体提交以 `git log` 为准。
 
 ## 1. 一句话现状
 
-**M3 已完成，v3 视为交付**：会话持久化、系统/浅色/深色主题、<768 px 的「Options / Code」选项卡、Service Worker 离线、a11y 收尾、首屏 gzip 预算与 native↔wasm 黄金对拍闸门全部落地。
-`npm run verify` 全绿（typecheck + **197 单测 / 12 文件** + build）；Playwright **47 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf）在 base `/` 与 `/<repo>/` 子路径下各全绿（约 26–35 s）；`npm run check:size` 10 项全过（首屏 JS 219.4 KB gzip）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；格式化 p95 19.3–21.7 ms（预算 80 ms）。
-**M4 是可选项**（分享链接、PWA、示例、补齐全部 52 个版本），不阻塞交付。
+**M0–M4 全部完成，v3 完整交付**：骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/响应式/离线、a11y 闸门，以及 M4 的分享链接、PWA（manifest + 安装提示）、C#/Proto 等示例与语言扩展、全部 **52** 个 wasm 版本、界面字号缩放、虚拟列表 roving、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查。
+`npm run verify` 全绿（typecheck + **298 单测 / 18 文件** + build）；Playwright **64 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 7 M4 + 5 M4-PWA + 5 M4-a11y）在 base `/` 与 `/<repo>/` 子路径下各 63 passed + 1 flaky（perf 的 cached 版本切换在并行 worker 下偶发 >200 ms，单独跑 76 ms）；`npm run check:size` **157 项全过**（首屏 JS **224.5 KB gzip** / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；52/52 版本运行期自检 + 312/312 native vs wasm 对拍；格式化 p95 9–23 ms（预算 80 ms）；dist ≈130 MB。
+**nightly**：`schema:check --allow-missing-native` 每日跑，漂移只开 issue，不阻塞发布。
 
 ## 2. 链接
 
@@ -30,9 +30,9 @@ npm run dev              # http://127.0.0.1:5173
 验证（提交前跑，不需要外网）：
 
 ```powershell
-npm run verify           # typecheck + vitest + build（197 单测）
-npm run check:size       # 需先 build；按 plan §1 检查 gzip 预算（10 项）
-npx playwright test      # 本地用 Edge（channel=msedge），47 条，约 26–35 s
+npm run verify           # typecheck + vitest + build（298 单测 / 18 文件）
+npm run check:size       # 需先 build；按 plan §1 检查 gzip 预算（157 项 / 52 版本）
+npx playwright test      # 本地用 Edge（channel=msedge），64 条，约 30 s
 ```
 
 子路径构建（模拟 Pages）：
@@ -79,7 +79,7 @@ npm run golden:gen -- --check      # 只校验是否与 native 漂移（CI 用�
 - **Service Worker（M3）**：
   - 只在 production（`import.meta.env.PROD`）注册，dev 下完全惰性；e2e 用 `vite preview` 才有 SW。
   - 首次加载虽然会被 claim，但已加载资源未经 SW；**测离线要先 reload 一次**再断网。
-  - SW 里所有 URL 从 `self.registration.scope` 推导，子路径安全；改缓存策略要 bump `CACHE_VERSION`（`cfc-v1`）。
+  - SW 里所有 URL 从 `self.registration.scope` 推导，子路径安全；改缓存策略要 bump `CACHE_VERSION`（M4 起 `cfc-v2`，预缓存 manifest + 图标）。
   - 导航 network-first：正常发版刷新即可看到新版本；更新横幅只有在 `sw.js` 变化时才出现。
 - **黄金对拍（M3）**：`tests/golden/golden-21.1.8.json` 是 **native 21.1.8 生成的提交物**；CI 用 `actions/setup-python@v7` + `pip install clang-format==21.1.8` 后跑 `node tools/gen-golden.mjs --check`（Linux 上重新生成 Windows 生成的 JSON，按 stdin/stdout 字节比较，理论上平台无关；如首跑出现漂移，按提示的 fixture 名排查，不要盲目重生成）。e2e 的 `golden.spec.ts` 在浏览器里用 wasm 跑同一组 fixture 并逐字节比较（29/29）。
 - **gzip 预算（M3）**：`tools/check-size.mjs` 口径是 zlib level 9，1 MB = 1024 KB；初 JS 只算 `dist/index.html` 里的入口 script + modulepreload，**不含**懒加载的 clike chunk（上屏实际约 +7.5 KB）也不含 wasm glue（plan §1 明确不含 wasm/schema）。CI 在 build 后跑。
@@ -87,58 +87,72 @@ npm run golden:gen -- --check      # 只校验是否与 native 漂移（CI 用�
 - **Windows 剪贴板**把换行归一成 CRLF：比较复制出来的 YAML 要 `replace(/\r\n/g,"\n")`；Edge 下载 `.clang-format` 的建议文件名是 `clang-format`（前导点被去掉）。
 - **CI 时长**：保留 Playwright 浏览器缓存、`npx playwright install chromium`（**不带 `--with-deps`**）、并发取消；M3 新增 setup-python + pip + `golden:gen --check` 约 +8–10 s，`check:size` 可忽略。
 - **网络**：`github.com`/`api.github.com` 偶发 DNS/TLS 抖动，**不要写重试循环**；API 还可能匿名限流（本次实测 403 rate limit），优先看 Actions 网页。
+- **界面字号（M4）**：`App.tsx` 把持久化的 `uiFontScale`（0.9/1/1.15）写到 `<html>` 的 `--ui-scale`，`styles.css` 用 `:root { font-size: calc(100% * var(--ui-scale)) }`，**组件 CSS 字号全部 rem**（`--font-size-editor` 仍是 px，不受影响）。改字号后虚拟列表必须重测行高：`OptionPanel` 收到 `remeasureKey` 后在 rAF 里对已渲染 `[data-index]` 行逐个 `virtualizer.measureElement(el)`；**不要改成 `virtualizer.measure()`**（它清 itemSizeCache 但保留旧 measurementsCache，delta 会算成 0，行按 44px 估算重叠）。改任何组件字号时记得也检查 px→rem。
+- **PWA（M4）**：manifest 用 `public/manifest.json`（曾用 `.webmanifest`，担心 GitHub Pages MIME 不是 `application/manifest+json`；`.json` 一定是 `application/json`，Chrome/Edge 都接受）。manifest 里 `start_url:"."`、`scope:"./"`、图标 `src` 全相对，子路径部署安全。`src/pwa/install.ts` 的浏览器单例在 `main.tsx` render 前创建，避免漏掉 `beforeinstallprompt`。
+- **52 个版本（M4）**：`public/schema/` 提交（105 文件 / 11.6 MB raw）；`public/wasm/` 仍不提交，CI 的 actions/cache key 是 `hashFiles('tools/versions.json')`，冷跑要下 118 MB / 约 2–4 分钟（ci/deploy 的 timeout 已提到 30 分钟）；dist ≈130 MB。26 个版本的 schema 默认值来自同版本 native（`versions.json` 里 `"dump": "native"`）：16.0.6、17.0.x、18.1.0–18.1.7、22.x、23.x；22.1.6/7 不在 PyPI，用 LLVM 官方 release 的 `clang-format.exe`（.cache，862 MB tarball 用完即删）。新增版本时按 `versions.json` 加行 → `npm run prepare:assets -- --only=<ver>` 或全量 → 提交 schema + lock。
+- **分享链接（M4）**：纯逻辑在 `src/lib/share-link.ts`（11 条单测）；`App.tsx` 在 `useState` 初始化器里读 `location.hash`，应用后 `history.replaceState` 清掉 fragment；优先级 hash > storage。新增字段必须 bump payload 的 `k`。
+- **CI**：nightly 只在 `schema:check --allow-missing-native` 下跳过 26 个 native-dump 版本的默认值（docs/结构仍比对）；本地/发布前要跑严格 `npm run schema:check`（需要 native 二进制）。
 
 ## 5. 代码地图
 
 ```
 tools/
-  versions.json        版本清单（唯一事实来源，当前 3 个）
+  versions.json        版本清单（唯一事实来源，52 行；native-dump 版本带 "dump": "native"）
   fetch-wasm.mjs       拉 npm tarball → 校验 sha512 → public/wasm/<ver>/ + 生成 entry.js
-  gen-schema.mjs       dump_config + LLVM RST → public/schema/<ver>/{core,docs}.json（含校验闸门）
+  gen-schema.mjs       wasm dump_config / native dump + LLVM RST → public/schema/<ver>/{core,docs}.json（含校验闸门、--check、--allow-missing-native）
   prepare-assets.mjs   依次跑上面两个；--only=<ver> / --refresh-rst 可传
   gen-golden.mjs       native 21.1.8 → tests/golden/golden-21.1.8.json；--check 防漂移
-  check-size.mjs       dist 的 gzip 预算闸门（plan §1）
+  check-size.mjs       dist 的 gzip 预算闸门（plan §1；52 版本、wasm ≤1.1MB）
   lib/rst.mjs          ClangFormatStyleOptions.rst 解析 + 子集 reST→HTML
   lib/tar.mjs          最小 ustar 读取（不引 tar 依赖）
-  wasm.lock.json       已提交：每版本 integrity + 每个文件 sha256
+  wasm.lock.json       已提交：52 条 integrity + 178 个文件 sha256
 src/
-  App.tsx              版本/风格/文件名 + 选项面板 + 编辑器/diff + 持久化/主题/移动端 tabs/离线横幅
+  App.tsx              版本/风格/文件名 + 选项面板 + 编辑器/diff + 持久化/分享链接/PWA/字号/移动端 tabs/离线横幅
   App.module.css       布局（桌面双栏；<768px 单栏+tabs）+ skip link/横幅样式
-  main.tsx / styles.css  design tokens（浅/深两套、--font-size-editor、--syntax-*、--border-control）
+  main.tsx / styles.css  design tokens（浅/深两套、--ui-scale、--font-size-editor、--syntax-*、--border-control）
   editor/
     CodeEditor.tsx      受控 CM6 编辑器：value/onChange/language/readOnly/testId/onSubmit
-    languages.ts        文件名→语言映射 + lazy 语言包（clike/protobuf/lang-yaml），带缓存
+    languages.ts        文件名→语言映射（含 kotlin/objc/js/ts）+ lazy 语言包，带缓存
+    examples.ts         各语言示例代码 + getSampleCode/isKnownSample（M4）
     theme.ts            共享 CM6 主题 + 语法高亮（全部走 CSS 变量）
+  pwa/
+    install.ts          beforeinstallprompt 生命周期（可注入环境、无 React）
+    InstallBanner.tsx   可安装横幅（可关闭/安装后隐藏）
   components/
-    OptionPanel/OptionRow/controls   选项面板五种控件（M1，M3 补 a11y 语义）
-    ConfigDialog.tsx    快速导入/导出对话框（M1/M2，M3 补 aria-labelledby/tabs ids）
-    ConfigDrawer.tsx    配置页抽屉（M2，M3 补 aria-labelledby/警告播报）
-    DiffPane.tsx        真实 split diff（M2，M3 加 region 语义）
-    ErrorPanel.tsx      结构化错误面板（M2，M3 让诊断可聚焦）
-    SettingsMenu.tsx    主题三档 + 编辑器字号（M3，Settings 弹出层）
-    useDocs.ts          docs 懒加载 hook（M1）
+    OptionPanel/OptionRow/controls   选项面板五种控件 + roving 键盘模型（M1/M4）
+    roving.ts / focus-trap.ts        键盘索引纯逻辑 / 焦点陷阱纯逻辑（M4，均有单测）
+    ConfigDialog.tsx    快速导入/导出对话框（焦点陷阱、两 modal 只有顶层响应）
+    ConfigDrawer.tsx    配置页抽屉（与 ConfigDialog 共用焦点陷阱）
+    DiffPane.tsx        真实 split diff（M2）
+    ErrorPanel.tsx      结构化错误面板（M2）
+    SettingsMenu.tsx    主题三档 + 编辑器字号 + 界面字号（M3/M4，Settings 弹出层）
+    useDocs.ts          docs 懒加载 hook + prepareDocsHtml（M4 修 docs pre/标记）
   lib/
     schema.ts / schema-store.ts / config.ts / config-state.ts / config-io.ts / config-diff.ts / diagnostics.ts
+    share-link.ts       URL hash 分享链接编解码（纯逻辑，M4）
     formatter-client.ts worker 封装：串行化、latest-wins、supersede、20s 超时、onFatal
-    persisted-state.ts  localStorage 持久化（stateVersion、损坏/不兼容/配额降级，纯逻辑可测）
+    persisted-state.ts  localStorage 持久化（stateVersion=1；uiFontScale 为兼容增字段）
     theme.ts            ThemePreference、resolveTheme、applyTheme（data-theme + color-scheme）
     service-worker.ts   SW 注册/更新/在线离线事件（prod-only，可注入环境测试）
   worker/              formatter.worker.ts（唯一 wasm 实例、串行化、console 诊断捕获）+ protocol
 tests/
   golden/              29 组 native clang-format 21.1.8 黄金输出（提交入库）
-  e2e/                 helpers + smoke + m1 + m2 + m3 + golden + perf
+  e2e/                 helpers + smoke + m1 + m2 + m3 + m4 + m4-pwa + m4-a11y + golden + perf
 public/
-  schema/<ver>/        已提交（core.json + docs.json），index.json 驱动版本下拉
-  sw.js               手写 Service Worker（Vite 原样拷进 dist）
+  schema/<ver>/        已提交（core.json + docs.json），52 个版本；index.json 驱动版本下拉
+  manifest.json        PWA manifest（相对 start_url/scope）
+  icons/               PWA 图标（192/512/maskable/apple-touch）
+  sw.js                手写 Service Worker（Vite 原样拷进 dist）
   wasm/<ver>/          不提交（.gitignore），由 prepare:assets 生成
 .github/workflows/
-  ci.yml               verify（typecheck/unit/golden check/size/build/e2e）+ Playwright 缓存
+  ci.yml               verify（typecheck/unit/golden check/size/build/e2e）+ Playwright/wasm 缓存
   deploy.yml           build（含 e2e）→ deploy → 对线上 URL 跑整套 e2e
+  nightly.yml          schema 漂移检查（只开 issue）
 docs/screenshot.png    线上截图（README 引用）
 NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt、v2 参考）
 ```
 
-## 6. M3 已实现的行为与实现细节（读代码前必须知道）
+## 6. 已实现的行为与实现细节（读代码前必须知道）
 
 1. **持久化（`persisted-state.ts` + `App.tsx`）**：状态文档 `{stateVersion, version, style, modified, code, theme, editorFontSize}`，`STORAGE_KEY="clang-format-configurator:v3"`，`STATE_VERSION=1`。`loadPersistedState` 同步、不抛异常：`empty/unavailable` 静默，`corrupt/version-mismatch` → 丢弃 + 一次性 notice（"Saved session was discarded"），单字段非法只降级为默认。`savePersistedState` 自身 stamp 版本号，quota/unavailable 返回状态码，App 只提示一次（`persist-banner`）。保存 400 ms 防抖；`pagehide`/卸载用 ref 稳定回调 flush（**不要让 flush effect 依赖每次编辑都变的函数**，否则每敲一个键都会同步写 localStorage）。
 2. **版本恢复**：版本列表加载后优先用存档里的 version（仍在 `schema/index.json` 里才用），否则用默认版本；`reconcileModified` 丢弃目标 schema 不认识/已废弃的键，丢弃时把键名收进 notice（最多列 12 个）。
@@ -149,65 +163,82 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 7. **质量闸门**：`check-size.mjs` 读 `dist/index.html` 找入口 script + modulepreload 算初 JS gzip，逐版本检查 wasm/core/docs；缺资源直接失败。`gen-golden.mjs` 的二进制解析顺序 `--clang-format` > `CLANG_FORMAT_BIN` > PATH > 仓库缓存（仅本机兜底），版本必须 21.1.8；`--check` 忽略 `generatedAt` 逐 fixture 比较。e2e 的 `golden.spec.ts` 在浏览器里 import `wasm/21.1.8/entry.js`，用 `JSON.stringify(style)` 调 `format(code, filename, style)`，**原始字节**比较（允许尾随空格/CRLF）。
 8. **性能**：`perf.spec.ts` 在页面里直接 import wasm（绕过 UI 防抖）测 20 KB C++ 代码的 `format()` p95，并测版本切换冷/缓存时间（select → status ready + 输出出现，10 ms 轮询）。本机实测 p95 **18.6–22.7 ms**、冷切换 **130–166 ms**、缓存 **104–108 ms**。
 9. **M0–M2 不变量仍然成立**：只发改动项；16 个 map 是稀疏 patch；导出按 schema 顺序、枚举 canonical、单结尾换行、导出→导入→导出**字节幂等**；版本切换剔除未知键；错误面板 `err.kind === "format"` 才进 ErrorPanel，fatal 走崩溃横幅；>2 MB 需确认；语言随文件名；diff 打开时普通双栏卸载（`source`/`output` 全局唯一）。
+10. **分享链接（M4，`share-link.ts` + `App.tsx`）**：载荷 `{k:1, v, s, m, c?}` → base64url(UTF-8 JSON) → `#s=...`；编码上限 48 KB、code 上限 8 KB（超过只分享配置）；解码对 base64/JSON/k/v/s/m/c 逐项校验，任何异常返回 null。`App` 的 `useState` 初始化器里读 hash（**首帧就是分享状态**），storage 的 theme/editorFontSize 仍用；hydrate 后一次性 notice + `history.replaceState` 清 fragment。Copy link 从当前会话重新编码，clipboard 失败时把 URL 放进 notice。
+11. **PWA（M4，`public/manifest.json` + `src/pwa/*`）**：manifest 全相对 URL；SW install 预缓存 shell/manifest/4 图标/favicon（逐项 catch，不因单个 404 失败），离线导航回退页有可操作文案。安装横幅自订阅 `install.ts` 单例（`main.tsx` 提前创建），`beforeinstallprompt` → canInstall，`promptInstall()` 用一次即丢弃事件，dismiss 写 `clang-format-configurator:install-dismissed`。
+12. **界面字号（M4）**：`uiFontScale` 0.9/1/1.15；根字号 `calc(100% * var(--ui-scale))`，组件字号全 rem；编辑器走独立 `--font-size-editor`。虚拟列表 `remeasureKey` 变化后在 rAF 中对已渲染行 `measureElement`（**不可用 `measure()`**，见 §4 的坑）。
+13. **键盘/焦点（M4）**：`roving.ts` 纯逻辑（isRovingNavigationKey/nextRovingIndex/pageStep/clampIndex/resolveActiveIndex/rovingTabIndex），OptionPanel 用一个 `activeKey` + `rangeExtractor` 强制把 active 行渲染进窗口；`focus-trap.ts` 提供 collectTabStops/resolveTabTarget + modal 栈（drawer z-index 110 > dialog 100），顶层 modal 消费 Escape/Tab 时 `stopImmediatePropagation()`，否则一次 Escape 会关两个。`useDocs.prepareDocsHtml` 在渲染层给 `<pre>` 加 `tabindex=0` 并清理 RST 泄漏标记（幂等，不改生成器）。
+14. **52 版本 schema（M4）**：`versions.json` 行可带 `"dump": "native"`；`gen-schema.mjs` 对 native 版本逐个 `--style=<Style> --dump-config`（二进制从 `.cache/cf-native/<ver>` 或 `.cache/llvm/<ver>` 找），仍用 RST 做类型/枚举/文档与校验闸门；`--check` 把结果写到 `.cache/schema-check` 并与 `public/schema` 逐文件比较；`--allow-missing-native` 跳过默认值、照验 docs/结构。`check-size.mjs` 读 `versions.json` 逐版本校验 wasm/core/docs，缺版本直接失败；wasm 预算 1.1 MB（23.x 上游变大）。
 
 ## 7. 已知缺陷 / 有意的取舍
 
-- **16.0.6 / 17.0.6 不可用**：wasm 包只导出 `format`/`version`，没有 `dump_config`。
-- **22.x / 23.x 不可用**：`dump_config` 值域错位，被 schema 校验闸门拦下，等上游修。
 - **SW 更新横幅没有 e2e**：只有 `sw.js` 字节变化才会出现等待中的 worker；本地要确定性复现得在两次加载之间换一份 sw.js，成本高。更新生命周期由 `src/lib/service-worker.test.ts` 的 20 条单测覆盖（含 waiting→applyUpdate→reload 流程）。
-- **持久化失败横幅（quota/unavailable）没有 e2e**：需要 stub localStorage 抛错；`persisted-state.test.ts` 19 条单测覆盖返回码。
+- **持久化失败横幅（quota/unavailable）没有 e2e**：需要 stub localStorage 抛错；`persisted-state.test.ts` 21 条单测覆盖返回码。
 - **M2 遗留**：>2 MB 输入与 worker 崩溃横幅没有 e2e（键盘输入 2 MB 太慢、崩溃无自然触发）；配置抽屉的"从文件加载"只由 M1 对话框同类用例覆盖。
-- **虚拟列表键盘模型**：Tab 只能到已渲染行，滚到更远的选项需要先滚动；没有 roving tabindex/listbox 语义（M4）。
-- **ConfigDialog 没有焦点陷阱**（`aria-modal` 但 Tab 可离开），ConfigDrawer 有；两者理论上可同时打开（两个 aria-modal）——M4 收敛。
-- **docs HTML 里 code-block 渲染仍粗糙**（"Meaning" 列出现字面 `code-block:: c++`），是 `tools/lib/rst.mjs` 子集渲染的局限；docs `<pre>` 横向滚动区域不可聚焦（要改生成器）。
-- **界面字号整体缩放未做**（只有编辑器字号 + 主题）；见 `docs/todo.md`。
-- **两个入口并存**：快速 Import/Export 模态框与配置抽屉（有意，见 M2 交接）；M4 可考虑收敛。
+- **两个入口并存**：快速 Import/Export 模态框与配置抽屉（有意，见 M2 交接）；M4 评估后仍保留——收敛会改变 M1 的 e2e 契约，收益不足以抵消回归风险。
+- **docs 表格里的代码块仍无 `<pre>` 语义**：生成器把 RST 表格单元格压平成一行文本，渲染层的 `prepareDocsHtml` 只能清理泄漏的 directive/标记；要真正还原代码块得改 `tools/lib/rst.mjs`（已记录，不阻塞）。
+- **安装横幅 dismiss 永久持久化**：key `clang-format-configurator:install-dismissed`，没有设置项重置（PWA 惯例；如需要可加"重置提示"）。
+- **19.1.1 的 `core.build` 是上游标签错**（npm 包 `version()` 报 19.1.0）；format 行为与 native 19.1.1 一致，UI 状态栏显示选中版本，不影响功能。
+- **nightly 不验 26 个 native-dump 版本的默认值**（需要 1.9 GB native；跳过时仍验 RST docs 与选项结构）。严格模式在本地/发布前跑 `npm run schema:check`。
 - 没有 ESLint/Prettier、没有 Dependabot、没有 per-PR 预览。
 
-## 8. e2e 覆盖清单（47 条）
+## 8. e2e 覆盖清单（64 条）
 
 - **smoke（4，M0）**：首屏格式化 / 换风格 / 换版本 / 改源码。
 - **m1（17，M1）**：纯 UI 生成配置、reset、Minimal/Full roundtrip、导入 warning/legacy、稀疏 map、struct list、list<string>、过滤 chips、对话框焦点、非法 YAML、文件加载、下载、复制、docs 懒加载、enum/bool 控件、override 警告。
 - **m2（12，M2）**：编辑器语义、Auto 关闭时 Ctrl/Cmd+Enter、语言徽标、字号、Diff 开关/真实高亮/在 diff 里编辑、抽屉实时校验/preview/apply/mode/下载/关闭、结构化错误面板。
 - **m3（11，M3）**：会话持久化恢复（option+code+theme+font）、版本持久化、损坏存档、stateVersion 不兼容、主题三档 + 系统深色、Settings 弹层行为/焦点、移动端 tabs、桌面↔移动 resize、跳过链接、离线 SW（controller→reload→caches→offline→reload→banner）、a11y 语义 smoke。
+- **m4（7，M4）**：分享链接复制→新标签恢复、hash 压过 storage、坏 hash 回退、首帧解码、界面字号缩放/持久化/行不重叠、文件名跟随示例（C#/Proto）、52 版本下拉 + 用 16.0.6/23.1.1 实际格式化。
+- **m4-pwa（5，M4）**：manifest 字段/scope/图标、SW 预缓存 manifest+图标、安装横幅出现→安装、dismiss 持久化、语言徽标。
+- **m4-a11y（5，M4）**：跨虚拟窗口方向键/Home/End/PageUp/PageDown、单一 Tab 停靠点与 Tab 进控件、ConfigDialog 焦点陷阱/Escape/焦点归还、docs `<pre>` 可聚焦 + RST 标记清理、两个 modal 只有顶层响应。
 - **golden（1）**：29 组 fixture 与 native 21.1.8 逐字节相同（wasm 在浏览器里跑）。
 - **perf（2）**：format p95 ≤80 ms；版本切换冷 ≤1.2 s / 缓存 ≤200 ms。
 
-## 9. 下一步：M4（可选，plan §9）
+## 9. 下一步（M4 已完成）
 
-M3 完成即 v3 交付；M4 按需，不阻塞上线：
+v3 的 M0–M4 已全部交付；没有阻塞项。留作以后（按需，不承诺）：
 
-1. **分享链接**：状态编码进 URL hash（`version/style/modified`，`code` 可选），复制链接按钮；与 localStorage 恢复的优先级要明确（hash > storage）。
-2. **PWA**：manifest + 图标 + 安装提示（SW 已有，补 manifest 与离线页文案即可）。
-3. **示例与语言**：C#/proto 代码示例、更多语言文件后缀（`.kt`、`.ts` 等仅影响高亮时用 clike 映射）。
-4. **补齐版本**：按 minor 补齐全部 52 个 wasm 版本（16/17 走 native dump 兜底、22/23 等上游或 native）；`tools/versions.json` 加行 → `prepare:assets` → 提交 schema。
-5. **界面字号缩放**（`docs/todo.md`）、虚拟列表 roving 键盘模型、ConfigDialog 焦点陷阱、docs HTML 渲染修整、把快速导入/导出与配置抽屉收敛成一个入口。
-6. **nightly 上游漂移检查**（plan §8.1.3）：重新生成 schema 到临时目录 + `git diff --exit-code`，失败只开 issue 不阻塞发布。
-
-## 10. 待决策
-
-- **16/17/22/23 怎么办**：(a) PyPI native binary 做构建期 dump（schema 仍提交，运行时不变）；(b) 支持范围改成 18+；(c) 等上游修 22/23。
-- 仓库是否长期 public（Pages 免费额度）；是否要 per-PR 预览（Pages 不支持，需 Cloudflare Pages）。
-- 是否删掉快速导入/导出模态框、只留配置抽屉。
-- 界面字号缩放做到什么粒度（三档 vs 85–120% 连续）。
+1. 收敛快速导入/导出与配置抽屉（有意保留现状，见 §7）。
+2. 改 `tools/lib/rst.mjs`，让 RST 表格单元格里的代码块有 `<pre>` 语义。
+3. 加"重置安装提示"入口；给 SW 更新横幅、>2 MB、崩溃横幅补 e2e。
+4. 仓库是否长期 public / 是否要 per-PR 预览（Pages 不支持，需 Cloudflare Pages）。
+5. 若上游修了 16/17/22/23 的 wasm `dump_config`，可去掉 `"dump": "native"` 与 native 构建步骤（其余版本不受影响）。
 
 ## 11. 约定
 
 - `plan.md` 是设计与取舍的唯一事实来源；实现偏离时先改 plan 再改代码。
 - 提交信息用 `area: summary`（`feat:` / `test:` / `docs:` / `ci:`），一次提交一件事。
-- 加版本：`tools/versions.json` 加一行 → `npm run prepare:assets -- --only=<ver>` → 提交 `public/schema/<ver>` 与 lock → push。CI 不重跑 schema 生成（只 `prepare:wasm`）。
-- **改持久化**：storage key / 文档 shape 变化必须 bump `STATE_VERSION`，并同步 `index.html` 的预置主题脚本（只依赖 `parsed.theme`）与 `persisted-state.test.ts`。
+- 加版本：`tools/versions.json` 加一行（wasm 没有 `dump_config` 就加 `"dump": "native"`，并把同版本 native 二进制放到 `.cache/cf-native/<ver>` 或 `.cache/llvm/<ver>`）→ `npm run prepare:assets -- --only=<ver>` → 提交 `public/schema/<ver>` 与 lock → push。CI 不重跑 schema 生成（只 `prepare:wasm`）。
+- **改持久化**：storage key / 不兼容 shape 变化必须 bump `STATE_VERSION`，并同步 `index.html` 的预置主题脚本（只依赖 `parsed.theme`）与 `persisted-state.test.ts`；**新增带默认值的字段**（如 `uiFontScale`）是向后兼容的，不 bump，但仍要更新 normalize/测试。
+- **改分享链接**：`share-link.ts` 的载荷 `k` 是格式版本；字段语义变化要 bump `k` 并保留旧格式解码，同时更新 `share-link.test.ts` 与 m4 e2e。
+- **改界面字号/字体**：组件 CSS 字号一律 rem（`--font-size-editor` 例外），改后跑 m4 的 "interface size" 用例；虚拟列表 remeasure 只能用 `measureElement`（见 §4）。
+- **改 PWA**：manifest 保持相对 URL（子路径安全）；改 SW 预缓存列表要同步 `public/sw.js` 与 `service-worker.test.ts`，并 bump `CACHE_VERSION`。
 - **改 SW**：bump `public/sw.js` 里的 `CACHE_VERSION`；保持 scope 从 `registration.scope` 推导、不要写死 `/`；改更新流程跑 `src/lib/service-worker.test.ts`。
 - **改导出/导入**：必须跑 `config-io` 的 roundtrip 与 e2e 的 roundtrip；字节幂等是最容易漏的回归。
 - **改 UI/主题**：跑 m2/m3 的 e2e；对比度用 `--border-control`（控件）与 `--border`（装饰）区分，别把装饰线调成高对比噪点。
 - **改 golden**：`npm run golden:gen` 后用 native 21.1.8 重新生成，并跑 `npx playwright test tests/e2e/golden.spec.ts`；CI 的 `--check` 会拦 Windows/Linux 漂移。
 - 提交前至少 `npm run verify`；动 UI/base/离线路径时跑 `npx playwright test`（base `/` 与子路径各一遍），再跑 `npm run check:size`。
-- 改 workflow：保持 Playwright 浏览器缓存、`npx playwright install chromium`（无 `--with-deps`）、并发取消；golden 的 setup-python/pip 步骤不要挪到 build 之后（现在放在 npm ci 前，漂移 8 秒内失败）。
+- 改 workflow：保持 Playwright 浏览器缓存、`npx playwright install chromium`（无 `--with-deps`）、并发取消；golden 的 setup-python/pip 步骤不要挪到 build 之后（现在放在 npm ci 前，漂移 8 秒内失败）；52 版本后 ci/deploy 的 timeout 是 30 分钟，wasm 缓存 key 用 `hashFiles('tools/versions.json')`。
 - 网络抖动时不写重试循环；GitHub API 匿名限流时直接看 Actions 网页。
 
 ## 12. 最近验证记录
 
-### 本地（2026-10-24，M3 完成后）
+### 本地（2026-10-24，M4 完成后）
+
+| 项 | 结果 |
+|---|---|
+| `npm run verify` | ✅ typecheck 0 错 + **298 unit（18 文件）** + build |
+| `npx playwright test`（base `/`，production build） | ✅ **63 passed + 1 flaky**（30.2 s；flaky 是 perf 的 cached 版本切换并行噪声，单独跑通过） |
+| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **63 passed + 1 flaky**（29.6 s，同一 flaky） |
+| `npm run check:size` | ✅ 157 项全过：初 JS **224.5 KB**（限 250）；52 个 wasm **902.4–1071.5 KB**（限 1.1 MB）；core 6.4–8.5 KB（限 25）；docs 19.3–24.6 KB（限 45） |
+| `node tools/gen-golden.mjs --check` | ✅ 29 组与 native 21.1.8 一致（M3 记录，未改 fixture） |
+| 黄金对拍（wasm vs native） | ✅ 29/29 逐字节相同 |
+| 52 版本自检 | ✅ 52/52 entry.js 可加载并格式化；26 个 native-dump 版本 **312/312** 次 CLI vs wasm 逐字节相同 |
+| `npm run schema:check` | ✅ 严格模式 52 版本 OK；`--allow-missing-native` 干净 checkout（清 `.cache/rst`）可跑；篡改 index → exit 1 |
+| 性能 | ✅ format p95 **9–23 ms**（限 80，单独跑 11.3 ms）；版本切换冷 **79–116 ms**、缓存 **76–144 ms**；并行偶尔 >200 ms（flaky） |
+| 离线/PWA | ✅ 断网刷新后 shell + 格式化可用；manifest/图标/SW 预缓存 e2e 通过 |
+| 单测覆盖 | 18 文件：config / config-state / config-io / schema-store / schema / config-diff / diagnostics / formatter-client / languages / examples / persisted-state / share-link / theme / service-worker / roving / focus-trap / useDocs / install |
+
+### 历史（2026-10-24，M3 完成后）
 
 | 项 | 结果 |
 |---|---|

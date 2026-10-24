@@ -1,30 +1,19 @@
 # TODO / 待办清单
 
 > 记录尚未排期或跨里程碑的功能想法。设计与取舍的唯一事实来源是 [`plan.md`](../plan.md)，当前状态与交接信息在 [`handoff.md`](handoff.md)；本文件只收"以后要做的事"。
-> 最后更新：2026-10-24
+> 最后更新：2026-10-24（M4 完成后）
 
-## 1. 字体大小调节（界面字体 + 编辑器字体）
+## 1. 字体大小调节（已完成，保留设计记录）
 
-- **状态**：编辑器字号已完成（M2 顶栏、M3 起移入 Settings 菜单，12–20 px，走 CSS 变量 `--font-size-editor`，见 `src/editor/theme.ts`）。**界面字号**（选项面板、状态栏、按钮、对话框，含持久化）尚未做——M3 只做了主题切换与编辑器字号；这项留到 M4（主题体系已有 `data-theme` 与持久化字段，可复用）。
-- **背景**：M2 之前字号是写死的——`src/styles.css` 里 `body { font-size: 14px }`，各组件 11–13px，编辑器区 13px；现在编辑器字号可调，界面字号还没有入口。
-- **剩余范围**：
-  1. **界面字体**：选项面板、状态栏、按钮、对话框等 UI 文本整体缩放（小 / 标准 / 大 三档，或 85%–120% 的比例），与编辑器字号解耦。
-  2. **入口**：顶栏设置菜单（或快捷键 `Ctrl/Cmd +` / `-`），提供"恢复默认"。
-  3. **持久化**：localStorage，与 M3 的持久化字段一起设计；schema/版本不兼容时回退默认。
-- **实现建议**：
-  - 统一走 CSS 变量 `--font-size-ui`（或 `html { font-size }` + rem 化），把现有写死字号改成变量派生，避免逐组件硬改。
-  - 编辑器字号已用 `--font-size-editor`（CM6 主题直接读取），不要再另起一套。
-  - **不要用 `transform: scale()`**：会让虚拟列表行高、diff 行号、滚动位置的计算失真。
-  - 字号变化后调用虚拟列表的 `virtualizer.measure()` 重新测量动态行高（编辑器侧 CM6 会自动重排）。
-  - 可访问性：最小字号不低于 12px；默认仍跟随系统/浏览器设置，只在用户显式调整时覆盖。
-- **验收**：
-  - 界面与编辑器字号即时变化且互不影响（编辑器侧已有 e2e：`editor-font-size` 改变 `.cm-content` 计算字号）；刷新后保持；恢复默认可撤销。
-  - 189 行虚拟列表在三种字号下行高正确、无跳动；导出/导入 roundtrip 与 e2e 回归不受影响。
-  - Playwright 补一条：改界面字号 → 搜索、改选项、导出关键流程仍可用。
+- **状态**：M2 完成编辑器字号（12–20 px，`--font-size-editor`），M4 完成**界面字号**（Settings 菜单里的 Interface size：Compact 90% / Standard 100% / Large 115%，`--ui-scale`，随会话持久化；编辑器与界面字号互不影响）。三项验收（即时变化/刷新保持/三种字号下列表行高正确）都有 e2e 覆盖（`tests/e2e/m4.spec.ts` 的 "interface size scales the UI (not the editor) and persists"）。
+- **实现要点（改字号前必读）**：
+  - 根字号 `:root { font-size: calc(100% * var(--ui-scale, 1)) }`，组件字号全部 rem；`transform/zoom` 会破坏虚拟列表行高计算，不要用。
+  - 改字号后虚拟列表要对已渲染行调 `virtualizer.measureElement(el)` 重测；**不要调 `virtualizer.measure()`**（清 cache 但保留旧 measurementsCache，delta 会算成 0，行按估算高度重叠）。
+  - 持久化字段 `uiFontScale` 是向后兼容的增字段，`STATE_VERSION` 仍为 1；旧存档按 1.0 加载。
+- **未做**：连续比例（85%–120%）而不是三档；"恢复默认"目前通过选回 Standard 实现。
 
-## 其他已记录的待办（不重复展开）
+## 2. M4 已完成项（保留追踪）
 
-- M3 已完成的持久化/主题/响应式/离线/a11y/质量闸门 → 见 `handoff.md` §6。
-- M3 验收留下的缺口（SW 更新横幅未 e2e、虚拟列表无 roving 键盘模型、ConfigDialog 无焦点陷阱、docs HTML 的 `<pre>` 不可聚焦、M2 的 >2 MB/崩溃横幅未 e2e）→ 见 `handoff.md` §7。
-- M4（可选）：分享链接（URL hash）、PWA manifest/安装、C#/proto 代码示例、按 minor 补齐全部 52 个版本、界面字号缩放。
-- 已知缺陷（16/17/22/23 版本、docs HTML 的 code-block 渲染等）→ 见 `handoff.md` §7。
+- 分享链接（URL hash）、PWA manifest/安装提示、C#/Proto 等示例与更多语言后缀、全部 52 个 wasm 版本、界面字号缩放、虚拟列表 roving 键盘模型、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查 → 见 `plan.md` 的 M4 状态与 `handoff.md` §6/§12。
+- M4 遗留（按需）：收敛快速导入/导出与配置抽屉（有意保留两个入口）、RST 表格单元格代码块的 `<pre>` 语义（需改 `tools/lib/rst.mjs`）、安装提示 dismiss 的重置入口、SW 更新横幅/>2 MB/崩溃横幅的 e2e 缺口（见 `handoff.md` §7）。
+- 已知缺陷（上游）：19.1.1 的 npm wasm `version()` 报 19.1.0；16/17/18.1.0–18.1.7/22/23 的 wasm 没有可用 `dump_config`（schema 走同版本 native dump，已解决）。
