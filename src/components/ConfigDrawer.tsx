@@ -251,13 +251,16 @@ export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | nu
         className={styles.panel}
         role="dialog"
         aria-modal="true"
-        aria-label="Configuration"
+        aria-labelledby="config-drawer-title"
+        aria-describedby="config-drawer-subtitle"
         data-testid="config-drawer"
       >
         <header className={styles.header}>
           <div>
-            <h2 className={styles.title}>Configuration</h2>
-            <p className={styles.subtitle}>
+            <h2 className={styles.title} id="config-drawer-title">
+              Configuration
+            </h2>
+            <p className={styles.subtitle} id="config-drawer-subtitle">
               Edit the <code>.clang-format</code> YAML directly, then apply it to the options panel.
             </p>
           </div>
@@ -312,16 +315,18 @@ export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | nu
             />
           </div>
 
-          <div className={styles.validation} aria-live="polite">
+          <div className={styles.validation}>
             {validation.error !== null ? (
               <div className={styles.error} role="alert" data-testid="config-errors">
                 <strong>{validation.error.message}</strong>
                 {validation.error.detail !== "" && (
-                  <pre className={styles.errorDetail}>{validation.error.detail}</pre>
+                  <pre className={styles.errorDetail} tabIndex={0}>
+                    {validation.error.detail}
+                  </pre>
                 )}
               </div>
             ) : validation.warnings.length > 0 ? (
-              <ul className={styles.warnings} data-testid="config-warnings">
+              <ul className={styles.warnings} data-testid="config-warnings" tabIndex={0}>
                 {validation.warnings.map((warning, index) => (
                   <li className={styles.warning} key={`${warning.path}:${warning.message}:${index}`}>
                     {warning.path !== "" && <code className={styles.warningPath}>{warning.path}</code>}
@@ -336,6 +341,15 @@ export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | nu
                   : "Configuration is valid."}
               </p>
             )}
+            {/* Warnings are announced politely; "Configuration is valid." is not,
+                so a SR user is not read a status line after every typing pause. */}
+            <span className={styles.srOnly} role="status" aria-atomic="true">
+              {validation.error === null && validation.warnings.length > 0
+                ? `${validation.warnings.length} warning${validation.warnings.length === 1 ? "" : "s"}: ${validation.warnings
+                    .map((warning) => (warning.path !== "" ? `${warning.path}: ${warning.message}` : warning.message))
+                    .join("; ")}`
+                : ""}
+            </span>
           </div>
 
           <section className={styles.preview} data-testid="config-preview" aria-label="Preview of changes">

@@ -5,6 +5,65 @@
   min-height: 0;
 }
 
+.skipLink {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  z-index: 100;
+  padding: 8px 12px;
+  border-radius: 0 0 6px 6px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-110%);
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mobileTabs {
+  display: none;
+}
+
+.mobileTab,
+.mobileTabActive {
+  flex: 1;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mobileTabActive {
+  border-bottom-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.optionsArea {
+  display: flex;
+  min-height: 0;
+}
+
 .header {
   display: flex;
   flex-wrap: wrap;
@@ -52,7 +111,7 @@
 .field select,
 .field input {
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-control);
   border-radius: 6px;
   padding: 4px 8px;
   color: var(--text);
@@ -78,7 +137,7 @@
 }
 
 .secondary {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-control);
   border-radius: 6px;
   padding: 5px 12px;
   background: var(--surface);
@@ -278,6 +337,19 @@
   gap: 10px;
 }
 
+.offlineBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--muted) 12%, var(--surface));
+  color: var(--text);
+  font-size: 12px;
+}
+
 .status {
   display: flex;
   align-items: center;
@@ -309,5 +381,26 @@
   .panes {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr;
+  }
+}
+
+/* plan §5: below 768 px the two columns become "Options / Code" tabs. */
+@media (max-width: 768px) {
+  .mobileTabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .mainOptions .workbench {
+    display: none;
+  }
+
+  .mainCode .optionsArea {
+    display: none;
   }
 }

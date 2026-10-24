@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --bg: #f6f7f9;
   --surface: #ffffff;
   --border: #d8dce3;
@@ -7,6 +7,9 @@
   --muted: #5c6673;
   --accent: #2563eb;
   --accent-contrast: #ffffff;
+  /* Interactive-control boundaries need 3:1 against their surroundings
+     (WCAG 1.4.11); --border stays for decorative dividers. */
+  --border-control: #868f9d;
   --danger-bg: #fdecec;
   --danger-border: #f0b4b4;
   --danger-text: #8a1f1f;
@@ -19,15 +22,17 @@
   --syntax-keyword: #7c3aed;
   --syntax-operator: #374151;
   --syntax-string: #0f766e;
-  --syntax-comment: #6b7280;
+  --syntax-comment: #5f6874;
   --syntax-number: #b45309;
   --syntax-type: #1d4ed8;
   --syntax-function: #9a3412;
   --syntax-property: #0369a1;
 }
 
+/* Dark palette: system preference unless the user explicitly picked light. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #0f1216;
     --surface: #161b22;
     --border: #2b323c;
@@ -35,6 +40,7 @@
     --muted: #9aa5b1;
     --accent: #5b8def;
     --accent-contrast: #0b0f14;
+  --border-control: #5f6b7a;
     --danger-bg: #2a1517;
     --danger-border: #5c2a2d;
     --danger-text: #ffb4b4;
@@ -50,6 +56,39 @@
     --syntax-function: #fdba74;
     --syntax-property: #7dd3fc;
   }
+}
+
+/* Explicit dark choice, also when the system is light. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1216;
+  --surface: #161b22;
+  --border: #2b323c;
+  --text: #e6e9ee;
+  --muted: #9aa5b1;
+  --accent: #5b8def;
+  --accent-contrast: #0b0f14;
+  --border-control: #5f6b7a;
+  --danger-bg: #2a1517;
+  --danger-border: #5c2a2d;
+  --danger-text: #ffb4b4;
+  --notice-bg: #2a2312;
+  --notice-border: #5c4a1a;
+  --notice-text: #ffd98a;
+  --syntax-keyword: #c4b5fd;
+  --syntax-operator: #cbd5e1;
+  --syntax-string: #6ee7b7;
+  --syntax-comment: #8b949e;
+  --syntax-number: #fbbf24;
+  --syntax-type: #93c5fd;
+  --syntax-function: #fdba74;
+  --syntax-property: #7dd3fc;
+}
+
+/* Explicit light choice: the base :root palette above already provides the
+   light tokens; only the browser UI hint has to be reset inside a dark system. */
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 * {
@@ -85,8 +124,12 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
   }
 }

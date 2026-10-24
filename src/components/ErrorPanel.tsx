@@ -36,7 +36,14 @@ export default function ErrorPanel({ message, detail, onDismiss }: ErrorPanelPro
       {hasDetail && (
         <details className={styles.details} data-testid="error-detail">
           <summary className={styles.detailsSummary}>LLVM diagnostics</summary>
-          <pre className={styles.pre}>{detail}</pre>
+          <pre
+            className={styles.pre}
+            role="region"
+            aria-label="LLVM diagnostics output"
+            tabIndex={0}
+          >
+            {detail}
+          </pre>
         </details>
       )}
     </div>

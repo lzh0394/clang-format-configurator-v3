@@ -170,6 +170,11 @@ export default function OptionPanel({
           <span className={styles.count} data-testid="options-count">
             {`${filtered.length} / ${schema.options.length}`}
           </span>
+          {/* The visible count is terse ("12 / 189"); this polite live region
+              announces the debounced result set without changing what is drawn. */}
+          <span className={styles.srOnly} role="status" aria-atomic="true">
+            {`${filtered.length} of ${schema.options.length} options shown`}
+          </span>
           <button
             type="button"
             className={styles.resetAll}
@@ -211,7 +216,12 @@ export default function OptionPanel({
         {searchActive && docsStatus === "error" && (
           <p className={styles.hint}>
             Docs unavailable — searching option names only.{" "}
-            <button type="button" className={styles.iconButton} onClick={retry}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              aria-label="Retry loading documentation"
+              onClick={retry}
+            >
               Retry
             </button>
           </p>

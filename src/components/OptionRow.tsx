@@ -91,6 +91,12 @@ export default function OptionRow({
   const showOverrideWarning =
     overridden && guard !== undefined && guardOption !== undefined && guardValue !== guard.required;
 
+  // Ids referenced by the expander/docs toggles via aria-controls. The target
+  // elements only exist while their section is open, so the attribute is set
+  // conditionally to keep every reference resolvable.
+  const bodyId = `option-body-${key}`;
+  const docsId = `option-docs-${key}`;
+
   let control: JSX.Element | null;
   if (type.kind === "map") {
     control = <span className={styles.summary}>{summarize(option, modified, value)}</span>;
@@ -163,6 +169,8 @@ export default function OptionRow({
               className={styles.iconButton}
               data-testid={`expand-${key}`}
               aria-expanded={bodyOpen}
+              aria-controls={bodyOpen ? bodyId : undefined}
+              aria-label={`${bodyOpen ? "Collapse" : "Edit"} ${key}`}
               onClick={() => onToggleBody(key)}
             >
               {bodyOpen ? "Collapse" : "Edit"}
@@ -173,6 +181,8 @@ export default function OptionRow({
             className={styles.iconButton}
             data-testid={`docs-${key}`}
             aria-expanded={docsOpen}
+            aria-controls={docsOpen ? docsId : undefined}
+            aria-label={`Docs for ${key}`}
             onClick={() => onToggleDocs(key)}
           >
             Docs
@@ -201,7 +211,7 @@ export default function OptionRow({
 
       {showOverrideWarning && guard !== undefined && guardOption !== undefined && (
         <div className={styles.overrideWarning} data-testid={`override-warning-${key}`} role="status">
-          <span>
+          <span id={`override-warning-text-${key}`}>
             {`${key} only takes effect when ${guard.option} is ${guard.required}; the current value is ${formatValue(
               guardValue,
             )}.`}
@@ -210,6 +220,7 @@ export default function OptionRow({
             type="button"
             className={styles.iconButton}
             data-testid={`apply-guard-${key}`}
+            aria-describedby={`override-warning-text-${key}`}
             onClick={() => onOptionChange(guard.option, guard.required)}
           >
             {`Set ${guard.option}: ${guard.required}`}
@@ -217,10 +228,10 @@ export default function OptionRow({
         </div>
       )}
 
-      {body}
+      {body !== null && <div id={bodyId}>{body}</div>}
 
       {docsOpen && (
-        <div className={styles.docs}>
+        <div className={styles.docs} id={docsId}>
           {docsStatus === "ready" && docsHtml !== undefined && (
             <div
               className={styles.docsContent}
@@ -242,6 +253,7 @@ export default function OptionRow({
                 type="button"
                 className={styles.iconButton}
                 data-testid={`docs-retry-${key}`}
+                aria-label={`Retry loading documentation for ${key}`}
                 onClick={onRetryDocs}
               >
                 Retry

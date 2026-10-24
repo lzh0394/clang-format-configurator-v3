@@ -1,11 +1,33 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f7f9" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1216" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>clang-format configurator</title>
+    <script>
+      // Apply the persisted theme before first paint so an explicit dark/light
+      // choice does not flash the system palette. Keep the storage key and shape
+      // in sync with src/lib/persisted-state.ts.
+      (function () {
+        try {
+          var raw = localStorage.getItem("clang-format-configurator:v3");
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          var theme = parsed && parsed.theme;
+          var root = document.documentElement;
+          if (theme === "light" || theme === "dark") {
+            root.setAttribute("data-theme", theme);
+            root.style.colorScheme = theme;
+          }
+        } catch (error) {
+          // A corrupt/unavailable storage entry must never break the page.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

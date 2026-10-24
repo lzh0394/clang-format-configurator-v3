@@ -3,10 +3,20 @@ import ConfigDialog from "./components/ConfigDialog";
 import ConfigDrawer from "./components/ConfigDrawer";
 import ErrorPanel from "./components/ErrorPanel";
 import OptionPanel from "./components/OptionPanel";
+import SettingsMenu from "./components/SettingsMenu";
 import { configReducer, initialConfigState, reconcileModified } from "./lib/config-state";
 import type { Modified } from "./lib/config";
 import type { ImportResult } from "./lib/config-io";
 import { FormatterClient, FormatterSupersededError, type FormatterError } from "./lib/formatter-client";
+import {
+  DEFAULT_EDITOR_FONT_SIZE,
+  DEFAULT_THEME,
+  STATE_VERSION,
+  loadPersistedState,
+  savePersistedState,
+} from "./lib/persisted-state";
+import { registerServiceWorker, type ServiceWorkerHandle } from "./lib/service-worker";
+import { applyTheme, type ThemePreference } from "./lib/theme";
 import {
   buildStylePayload,
   loadVersionIndex,
@@ -46,15 +56,24 @@ type DialogState = { open: boolean; tab: "import" | "export" };
 const LARGE_INPUT_LIMIT = 2 * 1024 * 1024;
 /** Input debounce (plan §6: 250 ms instead of one request per keystroke). */
 const DEBOUNCE_MS = 250;
-const EDITOR_FONT_SIZES = [12, 13, 14, 16, 18, 20] as const;
+/** Persist the session a little after the last edit. */
+const PERSIST_DEBOUNCE_MS = 400;
 
 export default function App() {
+  // Restore once, synchronously, so the first render already shows the saved
+  // session (plan §5 持久化). Invalid/incompatible documents are reported once.
+  const [restored] = useState(() => loadPersistedState());
   const [versions, setVersions] = useState<VersionInfo[]>([]);
   const [version, setVersion] = useState("");
   const [schema, setSchema] = useState<SchemaCore | null>(null);
-  const [config, dispatch] = useReducer(configReducer, initialConfigState(""));
+  const [config, dispatch] = useReducer(
+    configReducer,
+    restored.state
+      ? { version: restored.state.version, style: restored.state.style, modified: restored.state.modified }
+      : initialConfigState(""),
+  );
   const [filename, setFilename] = useState("main.cc");
-  const [code, setCode] = useState(SAMPLE);
+  const [code, setCode] = useState(() => restored.state?.code ?? SAMPLE);
   const [output, setOutput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
@@ -63,17 +82,27 @@ export default function App() {
   const [status, setStatus] = useState("loading…");
   const [timing, setTiming] = useState<number | null>(null);
   const [auto, setAuto] = useState(true);
-  const [editorFontSize, setEditorFontSize] = useState<number>(13);
+  const [theme, setTheme] = useState<ThemePreference>(restored.state?.theme ?? DEFAULT_THEME);
+  const [editorFontSize, setEditorFontSize] = useState<number>(
+    restored.state?.editorFontSize ?? DEFAULT_EDITOR_FONT_SIZE,
+  );
   const [largeInputPending, setLargeInputPending] = useState(false);
   const [diff, setDiff] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const [crash, setCrash] = useState<FormatterError | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobilePane, setMobilePane] = useState<"options" | "code">("code");
+  const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && navigator.onLine === false);
+  const [updateReady, setUpdateReady] = useState(false);
+  const [persistProblem, setPersistProblem] = useState<"quota" | "unavailable" | null>(null);
 
   const clientRef = useRef<FormatterClient | null>(null);
   const readyRef = useRef(false);
   const runRef = useRef(0);
   const largeAcceptedRef = useRef(false);
   const recoveryAttemptsRef = useRef(0);
+  const swRef = useRef<ServiceWorkerHandle | null>(null);
+  const persistProblemRef = useRef<"quota" | "unavailable" | null>(null);
   const inputRef = useRef<{ code: string; filename: string; style: StyleName; modified: Modified }>({
     code,
     filename,
@@ -95,7 +124,10 @@ export default function App() {
         const first = index.versions[0];
         if (!first) throw new Error("no schema found — run `npm run prepare:assets` first");
         setVersions(index.versions);
-        setVersion(index.default ?? first.version);
+        // Prefer the persisted version when it is still shipped (plan §5).
+        const saved = restored.state?.version;
+        const known = saved !== undefined && index.versions.some((entry) => entry.version === saved);
+        setVersion(known && saved !== undefined ? saved : (index.default ?? first.version));
       })
       .catch((cause: Error) => {
         if (cancelled) return;
@@ -105,7 +137,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [restored]);
 
   /** Lazily create the formatter facade and listen for fatal worker failures. */
   const getClient = useCallback((): FormatterClient => {
@@ -175,10 +207,18 @@ export default function App() {
       const nextSchema = await schemaStore.schema(version);
       await client.init(version);
       if (cancelled) return;
-      const { modified } = reconcileModified(configRef.current.modified, nextSchema);
+      const { modified, dropped } = reconcileModified(configRef.current.modified, nextSchema);
       inputRef.current = { ...inputRef.current, modified };
       setSchema(nextSchema);
       dispatch({ type: "setVersion", version, schema: nextSchema });
+      if (dropped.length > 0) {
+        setNotice({
+          title: `Dropped ${dropped.length} saved option${dropped.length === 1 ? "" : "s"}`,
+          items: dropped
+            .slice(0, 12)
+            .map((key) => `${key} is not available in clang-format ${nextSchema.version}`),
+        });
+      }
       setStatus(`clang-format ${version} ready`);
       readyRef.current = true;
       void runFormat();
@@ -262,6 +302,107 @@ export default function App() {
 
   useEffect(() => () => clientRef.current?.dispose(), []);
 
+  // plan §5: below 768 px the two columns become "Options / Code" tabs. The
+  // media query state only drives which panel is mounted; CSS handles layout.
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(max-width: 768px)");
+    const update = (): void => setIsMobile(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  // Report a discarded saved session once (plan §5: incompatible → drop + tell).
+  useEffect(() => {
+    if (restored.problem !== "version-mismatch" && restored.problem !== "corrupt") return;
+    setNotice({
+      title: "Saved session was discarded",
+      items: [
+        restored.problem === "version-mismatch"
+          ? "The stored session was written by an incompatible build and cannot be restored."
+          : "The stored session could not be read and cannot be restored.",
+      ],
+    });
+  }, [restored]);
+
+  // Theme: explicit light/dark wins, "system" follows the OS via CSS (plan §5).
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  // Offline support: the service worker is production-only and optional.
+  useEffect(() => {
+    let cancelled = false;
+    let handle: ServiceWorkerHandle | null = null;
+    void registerServiceWorker({
+      onUpdateReady: () => setUpdateReady(true),
+      onOfflineChange: (next) => setOffline(next),
+    }).then((registered) => {
+      if (cancelled) {
+        registered?.dispose();
+        return;
+      }
+      handle = registered;
+      swRef.current = registered;
+    });
+    return () => {
+      cancelled = true;
+      handle?.dispose();
+      swRef.current = null;
+    };
+  }, []);
+
+  const applyServiceWorkerUpdate = useCallback(() => {
+    swRef.current?.applyUpdate();
+    setUpdateReady(false);
+  }, []);
+
+  // Persist the session shortly after the last edit; `pagehide` flushes the
+  // final keystrokes so closing a tab does not lose them (plan §5 持久化).
+  const persistSession = useCallback(() => {
+    if (!version) return;
+    const result = savePersistedState({
+      stateVersion: STATE_VERSION,
+      version,
+      style: config.style,
+      modified: config.modified,
+      code,
+      theme,
+      editorFontSize,
+    });
+    if (result === "ok") {
+      persistProblemRef.current = null;
+      return;
+    }
+    // Report a storage problem once per page load; a broken storage backend
+    // must not keep interrupting the user.
+    if (persistProblemRef.current === null) {
+      persistProblemRef.current = result;
+      setPersistProblem(result);
+    }
+  }, [version, config.style, config.modified, code, theme, editorFontSize]);
+
+  useEffect(() => {
+    if (!version) return;
+    const timer = window.setTimeout(persistSession, PERSIST_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [persistSession, version]);
+
+  // Flush on pagehide/unmount only: a ref keeps the listener stable so typing
+  // does not trigger a synchronous localStorage write on every keystroke.
+  const persistRef = useRef(persistSession);
+  persistRef.current = persistSession;
+
+  useEffect(() => {
+    const flush = (): void => persistRef.current();
+    window.addEventListener("pagehide", flush);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      flush();
+    };
+  }, []);
+
   const handleOptionChange = useCallback((key: string, value: unknown) => {
     dispatch({ type: "setOption", key, value });
   }, []);
@@ -320,6 +461,9 @@ export default function App() {
 
   return (
     <div className={styles.app} style={appStyle}>
+      <a className={styles.skipLink} href="#main">
+        Skip to content
+      </a>
       <header className={styles.header}>
         <div className={styles.brand}>
           <span className={styles.logo} aria-hidden="true">
@@ -419,29 +563,63 @@ export default function App() {
             <span>Auto</span>
           </label>
 
-          <label className={styles.field}>
-            <span>Font</span>
-            <select
-              value={editorFontSize}
-              onChange={(event) => setEditorFontSize(Number(event.target.value))}
-              aria-label="Editor font size"
-              data-testid="editor-font-size"
-            >
-              {EDITOR_FONT_SIZES.map((size) => (
-                <option key={size} value={size}>
-                  {size}px
-                </option>
-              ))}
-            </select>
-          </label>
+          <SettingsMenu
+            theme={theme}
+            onThemeChange={setTheme}
+            editorFontSize={editorFontSize}
+            onFontSizeChange={setEditorFontSize}
+          />
         </div>
       </header>
+
+      {isMobile && (
+        <nav className={styles.mobileTabs} role="tablist" aria-label="Panels">
+          <button
+            type="button"
+            role="tab"
+            id="tab-options"
+            aria-selected={mobilePane === "options"}
+            aria-controls="panel-options"
+            className={mobilePane === "options" ? styles.mobileTabActive : styles.mobileTab}
+            data-testid="tab-options"
+            onClick={() => setMobilePane("options")}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+                event.preventDefault();
+                setMobilePane("code");
+                document.getElementById("tab-code")?.focus();
+              }
+            }}
+          >
+            Options
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-code"
+            aria-selected={mobilePane === "code"}
+            aria-controls="panel-code"
+            className={mobilePane === "code" ? styles.mobileTabActive : styles.mobileTab}
+            data-testid="tab-code"
+            onClick={() => setMobilePane("code")}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+                event.preventDefault();
+                setMobilePane("options");
+                document.getElementById("tab-options")?.focus();
+              }
+            }}
+          >
+            Code
+          </button>
+        </nav>
+      )}
 
       {notice && (
         <div className={styles.notice} role="status" data-testid="notice">
           <div className={styles.noticeBody}>
             <strong>{notice.title}</strong>
-            <ul>
+            <ul tabIndex={0}>
               {notice.items.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -453,6 +631,46 @@ export default function App() {
             onClick={() => setNotice(null)}
             aria-label="Dismiss notice"
             data-testid="notice-close"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {updateReady && (
+        <div className={styles.notice} role="status" data-testid="update-banner">
+          <div className={styles.noticeBody}>
+            <strong>A new version is available</strong>
+            <span>Reload to load the newest build. Your configuration is saved locally.</span>
+          </div>
+          <button
+            type="button"
+            className={styles.secondary}
+            data-testid="update-reload"
+            onClick={applyServiceWorkerUpdate}
+          >
+            Reload
+          </button>
+        </div>
+      )}
+
+      {offline && (
+        <div className={styles.offlineBanner} role="status" data-testid="offline-banner">
+          You are offline — the cached app and formatter still work; new versions need a connection.
+        </div>
+      )}
+
+      {persistProblem !== null && (
+        <div className={styles.offlineBanner} role="status" data-testid="persist-banner">
+          {persistProblem === "quota"
+            ? "Your session could not be saved: local storage is full."
+            : "Your session could not be saved: local storage is unavailable."}
+          <button
+            type="button"
+            className={styles.noticeClose}
+            aria-label="Dismiss warning"
+            data-testid="persist-dismiss"
+            onClick={() => setPersistProblem(null)}
           >
             ×
           </button>
@@ -497,27 +715,43 @@ export default function App() {
               Restart formatter
             </button>
           </div>
-          {crash.detail !== "" && <pre>{crash.detail}</pre>}
+          {crash.detail !== "" && <pre tabIndex={0}>{crash.detail}</pre>}
         </div>
       )}
 
-      <main className={styles.main}>
-        {schema ? (
-          <OptionPanel
-            schema={schema}
-            style={config.style}
-            modified={config.modified}
-            onOptionChange={handleOptionChange}
-            onChildChange={handleChildChange}
-            onResetAll={handleResetAll}
-          />
-        ) : (
-          <aside className={styles.panelPlaceholder} aria-hidden="true">
-            loading options…
-          </aside>
-        )}
+      <main
+        id="main"
+        className={`${styles.main} ${isMobile ? (mobilePane === "options" ? styles.mainOptions : styles.mainCode) : ""}`}
+      >
+        <div
+          className={styles.optionsArea}
+          id="panel-options"
+          aria-label="Options"
+          role={isMobile ? "tabpanel" : undefined}
+          aria-labelledby={isMobile ? "tab-options" : undefined}
+        >
+          {schema ? (
+            <OptionPanel
+              schema={schema}
+              style={config.style}
+              modified={config.modified}
+              onOptionChange={handleOptionChange}
+              onChildChange={handleChildChange}
+              onResetAll={handleResetAll}
+            />
+          ) : (
+            <aside className={styles.panelPlaceholder} aria-hidden="true">
+              loading options…
+            </aside>
+          )}
+        </div>
 
-        <div className={styles.workbench}>
+        <div
+          className={styles.workbench}
+          id="panel-code"
+          role={isMobile ? "tabpanel" : undefined}
+          aria-labelledby={isMobile ? "tab-code" : undefined}
+        >
           {diff ? (
             <Suspense fallback={<div className={styles.panelPlaceholder}>loading diff…</div>}>
               <DiffPane
@@ -569,6 +803,16 @@ export default function App() {
           )}
         </div>
       </main>
+
+      <div className={styles.srOnly} role="status" aria-live="polite" data-testid="live-status">
+        {error
+          ? `Error: ${error.message}`
+          : busy
+            ? "Formatting"
+            : timing !== null
+              ? "Formatted output updated"
+              : ""}
+      </div>
 
       <footer className={styles.status} data-testid="status">
         <span title={schema?.build}>{status}</span>

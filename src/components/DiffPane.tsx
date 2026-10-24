@@ -37,6 +37,7 @@ export type DiffPaneProps = {
 const SOURCE_ATTRIBUTES: Extension = EditorView.contentAttributes.of({
   "data-testid": "source",
   "aria-label": "Source code",
+  "aria-readonly": "false",
   "aria-multiline": "true",
   role: "textbox",
   spellcheck: "false",
@@ -202,5 +203,13 @@ export function DiffPane(props: DiffPaneProps): JSX.Element {
     };
   }, [language, sourceLanguage, outputLanguage]);
 
-  return <div ref={hostRef} className={styles.root} data-testid="diff-view" />;
+  return (
+    <div
+      ref={hostRef}
+      className={styles.root}
+      data-testid="diff-view"
+      role="region"
+      aria-label="Diff: source and formatted result"
+    />
+  );
 }

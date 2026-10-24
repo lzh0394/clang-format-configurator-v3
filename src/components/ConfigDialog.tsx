@@ -189,11 +189,13 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
         className={styles.panel}
         role="dialog"
         aria-modal="true"
-        aria-label="Configuration"
+        aria-labelledby="config-dialog-title"
         data-testid="config-dialog"
       >
         <header className={styles.header}>
-          <h2 className={styles.title}>Configuration</h2>
+          <h2 className={styles.title} id="config-dialog-title">
+            Configuration
+          </h2>
           <button
             type="button"
             className={styles.close}
@@ -209,7 +211,9 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
           <button
             type="button"
             role="tab"
+            id="config-dialog-tab-import"
             aria-selected={activeTab === "import"}
+            aria-controls={activeTab === "import" ? "config-dialog-panel-import" : undefined}
             data-testid="tab-import"
             className={tabClass("import")}
             onClick={() => setActiveTab("import")}
@@ -219,7 +223,9 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
           <button
             type="button"
             role="tab"
+            id="config-dialog-tab-export"
             aria-selected={activeTab === "export"}
+            aria-controls={activeTab === "export" ? "config-dialog-panel-export" : undefined}
             data-testid="tab-export"
             className={tabClass("export")}
             onClick={() => setActiveTab("export")}
@@ -229,7 +235,12 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
         </div>
 
         {activeTab === "export" ? (
-          <div className={styles.body} role="tabpanel" aria-label="Export configuration">
+          <div
+            className={styles.body}
+            role="tabpanel"
+            id="config-dialog-panel-export"
+            aria-labelledby="config-dialog-tab-export"
+          >
             <fieldset className={styles.modes}>
               <legend className={styles.modesLegend}>Export mode</legend>
               <label className={styles.mode}>
@@ -281,7 +292,12 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
             </div>
           </div>
         ) : (
-          <div className={styles.body} role="tabpanel" aria-label="Import configuration">
+          <div
+            className={styles.body}
+            role="tabpanel"
+            id="config-dialog-panel-import"
+            aria-labelledby="config-dialog-tab-import"
+          >
             <div className={styles.fileRow}>
               <label className={styles.fileLabel} htmlFor="config-dialog-file">
                 Load from file
@@ -312,7 +328,11 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
             {importError !== null && (
               <div className={styles.error} data-testid="import-error" role="alert">
                 <strong>{importError.message}</strong>
-                {importError.detail !== "" && <pre className={styles.errorDetail}>{importError.detail}</pre>}
+                {importError.detail !== "" && (
+                  <pre className={styles.errorDetail} tabIndex={0}>
+                    {importError.detail}
+                  </pre>
+                )}
               </div>
             )}
 

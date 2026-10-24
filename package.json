@@ -1,7 +1,7 @@
 {
   "name": "clang-format-configurator-v3",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,8 @@
     "test:e2e": "playwright test",
     "prepare:assets": "node tools/prepare-assets.mjs",
     "prepare:wasm": "node tools/fetch-wasm.mjs",
+    "check:size": "node tools/check-size.mjs",
+    "golden:gen": "node tools/gen-golden.mjs",
     "verify": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

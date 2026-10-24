@@ -1,0 +1,33 @@
+clang-format configurator v3
+============================
+
+Copyright (c) 2026 lzh0394
+
+This project is distributed under the MIT License (see the repository for the
+full text). It bundles or derives from the following third-party materials:
+
+1. LLVM / clang-format
+   Option documentation (docstrings) is derived from the LLVM project's
+   ClangFormatStyleOptions.rst, which is licensed under the Apache License v2.0
+   with LLVM Exceptions.
+   https://llvm.org/  https://github.com/llvm/llvm-project
+
+2. @wasm-fmt/clang-format
+   The browser WebAssembly builds of clang-format are redistributed (not
+   committed to the repository; they are downloaded by tools/fetch-wasm.mjs).
+   Licensed under the MIT License.
+   https://github.com/wasm-fmt/clang-format
+
+3. Runtime dependencies
+   React, CodeMirror 6, TanStack Virtual and the `yaml` package are distributed
+   under their respective MIT licenses. See node_modules/<package>/LICENSE files
+   or package.json in this repository for the exact versions.
+
+4. Design reference
+   The feature set and interaction model follow clang-format-configurator v2
+   (https://github.com/Wirena/clang-format-configurator-v2, MIT). No v2 source
+   code is copied; the v3 application is a rewrite.
+
+The clang-format option documentation shown in the UI is generated at build
+time from upstream LLVM sources; the generated JSON under public/schema/ keeps
+the upstream text and must retain this attribution when redistributed.

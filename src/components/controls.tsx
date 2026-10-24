@@ -411,7 +411,7 @@ export function MapControl({
   const patch = isPlainObject(override) ? override : {};
 
   return (
-    <div className={styles.children}>
+    <div className={styles.children} role="group" aria-label={`${option.key} options`}>
       {children.map((child) => {
         const path = `${option.key}.${child.key}`;
         const childValue = effectiveChildValue(option, child.key, style, modified);
@@ -493,14 +493,20 @@ export function StructListControl({
       {items.map((item, index) => {
         const record = isPlainObject(item) ? item : {};
         return (
-          <div className={styles.itemCard} key={index} data-testid={`item-${option.key}-${index}`}>
+          <div
+            className={styles.itemCard}
+            key={index}
+            data-testid={`item-${option.key}-${index}`}
+            role="group"
+            aria-label={`${option.key} item ${index + 1}`}
+          >
             <div className={styles.itemHead}>
               <span className={styles.itemTitle}>{`Item ${index + 1}`}</span>
               <button
                 type="button"
                 className={styles.iconButton}
                 data-testid={`remove-item-${option.key}-${index}`}
-                aria-label={`Remove item ${index + 1}`}
+                aria-label={`Remove ${option.key} item ${index + 1}`}
                 onClick={() => commit(items.filter((_, itemIndex) => itemIndex !== index))}
               >
                 Remove
@@ -535,6 +541,7 @@ export function StructListControl({
         type="button"
         className={styles.addButton}
         data-testid={`add-item-${option.key}`}
+        aria-label={`Add item (${option.key})`}
         onClick={() => commit([...items, emptyStructValue(fields)])}
       >
         Add item
