@@ -223,4 +223,9 @@ M3 完成即 v3 交付；M4 按需，不阻塞上线：
 
 ### CI / 部署（GitHub Actions）
 
-M3 的代码与文档提交推送后由 `ci.yml`（含 native golden drift 检查 + check:size + 47 条 e2e）与 `deploy.yml`（含 check:size + 47 条 e2e + 线上 smoke）验证；首次 CI 会顺带证明 Linux 上 `golden:gen --check` 与 Windows 提交物一致。发布成功后的 run 链接与线上结果补记在这里。
+| 项 | 结果 |
+|---|---|
+| ci（M3 提交 `92f665e`） | ✅ [40056377277](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40056377277)：setup-python + native 21.1.8 + `golden:gen --check` + typecheck/197 单测 + build + check:size + 47 条 e2e，全绿；**Linux 上重新生成的 fixture 与 Windows 提交物一致**（资源漂移闸门成立） |
+| deploy（M3 线上） | ✅ [40056377297](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40056377297)：build（含 47 条 e2e）→ deploy → 对线上 URL 再跑整套 e2e，全绿 |
+| 线上复跑（本地执行，M3/golden/perf 组） | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test tests/e2e/m3.spec.ts tests/e2e/golden.spec.ts tests/e2e/perf.spec.ts` → 13 passed + 1 flaky（perf 版本切换在公网抖动下首跑超时、retry 通过；非产品问题） |
+| 线上资源 | ✅ 首页 200 且含主题预置脚本；入口 JS/CSS 200；`sw.js` 200（7152 B，与仓库一致）；m3 的离线用例在线上通过 |
