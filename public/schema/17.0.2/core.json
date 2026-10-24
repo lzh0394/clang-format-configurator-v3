@@ -1,0 +1,4273 @@
+{
+  "version": "17.0.2",
+  "build": "clang-format version 17.0.2 (https://github.com/ssciwr/clang-format-wheel f928550dfaa8e13ccf1b9f7f76356f461d08c707)",
+  "tag": "llvmorg-17.0.2",
+  "styles": [
+    "LLVM",
+    "Google",
+    "Chromium",
+    "Mozilla",
+    "WebKit",
+    "Microsoft",
+    "GNU"
+  ],
+  "options": [
+    {
+      "key": "AccessModifierOffset",
+      "type": {
+        "kind": "scalar",
+        "scalar": "int"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": -2,
+        "Google": -1,
+        "Chromium": -1,
+        "Mozilla": -2,
+        "WebKit": -4,
+        "Microsoft": -2,
+        "GNU": -2
+      }
+    },
+    {
+      "key": "AlignAfterOpenBracket",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Align",
+          "DontAlign",
+          "AlwaysBreak",
+          "BlockIndent"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Align",
+        "Google": "Align",
+        "Chromium": "Align",
+        "Mozilla": "Align",
+        "WebKit": "DontAlign",
+        "Microsoft": "Align",
+        "GNU": "Align"
+      }
+    },
+    {
+      "key": "AlignArrayOfStructures",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Left",
+          "Right",
+          "None"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "None",
+        "WebKit": "None",
+        "Microsoft": "None",
+        "GNU": "None"
+      }
+    },
+    {
+      "key": "AlignConsecutiveAssignments",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Enabled",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossEmptyLines",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossComments",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AlignCompound",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "PadOperators",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        },
+        "Google": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        },
+        "Chromium": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        },
+        "Mozilla": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        },
+        "WebKit": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        },
+        "Microsoft": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        },
+        "GNU": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": true
+        }
+      }
+    },
+    {
+      "key": "AlignConsecutiveBitFields",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Enabled",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossEmptyLines",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossComments",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AlignCompound",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "PadOperators",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Google": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Chromium": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Mozilla": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "WebKit": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Microsoft": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "GNU": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        }
+      }
+    },
+    {
+      "key": "AlignConsecutiveDeclarations",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Enabled",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossEmptyLines",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossComments",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AlignCompound",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "PadOperators",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Google": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Chromium": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Mozilla": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "WebKit": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Microsoft": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "GNU": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        }
+      }
+    },
+    {
+      "key": "AlignConsecutiveMacros",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Enabled",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossEmptyLines",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossComments",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AlignCompound",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "PadOperators",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Google": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Chromium": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Mozilla": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "WebKit": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "Microsoft": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        },
+        "GNU": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCompound": false,
+          "PadOperators": false
+        }
+      }
+    },
+    {
+      "key": "AlignConsecutiveShortCaseStatements",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Enabled",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossEmptyLines",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AcrossComments",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AlignCaseColons",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        },
+        "Google": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        },
+        "Chromium": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        },
+        "Mozilla": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        },
+        "WebKit": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        },
+        "Microsoft": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        },
+        "GNU": {
+          "Enabled": false,
+          "AcrossEmptyLines": false,
+          "AcrossComments": false,
+          "AlignCaseColons": false
+        }
+      }
+    },
+    {
+      "key": "AlignEscapedNewlines",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "DontAlign",
+          "Left",
+          "Right"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Right",
+        "Google": "Left",
+        "Chromium": "Left",
+        "Mozilla": "Right",
+        "WebKit": "Right",
+        "Microsoft": "Right",
+        "GNU": "Right"
+      }
+    },
+    {
+      "key": "AlignOperands",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "DontAlign",
+          "Align",
+          "AlignAfterOperator"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Align",
+        "Google": "Align",
+        "Chromium": "Align",
+        "Mozilla": "Align",
+        "WebKit": "DontAlign",
+        "Microsoft": "Align",
+        "GNU": "Align"
+      }
+    },
+    {
+      "key": "AlignTrailingComments",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Kind",
+            "type": {
+              "kind": "enum",
+              "values": [
+                "Leave",
+                "Always",
+                "Never"
+              ]
+            }
+          },
+          {
+            "key": "OverEmptyLines",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Kind": "Always",
+          "OverEmptyLines": 0
+        },
+        "Google": {
+          "Kind": "Always",
+          "OverEmptyLines": 0
+        },
+        "Chromium": {
+          "Kind": "Always",
+          "OverEmptyLines": 0
+        },
+        "Mozilla": {
+          "Kind": "Always",
+          "OverEmptyLines": 0
+        },
+        "WebKit": {
+          "Kind": "Never",
+          "OverEmptyLines": 0
+        },
+        "Microsoft": {
+          "Kind": "Always",
+          "OverEmptyLines": 0
+        },
+        "GNU": {
+          "Kind": "Always",
+          "OverEmptyLines": 0
+        }
+      }
+    },
+    {
+      "key": "AllowAllArgumentsOnNextLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "AllowAllConstructorInitializersOnNextLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "AllowAllParametersOfDeclarationOnNextLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "AllowShortBlocksOnASingleLine",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Empty",
+          "Always"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Empty",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "AllowShortCaseLabelsOnASingleLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "AllowShortEnumsOnASingleLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": false,
+        "GNU": true
+      }
+    },
+    {
+      "key": "AllowShortFunctionsOnASingleLine",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "InlineOnly",
+          "Empty",
+          "Inline",
+          "All"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "All",
+        "Google": "All",
+        "Chromium": "Inline",
+        "Mozilla": "Inline",
+        "WebKit": "All",
+        "Microsoft": "None",
+        "GNU": "All"
+      }
+    },
+    {
+      "key": "AllowShortIfStatementsOnASingleLine",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "WithoutElse",
+          "OnlyFirstIf",
+          "AllIfsAndElse"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "WithoutElse",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Never",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "AllowShortLambdasOnASingleLine",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "Empty",
+          "Inline",
+          "All"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "All",
+        "Google": "All",
+        "Chromium": "All",
+        "Mozilla": "All",
+        "WebKit": "All",
+        "Microsoft": "All",
+        "GNU": "All"
+      }
+    },
+    {
+      "key": "AllowShortLoopsOnASingleLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": true,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "AlwaysBreakAfterDefinitionReturnType",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "All",
+          "TopLevel"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "TopLevel",
+        "WebKit": "None",
+        "Microsoft": "None",
+        "GNU": "All"
+      }
+    },
+    {
+      "key": "AlwaysBreakAfterReturnType",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "All",
+          "TopLevel",
+          "AllDefinitions",
+          "TopLevelDefinitions"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "TopLevel",
+        "WebKit": "None",
+        "Microsoft": "None",
+        "GNU": "AllDefinitions"
+      }
+    },
+    {
+      "key": "AlwaysBreakBeforeMultilineStrings",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "AlwaysBreakTemplateDeclarations",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "No",
+          "MultiLine",
+          "Yes"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "MultiLine",
+        "Google": "Yes",
+        "Chromium": "Yes",
+        "Mozilla": "Yes",
+        "WebKit": "MultiLine",
+        "Microsoft": "MultiLine",
+        "GNU": "MultiLine"
+      }
+    },
+    {
+      "key": "AttributeMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          "__capability"
+        ],
+        "Google": [
+          "__capability"
+        ],
+        "Chromium": [
+          "__capability"
+        ],
+        "Mozilla": [
+          "__capability"
+        ],
+        "WebKit": [
+          "__capability"
+        ],
+        "Microsoft": [
+          "__capability"
+        ],
+        "GNU": [
+          "__capability"
+        ]
+      }
+    },
+    {
+      "key": "BinPackArguments",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "BinPackParameters",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "BitFieldColonSpacing",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Both",
+          "None",
+          "Before",
+          "After"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Both",
+        "Google": "Both",
+        "Chromium": "Both",
+        "Mozilla": "Both",
+        "WebKit": "Both",
+        "Microsoft": "Both",
+        "GNU": "Both"
+      }
+    },
+    {
+      "key": "BraceWrapping",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "AfterCaseLabel",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterClass",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterControlStatement",
+            "type": {
+              "kind": "enum",
+              "values": [
+                "Never",
+                "MultiLine",
+                "Always"
+              ]
+            }
+          },
+          {
+            "key": "AfterEnum",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterExternBlock",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterFunction",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterNamespace",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterObjCDeclaration",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterStruct",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterUnion",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "BeforeCatch",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "BeforeElse",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "BeforeLambdaBody",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "BeforeWhile",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "IndentBraces",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "SplitEmptyFunction",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "SplitEmptyRecord",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "SplitEmptyNamespace",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "AfterCaseLabel": false,
+          "AfterClass": false,
+          "AfterControlStatement": "Never",
+          "AfterEnum": false,
+          "AfterExternBlock": false,
+          "AfterFunction": false,
+          "AfterNamespace": false,
+          "AfterObjCDeclaration": false,
+          "AfterStruct": false,
+          "AfterUnion": false,
+          "BeforeCatch": false,
+          "BeforeElse": false,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": false,
+          "IndentBraces": false,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": true,
+          "SplitEmptyNamespace": true
+        },
+        "Google": {
+          "AfterCaseLabel": false,
+          "AfterClass": false,
+          "AfterControlStatement": "Never",
+          "AfterEnum": false,
+          "AfterExternBlock": false,
+          "AfterFunction": false,
+          "AfterNamespace": false,
+          "AfterObjCDeclaration": false,
+          "AfterStruct": false,
+          "AfterUnion": false,
+          "BeforeCatch": false,
+          "BeforeElse": false,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": false,
+          "IndentBraces": false,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": true,
+          "SplitEmptyNamespace": true
+        },
+        "Chromium": {
+          "AfterCaseLabel": false,
+          "AfterClass": false,
+          "AfterControlStatement": "Never",
+          "AfterEnum": false,
+          "AfterExternBlock": false,
+          "AfterFunction": false,
+          "AfterNamespace": false,
+          "AfterObjCDeclaration": false,
+          "AfterStruct": false,
+          "AfterUnion": false,
+          "BeforeCatch": false,
+          "BeforeElse": false,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": false,
+          "IndentBraces": false,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": true,
+          "SplitEmptyNamespace": true
+        },
+        "Mozilla": {
+          "AfterCaseLabel": false,
+          "AfterClass": true,
+          "AfterControlStatement": "Never",
+          "AfterEnum": true,
+          "AfterExternBlock": true,
+          "AfterFunction": true,
+          "AfterNamespace": false,
+          "AfterObjCDeclaration": false,
+          "AfterStruct": true,
+          "AfterUnion": true,
+          "BeforeCatch": false,
+          "BeforeElse": false,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": false,
+          "IndentBraces": false,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": false,
+          "SplitEmptyNamespace": true
+        },
+        "WebKit": {
+          "AfterCaseLabel": false,
+          "AfterClass": false,
+          "AfterControlStatement": "Never",
+          "AfterEnum": false,
+          "AfterExternBlock": false,
+          "AfterFunction": true,
+          "AfterNamespace": false,
+          "AfterObjCDeclaration": false,
+          "AfterStruct": false,
+          "AfterUnion": false,
+          "BeforeCatch": false,
+          "BeforeElse": false,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": false,
+          "IndentBraces": false,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": true,
+          "SplitEmptyNamespace": true
+        },
+        "Microsoft": {
+          "AfterCaseLabel": false,
+          "AfterClass": true,
+          "AfterControlStatement": "Always",
+          "AfterEnum": true,
+          "AfterExternBlock": true,
+          "AfterFunction": true,
+          "AfterNamespace": true,
+          "AfterObjCDeclaration": true,
+          "AfterStruct": true,
+          "AfterUnion": false,
+          "BeforeCatch": true,
+          "BeforeElse": true,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": false,
+          "IndentBraces": false,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": true,
+          "SplitEmptyNamespace": true
+        },
+        "GNU": {
+          "AfterCaseLabel": true,
+          "AfterClass": true,
+          "AfterControlStatement": "Always",
+          "AfterEnum": true,
+          "AfterExternBlock": true,
+          "AfterFunction": true,
+          "AfterNamespace": true,
+          "AfterObjCDeclaration": true,
+          "AfterStruct": true,
+          "AfterUnion": true,
+          "BeforeCatch": true,
+          "BeforeElse": true,
+          "BeforeLambdaBody": false,
+          "BeforeWhile": true,
+          "IndentBraces": true,
+          "SplitEmptyFunction": true,
+          "SplitEmptyRecord": true,
+          "SplitEmptyNamespace": true
+        }
+      }
+    },
+    {
+      "key": "BracedInitializerIndentWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "BreakAfterAttributes",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Always",
+          "Leave",
+          "Never"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Never",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "BreakAfterJavaFieldAnnotations",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "BreakArrays",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "BreakBeforeBinaryOperators",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "NonAssignment",
+          "All"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "None",
+        "WebKit": "All",
+        "Microsoft": "None",
+        "GNU": "All"
+      }
+    },
+    {
+      "key": "BreakBeforeBraces",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Attach",
+          "Linux",
+          "Mozilla",
+          "Stroustrup",
+          "Allman",
+          "Whitesmiths",
+          "GNU",
+          "WebKit",
+          "Custom"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Attach",
+        "Google": "Attach",
+        "Chromium": "Attach",
+        "Mozilla": "Mozilla",
+        "WebKit": "WebKit",
+        "Microsoft": "Custom",
+        "GNU": "GNU"
+      }
+    },
+    {
+      "key": "BreakBeforeConceptDeclarations",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Allowed",
+          "Always"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Always",
+        "Google": "Always",
+        "Chromium": "Always",
+        "Mozilla": "Always",
+        "WebKit": "Always",
+        "Microsoft": "Always",
+        "GNU": "Always"
+      }
+    },
+    {
+      "key": "BreakBeforeInlineASMColon",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "OnlyMultiline",
+          "Always"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "OnlyMultiline",
+        "Google": "OnlyMultiline",
+        "Chromium": "OnlyMultiline",
+        "Mozilla": "OnlyMultiline",
+        "WebKit": "OnlyMultiline",
+        "Microsoft": "OnlyMultiline",
+        "GNU": "OnlyMultiline"
+      }
+    },
+    {
+      "key": "BreakBeforeTernaryOperators",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "BreakConstructorInitializers",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "BeforeColon",
+          "BeforeComma",
+          "AfterColon"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "BeforeColon",
+        "Google": "BeforeColon",
+        "Chromium": "BeforeColon",
+        "Mozilla": "BeforeComma",
+        "WebKit": "BeforeComma",
+        "Microsoft": "BeforeColon",
+        "GNU": "BeforeColon"
+      }
+    },
+    {
+      "key": "BreakInheritanceList",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "BeforeColon",
+          "BeforeComma",
+          "AfterColon",
+          "AfterComma"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "BeforeColon",
+        "Google": "BeforeColon",
+        "Chromium": "BeforeColon",
+        "Mozilla": "BeforeComma",
+        "WebKit": "BeforeColon",
+        "Microsoft": "BeforeColon",
+        "GNU": "BeforeColon"
+      }
+    },
+    {
+      "key": "BreakStringLiterals",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "ColumnLimit",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 80,
+        "Google": 80,
+        "Chromium": 80,
+        "Mozilla": 80,
+        "WebKit": 0,
+        "Microsoft": 120,
+        "GNU": 79
+      }
+    },
+    {
+      "key": "CommentPragmas",
+      "type": {
+        "kind": "scalar",
+        "scalar": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "^ IWYU pragma:",
+        "Google": "^ IWYU pragma:",
+        "Chromium": "^ IWYU pragma:",
+        "Mozilla": "^ IWYU pragma:",
+        "WebKit": "^ IWYU pragma:",
+        "Microsoft": "^ IWYU pragma:",
+        "GNU": "^ IWYU pragma:"
+      }
+    },
+    {
+      "key": "CompactNamespaces",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "ConstructorInitializerAllOnOneLineOrOnePerLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "ConstructorInitializerIndentWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 4,
+        "Google": 4,
+        "Chromium": 4,
+        "Mozilla": 2,
+        "WebKit": 4,
+        "Microsoft": 4,
+        "GNU": 4
+      }
+    },
+    {
+      "key": "ContinuationIndentWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 4,
+        "Google": 4,
+        "Chromium": 4,
+        "Mozilla": 2,
+        "WebKit": 4,
+        "Microsoft": 4,
+        "GNU": 4
+      }
+    },
+    {
+      "key": "Cpp11BracedListStyle",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": true,
+        "GNU": false
+      }
+    },
+    {
+      "key": "DeriveLineEnding",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "DerivePointerAlignment",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": true,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "DisableFormat",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "EmptyLineAfterAccessModifier",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Leave",
+          "Always"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Never",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "EmptyLineBeforeAccessModifier",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Leave",
+          "LogicalBlock",
+          "Always"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "LogicalBlock",
+        "Google": "LogicalBlock",
+        "Chromium": "LogicalBlock",
+        "Mozilla": "LogicalBlock",
+        "WebKit": "LogicalBlock",
+        "Microsoft": "LogicalBlock",
+        "GNU": "LogicalBlock"
+      }
+    },
+    {
+      "key": "ExperimentalAutoDetectBinPacking",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "FixNamespaceComments",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": true,
+        "GNU": false
+      }
+    },
+    {
+      "key": "ForEachMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ],
+        "Google": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ],
+        "Chromium": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ],
+        "Mozilla": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ],
+        "WebKit": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ],
+        "Microsoft": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ],
+        "GNU": [
+          "foreach",
+          "Q_FOREACH",
+          "BOOST_FOREACH"
+        ]
+      }
+    },
+    {
+      "key": "IfMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          "KJ_IF_MAYBE"
+        ],
+        "Google": [
+          "KJ_IF_MAYBE"
+        ],
+        "Chromium": [
+          "KJ_IF_MAYBE"
+        ],
+        "Mozilla": [
+          "KJ_IF_MAYBE"
+        ],
+        "WebKit": [
+          "KJ_IF_MAYBE"
+        ],
+        "Microsoft": [
+          "KJ_IF_MAYBE"
+        ],
+        "GNU": [
+          "KJ_IF_MAYBE"
+        ]
+      }
+    },
+    {
+      "key": "IncludeBlocks",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Preserve",
+          "Merge",
+          "Regroup"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Preserve",
+        "Google": "Regroup",
+        "Chromium": "Preserve",
+        "Mozilla": "Preserve",
+        "WebKit": "Preserve",
+        "Microsoft": "Preserve",
+        "GNU": "Preserve"
+      }
+    },
+    {
+      "key": "IncludeCategories",
+      "type": {
+        "kind": "list",
+        "item": "struct",
+        "fields": [
+          {
+            "key": "Regex",
+            "type": {
+              "kind": "scalar",
+              "scalar": "string"
+            }
+          },
+          {
+            "key": "Priority",
+            "type": {
+              "kind": "scalar",
+              "scalar": "int"
+            }
+          },
+          {
+            "key": "SortPriority",
+            "type": {
+              "kind": "scalar",
+              "scalar": "int"
+            }
+          },
+          {
+            "key": "CaseSensitive",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          {
+            "Regex": "^\"(llvm|llvm-c|clang|clang-c)/",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^(<|\"(gtest|gmock|isl|json)/)",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ],
+        "Google": [
+          {
+            "Regex": "^<ext/.*\\.h>",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^<.*\\.h>",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^<.*",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ],
+        "Chromium": [
+          {
+            "Regex": "^<ext/.*\\.h>",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^<.*\\.h>",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^<.*",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ],
+        "Mozilla": [
+          {
+            "Regex": "^\"(llvm|llvm-c|clang|clang-c)/",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^(<|\"(gtest|gmock|isl|json)/)",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ],
+        "WebKit": [
+          {
+            "Regex": "^\"(llvm|llvm-c|clang|clang-c)/",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^(<|\"(gtest|gmock|isl|json)/)",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ],
+        "Microsoft": [
+          {
+            "Regex": "^\"(llvm|llvm-c|clang|clang-c)/",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^(<|\"(gtest|gmock|isl|json)/)",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ],
+        "GNU": [
+          {
+            "Regex": "^\"(llvm|llvm-c|clang|clang-c)/",
+            "Priority": 2,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": "^(<|\"(gtest|gmock|isl|json)/)",
+            "Priority": 3,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          },
+          {
+            "Regex": ".*",
+            "Priority": 1,
+            "SortPriority": 0,
+            "CaseSensitive": false
+          }
+        ]
+      }
+    },
+    {
+      "key": "IncludeIsMainRegex",
+      "type": {
+        "kind": "scalar",
+        "scalar": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "(Test)?$",
+        "Google": "([-_](test|unittest))?$",
+        "Chromium": "([-_](test|unittest))?$",
+        "Mozilla": "(Test)?$",
+        "WebKit": "(Test)?$",
+        "Microsoft": "(Test)?$",
+        "GNU": "(Test)?$"
+      }
+    },
+    {
+      "key": "IncludeIsMainSourceRegex",
+      "type": {
+        "kind": "scalar",
+        "scalar": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "",
+        "Google": "",
+        "Chromium": "",
+        "Mozilla": "",
+        "WebKit": "",
+        "Microsoft": "",
+        "GNU": ""
+      }
+    },
+    {
+      "key": "IndentAccessModifiers",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "IndentCaseBlocks",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "IndentCaseLabels",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "IndentExternBlock",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "AfterExternBlock",
+          "NoIndent",
+          "Indent"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "AfterExternBlock",
+        "Google": "AfterExternBlock",
+        "Chromium": "AfterExternBlock",
+        "Mozilla": "AfterExternBlock",
+        "WebKit": "AfterExternBlock",
+        "Microsoft": "AfterExternBlock",
+        "GNU": "AfterExternBlock"
+      }
+    },
+    {
+      "key": "IndentGotoLabels",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "IndentPPDirectives",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "AfterHash",
+          "BeforeHash"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "None",
+        "WebKit": "None",
+        "Microsoft": "None",
+        "GNU": "None"
+      }
+    },
+    {
+      "key": "IndentRequiresClause",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "IndentWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 2,
+        "Google": 2,
+        "Chromium": 2,
+        "Mozilla": 2,
+        "WebKit": 4,
+        "Microsoft": 4,
+        "GNU": 2
+      }
+    },
+    {
+      "key": "IndentWrappedFunctionNames",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "InsertBraces",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "InsertNewlineAtEOF",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "InsertTrailingCommas",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "Wrapped"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "None",
+        "WebKit": "None",
+        "Microsoft": "None",
+        "GNU": "None"
+      }
+    },
+    {
+      "key": "IntegerLiteralSeparator",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Binary",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          },
+          {
+            "key": "BinaryMinDigits",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          },
+          {
+            "key": "Decimal",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          },
+          {
+            "key": "DecimalMinDigits",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          },
+          {
+            "key": "Hex",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          },
+          {
+            "key": "HexMinDigits",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        },
+        "Google": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        },
+        "Chromium": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        },
+        "Mozilla": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        },
+        "WebKit": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        },
+        "Microsoft": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        },
+        "GNU": {
+          "Binary": 0,
+          "BinaryMinDigits": 0,
+          "Decimal": 0,
+          "DecimalMinDigits": 0,
+          "Hex": 0,
+          "HexMinDigits": 0
+        }
+      }
+    },
+    {
+      "key": "JavaImportGroups",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [],
+        "Chromium": [],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "JavaScriptQuotes",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Leave",
+          "Single",
+          "Double"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Leave",
+        "Google": "Leave",
+        "Chromium": "Leave",
+        "Mozilla": "Leave",
+        "WebKit": "Leave",
+        "Microsoft": "Leave",
+        "GNU": "Leave"
+      }
+    },
+    {
+      "key": "JavaScriptWrapImports",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "KeepEmptyLinesAtEOF",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "KeepEmptyLinesAtTheStartOfBlocks",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "LambdaBodyIndentation",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Signature",
+          "OuterScope"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Signature",
+        "Google": "Signature",
+        "Chromium": "Signature",
+        "Mozilla": "Signature",
+        "WebKit": "Signature",
+        "Microsoft": "Signature",
+        "GNU": "Signature"
+      }
+    },
+    {
+      "key": "LineEnding",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "LF",
+          "CRLF",
+          "DeriveLF",
+          "DeriveCRLF"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "DeriveLF",
+        "Google": "DeriveLF",
+        "Chromium": "DeriveLF",
+        "Mozilla": "DeriveLF",
+        "WebKit": "DeriveLF",
+        "Microsoft": "DeriveLF",
+        "GNU": "DeriveLF"
+      }
+    },
+    {
+      "key": "MacroBlockBegin",
+      "type": {
+        "kind": "scalar",
+        "scalar": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "",
+        "Google": "",
+        "Chromium": "",
+        "Mozilla": "",
+        "WebKit": "",
+        "Microsoft": "",
+        "GNU": ""
+      }
+    },
+    {
+      "key": "MacroBlockEnd",
+      "type": {
+        "kind": "scalar",
+        "scalar": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "",
+        "Google": "",
+        "Chromium": "",
+        "Mozilla": "",
+        "WebKit": "",
+        "Microsoft": "",
+        "GNU": ""
+      }
+    },
+    {
+      "key": "Macros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [],
+        "Chromium": [],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "MaxEmptyLinesToKeep",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 1,
+        "Google": 1,
+        "Chromium": 1,
+        "Mozilla": 1,
+        "WebKit": 1,
+        "Microsoft": 1,
+        "GNU": 1
+      }
+    },
+    {
+      "key": "NamespaceIndentation",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "None",
+          "Inner",
+          "All"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "None",
+        "Google": "None",
+        "Chromium": "None",
+        "Mozilla": "None",
+        "WebKit": "Inner",
+        "Microsoft": "None",
+        "GNU": "None"
+      }
+    },
+    {
+      "key": "NamespaceMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [],
+        "Chromium": [],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "ObjCBinPackProtocolList",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Auto",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Auto",
+        "WebKit": "Auto",
+        "Microsoft": "Auto",
+        "GNU": "Auto"
+      }
+    },
+    {
+      "key": "ObjCBlockIndentWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 2,
+        "Google": 2,
+        "Chromium": 2,
+        "Mozilla": 2,
+        "WebKit": 4,
+        "Microsoft": 2,
+        "GNU": 2
+      }
+    },
+    {
+      "key": "ObjCBreakBeforeNestedBlockParam",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "ObjCSpaceAfterProperty",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "ObjCSpaceBeforeProtocolList",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "PPIndentWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "int"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": -1,
+        "Google": -1,
+        "Chromium": -1,
+        "Mozilla": -1,
+        "WebKit": -1,
+        "Microsoft": -1,
+        "GNU": -1
+      }
+    },
+    {
+      "key": "PackConstructorInitializers",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "BinPack",
+          "CurrentLine",
+          "NextLine",
+          "NextLineOnly"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "BinPack",
+        "Google": "NextLine",
+        "Chromium": "NextLine",
+        "Mozilla": "BinPack",
+        "WebKit": "BinPack",
+        "Microsoft": "BinPack",
+        "GNU": "BinPack"
+      }
+    },
+    {
+      "key": "PenaltyBreakAssignment",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 2,
+        "Google": 2,
+        "Chromium": 2,
+        "Mozilla": 2,
+        "WebKit": 2,
+        "Microsoft": 2,
+        "GNU": 2
+      }
+    },
+    {
+      "key": "PenaltyBreakBeforeFirstCallParameter",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 19,
+        "Google": 1,
+        "Chromium": 1,
+        "Mozilla": 19,
+        "WebKit": 19,
+        "Microsoft": 19,
+        "GNU": 19
+      }
+    },
+    {
+      "key": "PenaltyBreakComment",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 300,
+        "Google": 300,
+        "Chromium": 300,
+        "Mozilla": 300,
+        "WebKit": 300,
+        "Microsoft": 300,
+        "GNU": 300
+      }
+    },
+    {
+      "key": "PenaltyBreakFirstLessLess",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 120,
+        "Google": 120,
+        "Chromium": 120,
+        "Mozilla": 120,
+        "WebKit": 120,
+        "Microsoft": 120,
+        "GNU": 120
+      }
+    },
+    {
+      "key": "PenaltyBreakOpenParenthesis",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 0,
+        "Google": 0,
+        "Chromium": 0,
+        "Mozilla": 0,
+        "WebKit": 0,
+        "Microsoft": 0,
+        "GNU": 0
+      }
+    },
+    {
+      "key": "PenaltyBreakString",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 1000,
+        "Google": 1000,
+        "Chromium": 1000,
+        "Mozilla": 1000,
+        "WebKit": 1000,
+        "Microsoft": 1000,
+        "GNU": 1000
+      }
+    },
+    {
+      "key": "PenaltyBreakTemplateDeclaration",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 10,
+        "Google": 10,
+        "Chromium": 10,
+        "Mozilla": 10,
+        "WebKit": 10,
+        "Microsoft": 10,
+        "GNU": 10
+      }
+    },
+    {
+      "key": "PenaltyExcessCharacter",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 1000000,
+        "Google": 1000000,
+        "Chromium": 1000000,
+        "Mozilla": 1000000,
+        "WebKit": 1000000,
+        "Microsoft": 1000000,
+        "GNU": 1000000
+      }
+    },
+    {
+      "key": "PenaltyIndentedWhitespace",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 0,
+        "Google": 0,
+        "Chromium": 0,
+        "Mozilla": 0,
+        "WebKit": 0,
+        "Microsoft": 0,
+        "GNU": 0
+      }
+    },
+    {
+      "key": "PenaltyReturnTypeOnItsOwnLine",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 60,
+        "Google": 200,
+        "Chromium": 200,
+        "Mozilla": 200,
+        "WebKit": 60,
+        "Microsoft": 1000,
+        "GNU": 60
+      }
+    },
+    {
+      "key": "PointerAlignment",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Left",
+          "Right",
+          "Middle"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Right",
+        "Google": "Left",
+        "Chromium": "Left",
+        "Mozilla": "Left",
+        "WebKit": "Left",
+        "Microsoft": "Right",
+        "GNU": "Right"
+      }
+    },
+    {
+      "key": "QualifierAlignment",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Leave",
+          "Left",
+          "Right",
+          "Custom"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Leave",
+        "Google": "Leave",
+        "Chromium": "Leave",
+        "Mozilla": "Leave",
+        "WebKit": "Leave",
+        "Microsoft": "Leave",
+        "GNU": "Leave"
+      }
+    },
+    {
+      "key": "QualifierOrder",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [],
+        "Chromium": [],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "RawStringFormats",
+      "type": {
+        "kind": "list",
+        "item": "struct",
+        "fields": [
+          {
+            "key": "Language",
+            "type": {
+              "kind": "enum",
+              "values": [
+                "None",
+                "Cpp",
+                "CSharp",
+                "Java",
+                "JavaScript",
+                "Json",
+                "ObjC",
+                "Proto",
+                "TableGen",
+                "TextProto",
+                "Verilog"
+              ]
+            }
+          },
+          {
+            "key": "Delimiters",
+            "type": {
+              "kind": "list",
+              "item": "string"
+            }
+          },
+          {
+            "key": "EnclosingFunctions",
+            "type": {
+              "kind": "list",
+              "item": "string"
+            }
+          },
+          {
+            "key": "CanonicalDelimiter",
+            "type": {
+              "kind": "scalar",
+              "scalar": "string"
+            }
+          },
+          {
+            "key": "BasedOnStyle",
+            "type": {
+              "kind": "enum",
+              "values": [
+                "LLVM",
+                "Google",
+                "Chromium",
+                "Mozilla",
+                "WebKit",
+                "Microsoft",
+                "GNU"
+              ]
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [
+          {
+            "Language": "Cpp",
+            "Delimiters": [
+              "cc",
+              "CC",
+              "cpp",
+              "Cpp",
+              "CPP",
+              "c++",
+              "C++"
+            ],
+            "CanonicalDelimiter": "",
+            "BasedOnStyle": "google"
+          },
+          {
+            "Language": "TextProto",
+            "Delimiters": [
+              "pb",
+              "PB",
+              "proto",
+              "PROTO"
+            ],
+            "EnclosingFunctions": [
+              "EqualsProto",
+              "EquivToProto",
+              "PARSE_PARTIAL_TEXT_PROTO",
+              "PARSE_TEST_PROTO",
+              "PARSE_TEXT_PROTO",
+              "ParseTextOrDie",
+              "ParseTextProtoOrDie",
+              "ParseTestProto",
+              "ParsePartialTestProto"
+            ],
+            "CanonicalDelimiter": "pb",
+            "BasedOnStyle": "google"
+          }
+        ],
+        "Chromium": [
+          {
+            "Language": "Cpp",
+            "Delimiters": [
+              "cc",
+              "CC",
+              "cpp",
+              "Cpp",
+              "CPP",
+              "c++",
+              "C++"
+            ],
+            "CanonicalDelimiter": "",
+            "BasedOnStyle": "google"
+          },
+          {
+            "Language": "TextProto",
+            "Delimiters": [
+              "pb",
+              "PB",
+              "proto",
+              "PROTO"
+            ],
+            "EnclosingFunctions": [
+              "EqualsProto",
+              "EquivToProto",
+              "PARSE_PARTIAL_TEXT_PROTO",
+              "PARSE_TEST_PROTO",
+              "PARSE_TEXT_PROTO",
+              "ParseTextOrDie",
+              "ParseTextProtoOrDie",
+              "ParseTestProto",
+              "ParsePartialTestProto"
+            ],
+            "CanonicalDelimiter": "pb",
+            "BasedOnStyle": "google"
+          }
+        ],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "ReferenceAlignment",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Pointer",
+          "Left",
+          "Right",
+          "Middle"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Pointer",
+        "Google": "Pointer",
+        "Chromium": "Pointer",
+        "Mozilla": "Pointer",
+        "WebKit": "Pointer",
+        "Microsoft": "Pointer",
+        "GNU": "Pointer"
+      }
+    },
+    {
+      "key": "ReflowComments",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "RemoveBracesLLVM",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "RemoveParentheses",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Leave",
+          "MultipleParentheses",
+          "ReturnStatement"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Leave",
+        "Google": "Leave",
+        "Chromium": "Leave",
+        "Mozilla": "Leave",
+        "WebKit": "Leave",
+        "Microsoft": "Leave",
+        "GNU": "Leave"
+      }
+    },
+    {
+      "key": "RemoveSemicolon",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "RequiresClausePosition",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "OwnLine",
+          "WithPreceding",
+          "WithFollowing",
+          "SingleLine"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "OwnLine",
+        "Google": "OwnLine",
+        "Chromium": "OwnLine",
+        "Mozilla": "OwnLine",
+        "WebKit": "OwnLine",
+        "Microsoft": "OwnLine",
+        "GNU": "OwnLine"
+      }
+    },
+    {
+      "key": "RequiresExpressionIndentation",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "OuterScope",
+          "Keyword"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "OuterScope",
+        "Google": "OuterScope",
+        "Chromium": "OuterScope",
+        "Mozilla": "OuterScope",
+        "WebKit": "OuterScope",
+        "Microsoft": "OuterScope",
+        "GNU": "OuterScope"
+      }
+    },
+    {
+      "key": "SeparateDefinitionBlocks",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Leave",
+          "Always",
+          "Never"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Leave",
+        "Google": "Leave",
+        "Chromium": "Leave",
+        "Mozilla": "Leave",
+        "WebKit": "Leave",
+        "Microsoft": "Leave",
+        "GNU": "Leave"
+      }
+    },
+    {
+      "key": "ShortNamespaceLines",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 1,
+        "Google": 1,
+        "Chromium": 1,
+        "Mozilla": 1,
+        "WebKit": 1,
+        "Microsoft": 1,
+        "GNU": 1
+      }
+    },
+    {
+      "key": "SortIncludes",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "CaseSensitive",
+          "CaseInsensitive"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "CaseSensitive",
+        "Google": "CaseSensitive",
+        "Chromium": "CaseSensitive",
+        "Mozilla": "CaseSensitive",
+        "WebKit": "CaseSensitive",
+        "Microsoft": "CaseSensitive",
+        "GNU": "CaseSensitive"
+      }
+    },
+    {
+      "key": "SortJavaStaticImport",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Before",
+          "After"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Before",
+        "Google": "Before",
+        "Chromium": "Before",
+        "Mozilla": "Before",
+        "WebKit": "Before",
+        "Microsoft": "Before",
+        "GNU": "Before"
+      }
+    },
+    {
+      "key": "SortUsingDeclarations",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Lexicographic",
+          "LexicographicNumeric"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "LexicographicNumeric",
+        "Google": "LexicographicNumeric",
+        "Chromium": "LexicographicNumeric",
+        "Mozilla": "LexicographicNumeric",
+        "WebKit": "LexicographicNumeric",
+        "Microsoft": "LexicographicNumeric",
+        "GNU": "LexicographicNumeric"
+      }
+    },
+    {
+      "key": "SpaceAfterCStyleCast",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceAfterLogicalNot",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceAfterTemplateKeyword",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "SpaceAroundPointerQualifiers",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Default",
+          "Before",
+          "After",
+          "Both"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Default",
+        "Google": "Default",
+        "Chromium": "Default",
+        "Mozilla": "Default",
+        "WebKit": "Default",
+        "Microsoft": "Default",
+        "GNU": "Default"
+      }
+    },
+    {
+      "key": "SpaceBeforeAssignmentOperators",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "SpaceBeforeCaseColon",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceBeforeCpp11BracedList",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceBeforeCtorInitializerColon",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "SpaceBeforeInheritanceColon",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "SpaceBeforeJsonColon",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceBeforeParens",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "ControlStatements",
+          "ControlStatementsExceptControlMacros",
+          "NonEmptyParentheses",
+          "Always",
+          "Custom"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "ControlStatements",
+        "Google": "ControlStatements",
+        "Chromium": "ControlStatements",
+        "Mozilla": "ControlStatements",
+        "WebKit": "ControlStatements",
+        "Microsoft": "ControlStatements",
+        "GNU": "Always"
+      }
+    },
+    {
+      "key": "SpaceBeforeParensOptions",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "AfterControlStatements",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterForeachMacros",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterFunctionDefinitionName",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterFunctionDeclarationName",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterIfMacros",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterOverloadedOperator",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterRequiresInClause",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "AfterRequiresInExpression",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "BeforeNonEmptyParentheses",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "AfterControlStatements": true,
+          "AfterForeachMacros": true,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": true,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        },
+        "Google": {
+          "AfterControlStatements": true,
+          "AfterForeachMacros": true,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": true,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        },
+        "Chromium": {
+          "AfterControlStatements": true,
+          "AfterForeachMacros": true,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": true,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        },
+        "Mozilla": {
+          "AfterControlStatements": true,
+          "AfterForeachMacros": true,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": true,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        },
+        "WebKit": {
+          "AfterControlStatements": true,
+          "AfterForeachMacros": true,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": true,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        },
+        "Microsoft": {
+          "AfterControlStatements": true,
+          "AfterForeachMacros": true,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": true,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        },
+        "GNU": {
+          "AfterControlStatements": false,
+          "AfterForeachMacros": false,
+          "AfterFunctionDefinitionName": false,
+          "AfterFunctionDeclarationName": false,
+          "AfterIfMacros": false,
+          "AfterOverloadedOperator": false,
+          "AfterRequiresInClause": false,
+          "AfterRequiresInExpression": false,
+          "BeforeNonEmptyParentheses": false
+        }
+      }
+    },
+    {
+      "key": "SpaceBeforeRangeBasedForLoopColon",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "SpaceBeforeSquareBrackets",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceInEmptyBlock",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": true,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "SpaceInEmptyParentheses",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "SpacesBeforeTrailingComments",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 1,
+        "Google": 2,
+        "Chromium": 2,
+        "Mozilla": 1,
+        "WebKit": 1,
+        "Microsoft": 1,
+        "GNU": 1
+      }
+    },
+    {
+      "key": "SpacesInAngles",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Always",
+          "Leave"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Never",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "SpacesInCStyleCastParentheses",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "SpacesInConditionalStatement",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "SpacesInContainerLiterals",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "SpacesInLineCommentPrefix",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "Minimum",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          },
+          {
+            "key": "Maximum",
+            "type": {
+              "kind": "scalar",
+              "scalar": "uint"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "Minimum": 1,
+          "Maximum": -1
+        },
+        "Google": {
+          "Minimum": 1,
+          "Maximum": -1
+        },
+        "Chromium": {
+          "Minimum": 1,
+          "Maximum": -1
+        },
+        "Mozilla": {
+          "Minimum": 1,
+          "Maximum": -1
+        },
+        "WebKit": {
+          "Minimum": 1,
+          "Maximum": -1
+        },
+        "Microsoft": {
+          "Minimum": 1,
+          "Maximum": -1
+        },
+        "GNU": {
+          "Minimum": 1,
+          "Maximum": -1
+        }
+      }
+    },
+    {
+      "key": "SpacesInParens",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "Custom"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Never",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "SpacesInParensOptions",
+      "type": {
+        "kind": "map",
+        "children": [
+          {
+            "key": "InCStyleCasts",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "InConditionalStatements",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "InEmptyParentheses",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          },
+          {
+            "key": "Other",
+            "type": {
+              "kind": "scalar",
+              "scalar": "bool"
+            }
+          }
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        },
+        "Google": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        },
+        "Chromium": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        },
+        "Mozilla": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        },
+        "WebKit": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        },
+        "Microsoft": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        },
+        "GNU": {
+          "InCStyleCasts": false,
+          "InConditionalStatements": false,
+          "InEmptyParentheses": false,
+          "Other": false
+        }
+      }
+    },
+    {
+      "key": "SpacesInParentheses",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "SpacesInSquareBrackets",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": false,
+        "Google": false,
+        "Chromium": false,
+        "Mozilla": false,
+        "WebKit": false,
+        "Microsoft": false,
+        "GNU": false
+      }
+    },
+    {
+      "key": "Standard",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "c++03",
+          "c++11",
+          "c++14",
+          "c++17",
+          "c++20",
+          "Latest",
+          "Auto"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Latest",
+        "Google": "Auto",
+        "Chromium": "Auto",
+        "Mozilla": "Latest",
+        "WebKit": "Latest",
+        "Microsoft": "Latest",
+        "GNU": "c++03"
+      }
+    },
+    {
+      "key": "StatementAttributeLikeMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          "Q_EMIT"
+        ],
+        "Google": [
+          "Q_EMIT"
+        ],
+        "Chromium": [
+          "Q_EMIT"
+        ],
+        "Mozilla": [
+          "Q_EMIT"
+        ],
+        "WebKit": [
+          "Q_EMIT"
+        ],
+        "Microsoft": [
+          "Q_EMIT"
+        ],
+        "GNU": [
+          "Q_EMIT"
+        ]
+      }
+    },
+    {
+      "key": "StatementMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ],
+        "Google": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ],
+        "Chromium": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ],
+        "Mozilla": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ],
+        "WebKit": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ],
+        "Microsoft": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ],
+        "GNU": [
+          "Q_UNUSED",
+          "QT_REQUIRE_VERSION"
+        ]
+      }
+    },
+    {
+      "key": "TabWidth",
+      "type": {
+        "kind": "scalar",
+        "scalar": "uint"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": 8,
+        "Google": 8,
+        "Chromium": 8,
+        "Mozilla": 8,
+        "WebKit": 8,
+        "Microsoft": 4,
+        "GNU": 8
+      }
+    },
+    {
+      "key": "TypeNames",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [],
+        "Chromium": [],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "TypenameMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [],
+        "Google": [],
+        "Chromium": [],
+        "Mozilla": [],
+        "WebKit": [],
+        "Microsoft": [],
+        "GNU": []
+      }
+    },
+    {
+      "key": "UseCRLF",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {}
+    },
+    {
+      "key": "UseTab",
+      "type": {
+        "kind": "enum",
+        "values": [
+          "Never",
+          "ForIndentation",
+          "ForContinuationAndIndentation",
+          "AlignWithSpaces",
+          "Always"
+        ]
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": "Never",
+        "Google": "Never",
+        "Chromium": "Never",
+        "Mozilla": "Never",
+        "WebKit": "Never",
+        "Microsoft": "Never",
+        "GNU": "Never"
+      }
+    },
+    {
+      "key": "VerilogBreakBetweenInstancePorts",
+      "type": {
+        "kind": "scalar",
+        "scalar": "bool"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": true,
+        "Google": true,
+        "Chromium": true,
+        "Mozilla": true,
+        "WebKit": true,
+        "Microsoft": true,
+        "GNU": true
+      }
+    },
+    {
+      "key": "WhitespaceSensitiveMacros",
+      "type": {
+        "kind": "list",
+        "item": "string"
+      },
+      "deprecated": false,
+      "defaults": {
+        "LLVM": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ],
+        "Google": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ],
+        "Chromium": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ],
+        "Mozilla": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ],
+        "WebKit": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ],
+        "Microsoft": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ],
+        "GNU": [
+          "BOOST_PP_STRINGIZE",
+          "CF_SWIFT_NAME",
+          "NS_SWIFT_NAME",
+          "PP_STRINGIZE",
+          "STRINGIZE"
+        ]
+      }
+    }
+  ]
+}

@@ -1,4 +1,154 @@
 {
+  "16.0.6": {
+    "integrity": "sha512-0iSox3digbmvMctngeaVwdXzYCoz0mw37RXxdsYSbjE0etxkF3rjDNNSI9JWlkjdv/L0reF700bmjEWvHC/hUg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-16.0.6.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/16.0.6/clang-format.js": "6010bd1db58efe51a73526ff0d95017d2a44c1d46c20e572c08a62cb79f96d99",
+      "public/wasm/16.0.6/clang-format.wasm": "3121705df73a49aa1ed7d29fd856c83b536f97f68162653e003477fca130220b",
+      "public/wasm/16.0.6/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "17.0.1": {
+    "integrity": "sha512-Djkw/5Y436FM/OuKy7Ftg625p+3OZjT3JwwvMw8IYWs3KM27U5EimFUXsiQKppxUMyVmMy6PkIuoLOl6Obgzxg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-17.0.1.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/17.0.1/clang-format.js": "61d4e3543461571502f506f2bd7a007ce2538e602f90bdeb344395def9ee61a0",
+      "public/wasm/17.0.1/clang-format.wasm": "21272cd324ce6ff853b077f40d6696f259d8170e28df0d4363d20adb02046bef",
+      "public/wasm/17.0.1/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "17.0.2": {
+    "integrity": "sha512-0qC4SGMgv8JIU/hWGrERwMYOepkSE07qFj4Tm5cj2wVv7jh78OKHh8CjlzMrC2+XfpOl68p5CzW7+jHPVnWQfA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-17.0.2.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/17.0.2/clang-format.js": "61d4e3543461571502f506f2bd7a007ce2538e602f90bdeb344395def9ee61a0",
+      "public/wasm/17.0.2/clang-format.wasm": "2131f442953bb027bb9b371d1e232d91daf966c5448652a6e9551c47ea823180",
+      "public/wasm/17.0.2/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "17.0.3": {
+    "integrity": "sha512-ED7k6VGB9B9rFg8llggtPCXpw9hZx9jgSSK9I2f0o7WZf2EeExMpfGHfI8RfyUNUcWV2oh1QWCLx5aioMydJ2w==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-17.0.3.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/17.0.3/clang-format.js": "61d4e3543461571502f506f2bd7a007ce2538e602f90bdeb344395def9ee61a0",
+      "public/wasm/17.0.3/clang-format.wasm": "29aa86536ea84e5886805fb7bb2082703bbc07dd3584960997a943da078f42f7",
+      "public/wasm/17.0.3/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "17.0.4": {
+    "integrity": "sha512-edy6SsfE6tfJXe+iRmR31BvulH3QP2ML2MX0AnFjr0D6Wx2aUjVQs1OntjMMXFb7/r+sXVTR2mFjju8PyluLcg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-17.0.4.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/17.0.4/clang-format.js": "61d4e3543461571502f506f2bd7a007ce2538e602f90bdeb344395def9ee61a0",
+      "public/wasm/17.0.4/clang-format.wasm": "e27a24a7766214d5da9e9543db730556806e542e7519fcdf5597bda725fb8a39",
+      "public/wasm/17.0.4/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "17.0.5": {
+    "integrity": "sha512-ohd9ly+C8dmmtHQ+nBhu93k/4lS8LQMLuGY3NbpOLW2cxsYeJoftEzJXJdYcs/N0IjFLF+fjhkZ43JJlCeZ3ew==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-17.0.5.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/17.0.5/clang-format.js": "61d4e3543461571502f506f2bd7a007ce2538e602f90bdeb344395def9ee61a0",
+      "public/wasm/17.0.5/clang-format.wasm": "d3f70a33116751c1a13327f9d59ff9a762e9e0f0a1c05422e994ddc77c05216b",
+      "public/wasm/17.0.5/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "17.0.6": {
+    "integrity": "sha512-QtDd9BAWEWeRr1U5KRh2q3lMR2kvJzmIvGiyay5lL9k1YpAYXhehwQrVlomg7Ea8GO1Hu32yGZNmExjgLdVC6w==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-17.0.6.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/17.0.6/clang-format.js": "93d113920de7c511eb2c847989d303f5f0f74f848c04e9c7d33a0c35e6b6a228",
+      "public/wasm/17.0.6/clang-format.wasm": "cc05549196e29ad1acf0495add6a059ed30d6196fa6d0a2861d2a0b1a0547dc3",
+      "public/wasm/17.0.6/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.0": {
+    "integrity": "sha512-/O/7uXf44K7ESbtdu3Jl6uoQutjt0vKhoZroahg5DP0bRDYMpqnYooMytq1FlkyuPjk6KjQX4igGw52i4CDSNw==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.0.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.0/clang-format.js": "c0b28fbbab010becd0133d155fc6345de77e2352f2e31bcfe357e7073aaf8724",
+      "public/wasm/18.1.0/clang-format.wasm": "43c20332289f24cc97fea23bfa412c5b153119368d8c60ffe5729ec12d77da04",
+      "public/wasm/18.1.0/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.1": {
+    "integrity": "sha512-Wy77o9ay+I6ZVUf7valgCG3N9QjXWp+l/vsQRet6NOm9LhiwhRMHcSFn3HM+03cacEU3ovCO1f4xVhHK5LWKog==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.1.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.1/clang-format.js": "c0b28fbbab010becd0133d155fc6345de77e2352f2e31bcfe357e7073aaf8724",
+      "public/wasm/18.1.1/clang-format.wasm": "2a8364225efa771be7495970f6fb1ff0b84ed387d9a969a7f79a476d1994f7e0",
+      "public/wasm/18.1.1/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.2": {
+    "integrity": "sha512-poH2MertFUeibxdtz/uBWk8RSr+GziMQVZOAXfgZWTO5goTiFYlOBY9iBRkUMiEkSSZkSkGoLlrbtABoQoR28Q==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.2.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.2/clang-format.js": "c0b28fbbab010becd0133d155fc6345de77e2352f2e31bcfe357e7073aaf8724",
+      "public/wasm/18.1.2/clang-format.wasm": "bd8faf38e00a9e69a9970d2d415fe3de9074cf1d6ce42fd388c1349927610346",
+      "public/wasm/18.1.2/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.3": {
+    "integrity": "sha512-HKq4lioATBGRk9CvpZtYGj6vsvc7U72B1GBaK9B6hp+YUPp4qFdKIto4mDPg3nc689p45elqk8LV6LtWdjN/Rw==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.3.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.3/clang-format.js": "6cc8a646df51a59a69235403ffc75c5742885d12b8a1b2bc8364ab3c10584df3",
+      "public/wasm/18.1.3/clang-format.wasm": "85f29e09330d282e9ec0be042f89b1a135dc86f73df2a4284a9577967fbd882b",
+      "public/wasm/18.1.3/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.4": {
+    "integrity": "sha512-yhJ3gxl9fpiAINIE+/EoBFeYQwZXGf5a+v7D2JN98Ldns0ToX47FOl45qWMQA6qwcBccUoPKebfWTUCgLOzNXA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.4.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.4/clang-format.js": "6cc8a646df51a59a69235403ffc75c5742885d12b8a1b2bc8364ab3c10584df3",
+      "public/wasm/18.1.4/clang-format.wasm": "af17752d06e9af77e9640a232e07638080f6c3c7ecb01bfdbe0b7f069e8a9069",
+      "public/wasm/18.1.4/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.5": {
+    "integrity": "sha512-6xYZPtjB9IEvQRMUNHsFulqWsvbaodmMDEZT4pncnE3v5oBJwRNw8sARfHkmJIPU707hZ2llwlU+1TseLMA2TA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.5.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.5/clang-format.js": "4fe2744d1f88ed92b470b32080b3f9aef23ecab5fa4d4ae05ceaa6b8b54f5535",
+      "public/wasm/18.1.5/clang-format.wasm": "e79ec5eba93753a2038e94e9ffdaf8f8013df2b41ccf54c408bdb9ba106c535a",
+      "public/wasm/18.1.5/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.6": {
+    "integrity": "sha512-HU1p38BXbmG0tciMMKsj63Yv7K1PDTuXKRn/uANUtNULvlNMdtx5XXRGpfVBCSOOyMt0JobMI7eu/sjSmiflSw==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.6.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.6/clang-format.js": "4fe2744d1f88ed92b470b32080b3f9aef23ecab5fa4d4ae05ceaa6b8b54f5535",
+      "public/wasm/18.1.6/clang-format.wasm": "60c94f535b871993a6033a1333bf09043abd2b5263dc1a7eb3ca32cef987e961",
+      "public/wasm/18.1.6/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "18.1.7": {
+    "integrity": "sha512-4xO0Va/UjGHZx5zkkdupDth1U66HQmBzo/ZAl6NpNgkqQ1bPBQyxlGpW83UJyuxvoc24OPS3o+QHycFr1US7zA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.7.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/18.1.7/clang-format.js": "4fe2744d1f88ed92b470b32080b3f9aef23ecab5fa4d4ae05ceaa6b8b54f5535",
+      "public/wasm/18.1.7/clang-format.wasm": "14ebf52ed6b3ebf6d3477698eaf0383fe4513830b4353b5bc6eb9216dd8cec84",
+      "public/wasm/18.1.7/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
   "18.1.8": {
     "integrity": "sha512-JWX9ILldydxP0/Z6ksCiyWbpN9mB7X1Kj8ESVGkZ3KA5aV363EEzTctHb/Y/FHXAsNIdWO7dp73OMNM0uCUPBg==",
     "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-18.1.8.tgz",
@@ -7,6 +157,156 @@
       "public/wasm/18.1.8/clang-format.js": "d5b7cf50c863a0f44ad09682a52bebb32678cf668fa25c0fb27a5cebb7d2892a",
       "public/wasm/18.1.8/clang-format.wasm": "a0c5941e16f64bdb8a7464bf0249b3ca44ffc0a9e2cf8944c297f4a4616f4463",
       "public/wasm/18.1.8/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.0": {
+    "integrity": "sha512-GMdOYEyF+0Od69vlcl5I8MkY7b9wZqX8kbPL2fOO/592g50JA+OhhsZNeBlpuicM6snG9AWVb2LlTXTXGkjEHg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.0.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.0/clang-format.js": "d2839f6f3fe93c821415fdd415f5abffab914c45f1b1c65621e31ff94e6c0787",
+      "public/wasm/19.1.0/clang-format.wasm": "c0ad5bbbbb227cb451fa0110ec2aa7efc00dfce146c310b2a023e168c68af4fa",
+      "public/wasm/19.1.0/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.1": {
+    "integrity": "sha512-BuL2GnYzb3OocY2kWFTa/8z7VN2e/j0FoeucEsZyULNKdGEB1lrIbvgtv4uJWs9OGDzmAg/seMC+rHvK41NKOg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.1.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.1/clang-format.js": "d2839f6f3fe93c821415fdd415f5abffab914c45f1b1c65621e31ff94e6c0787",
+      "public/wasm/19.1.1/clang-format.wasm": "6f4765c883bac595e08634d87b24a630b344dcd661d2e5b3dec0515b6177ac91",
+      "public/wasm/19.1.1/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.2": {
+    "integrity": "sha512-Zv8nrN0WpaTP4qyxHwESVBWbJZtzoScfGdeH0FBKM2RUU3seeBMSL5Jp97DbgMUwwBXqwXQp5evxZmiZ+BiaAQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.2.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.2/clang-format.js": "d2839f6f3fe93c821415fdd415f5abffab914c45f1b1c65621e31ff94e6c0787",
+      "public/wasm/19.1.2/clang-format.wasm": "f1129715d593474843ae1e5ec1f2986c2ca92b7e99a011336061cb8d144cb30b",
+      "public/wasm/19.1.2/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.3": {
+    "integrity": "sha512-E8yh9TnzIZu109TlXvb16aEDgucl675cW0jM+tuzPR+6E+F1n2DBxA+9s+QB+X4+RQcvI9W/BJ6MaeS6FBcL+g==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.3.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.3/clang-format.js": "d2839f6f3fe93c821415fdd415f5abffab914c45f1b1c65621e31ff94e6c0787",
+      "public/wasm/19.1.3/clang-format.wasm": "af1adc6c43ae4399c3962062ce359584608121f9597ee6758c658b60303d8489",
+      "public/wasm/19.1.3/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.4": {
+    "integrity": "sha512-1/H8AOkoc7Etgml9AeH6LH63xIXkyJyw+nloou1r6j96MmYT5pA/G4RebEnRzllYJXOvjqNy+cVqDC1lvvWR8w==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.4.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.4/clang-format.js": "e8b88518526b7791b38a69e49cf80881f5cf2b5f8ad37a89339419dd3737019c",
+      "public/wasm/19.1.4/clang-format.wasm": "b6ce65dd5a03fe10ed313a0d85abba358bfd193cf1cdcf7177d6647aeae5e221",
+      "public/wasm/19.1.4/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.5": {
+    "integrity": "sha512-ERZO/vHGLfAu78eRaswF0sTvTNuTMnQi18vyay7wbeMBR+vv+4h4GJ6q2aF2ET8Bpbfc4ClG7f0V0u+qlPWoMA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.5.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.5/clang-format.js": "e8b88518526b7791b38a69e49cf80881f5cf2b5f8ad37a89339419dd3737019c",
+      "public/wasm/19.1.5/clang-format.wasm": "f0cae9e47db3e7b51325b2a47cc62b204df25114cd0442faec246650bcf26d4d",
+      "public/wasm/19.1.5/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.6": {
+    "integrity": "sha512-EJ2adunZsBwbs8M1vIufrvLLXV7VyHI2CrIe66ApKSn6uEv5bL8TwiY+0u4M812QkhzoqNeA/Y1RoUSi+AEtrg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.6.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.6/clang-format.js": "e8b88518526b7791b38a69e49cf80881f5cf2b5f8ad37a89339419dd3737019c",
+      "public/wasm/19.1.6/clang-format.wasm": "3e26c56b3ca42f4f98d3141da22fb75f9089fcc37d10ae5ec7a51000b9568849",
+      "public/wasm/19.1.6/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "19.1.7": {
+    "integrity": "sha512-MF5MDlffHoB3YYRVabCuy1rhOx8ReKey3BoqFxqVYgHZUeXO+KCC1tfhXtAL+4iYD+EmvUU5ZP3R+QmG57tVbg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-19.1.7.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/19.1.7/clang-format.js": "e8b88518526b7791b38a69e49cf80881f5cf2b5f8ad37a89339419dd3737019c",
+      "public/wasm/19.1.7/clang-format.wasm": "3a6e831f6335c8c487c994df9ab37859d15a12312b1e05a5eaeca34f0167e587",
+      "public/wasm/19.1.7/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.0": {
+    "integrity": "sha512-XZ2vdgyjcR9KV/5tv9SS56s81KXFEhk0ypme4pqiQuRHWug1mcsRU/Jv0SPj611+qkineLc9rydbEhM89+Nj+A==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.0.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.0/clang-format.js": "e8b88518526b7791b38a69e49cf80881f5cf2b5f8ad37a89339419dd3737019c",
+      "public/wasm/20.1.0/clang-format.wasm": "efb4c75e6f1ec29a8fbc655b33ad5549e775e6a4cddfcdfe9df109607c6fd9bc",
+      "public/wasm/20.1.0/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.1": {
+    "integrity": "sha512-oZTZsnfLhvN7K02XH9rag5WEszSNT3tgV6tiIp70I/EMbO50Q3oXogwtwQWrSlw2z+rVJh5AoxlfP/wJ5NPJOg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.1.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.1/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/20.1.1/clang-format.wasm": "71326cbfa0b723be4ab236e50cdd8267734e31f190436a710d9751240dcfc60a",
+      "public/wasm/20.1.1/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.2": {
+    "integrity": "sha512-6a5qZnXtyVZ/J4vnYIlBXtIJdG8l/QTcsOlJYrdOleZ2w4+fahKZkfH3qBlHnsmXHayfbSI3uqxdY8PZ+yP/TQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.2.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.2/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/20.1.2/clang-format.wasm": "44a1d0545028a1277e6409ed556bd69b97a104f60a9aa2c5605954c3dfe52af4",
+      "public/wasm/20.1.2/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.3": {
+    "integrity": "sha512-WD8kMb73LUV30NNgLQFSQDD6dQXjShtmTYUMAJ04Ogl3tHWfaSKccPnnQUN/SQmLzSeQ7LhvRHFe23u6PfsKbg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.3.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.3/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/20.1.3/clang-format.wasm": "91108a2b3692590c00c386ea402e25eeca561e143ceba85780649e536bdf0933",
+      "public/wasm/20.1.3/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.4": {
+    "integrity": "sha512-EyiHvXQ3+In3Revou5v+SoSWNvBiwhnUf9Mt77gRBwYjBZiDMQ+sflk9yicdSXueuC+luhzPMKKSDddZlBZEMA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.4.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.4/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/20.1.4/clang-format.wasm": "644e5f75425e6dfa4a9964280927486de1056af7f22ec63157f47fa20ea5bb3b",
+      "public/wasm/20.1.4/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.5": {
+    "integrity": "sha512-Um78L+08qJ0vxRfLETJnleZrv1mS34FUxPwwLnc81w0Gi2NVzpJSH7ORQ2k7TtOkVs7EZqp50CKJfLFHhmecwQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.5.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.5/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/20.1.5/clang-format.wasm": "bd601f9c20dfbdb70f8d2857fc263d815720b217e773937bda95bfcfee52f277",
+      "public/wasm/20.1.5/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "20.1.6": {
+    "integrity": "sha512-wSB9Tc16TK66eUCo5fS64t2Z5rIT22Ie3ui8iSGcMYWpO8KcRW7H52kzEHoyNSBfrZCNubmNB2dNUS7Id4KOwA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-20.1.6.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/20.1.6/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/20.1.6/clang-format.wasm": "1f5b5a338a16fa2606d4d3e6f61538ab5d695c0a129faab810715c082b6b9709",
+      "public/wasm/20.1.6/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
     }
   },
   "20.1.7": {
@@ -19,6 +319,86 @@
       "public/wasm/20.1.7/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
     }
   },
+  "21.1.0": {
+    "integrity": "sha512-nCRBWI8cFoptBivky4pTggOSkbx2ekGfDhOVKGRr79jNj1u23Y68MJpDCdb5UjsSsHMabprgHsZQC9ZI6Gh+gw==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.0.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.0/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.0/clang-format.wasm": "b29313af45190acaf693f6b5215145307ff6b1aa11c8834c816353ca6f040643",
+      "public/wasm/21.1.0/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.1": {
+    "integrity": "sha512-oEexRdVzoiT4cdTnNYL0m+n3drkFu6/W3CNctsNKL6TteG1WbhrcyFNZnOhSmrhRTml/ip6l6L0v5i8LnvkH8Q==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.1.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.1/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.1/clang-format.wasm": "a9207ccb0ad2408603ea7ba2e05ca6e13197195ae2c7aab496b31acae4287c08",
+      "public/wasm/21.1.1/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.2": {
+    "integrity": "sha512-ZwL3IPnPT2uJLixgAkqgbw+GYirn5R/yOdgNmowqWZ0M1DzzAzwZjQvhm5KzR96OGifz/ru4sj/sQurLogXMGQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.2.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.2/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.2/clang-format.wasm": "d555b73d9969a7497d362f6ba2a68bdf928b96579092e04fce252a545dc8c4b7",
+      "public/wasm/21.1.2/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.3": {
+    "integrity": "sha512-SlnxlTKsZpsS7DXr+gnLuiSjVYxA0/N15o6qqC6hkUaNURfwhVROChtor8nOZm5v3maxu9eR+gTee/l9kI722Q==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.3.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.3/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.3/clang-format.wasm": "e720557f1f600526505917c856291aaa6e01c17cbb6d0d06246e1d4c84d11059",
+      "public/wasm/21.1.3/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.4": {
+    "integrity": "sha512-n5E0HTnC/pnAVyxm9UzRb3W+xNySpiBOCCXeZMABNXggxmS3lRQM1xxAu7qnPUeQvorj+IViquMwHb8Q31KhDQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.4.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.4/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.4/clang-format.wasm": "4d8a2668bba11a5d56616b26e2090626c5491124032825387393b693943dce90",
+      "public/wasm/21.1.4/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.5": {
+    "integrity": "sha512-ZcRcjT1fUFTMP8hXzLzNUwvGdr4DpbI2TeHYMTcQ+6CzkhGLryTmpVR6ghSkJY/ga0rZRessP5HRdv24KZlt4Q==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.5.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.5/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.5/clang-format.wasm": "1a16cf5fbb9e1cb551040bb74f887961472b2f4317b67db31ecbe6afbf32cfac",
+      "public/wasm/21.1.5/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.6": {
+    "integrity": "sha512-vyYxRkOFOsNJGrI1u2TbWBPc2hzUExYwkEx1N/x+lNUlweOmW8fb9VANQMlPjYBHa8oIsPxxyTZJDZj6f7lw8Q==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.6.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.6/clang-format.js": "e79c7e8dd798aa775e2507b656d24faacfb7e231aee49793dd443c6521e173d8",
+      "public/wasm/21.1.6/clang-format.wasm": "30a9cef49e02bb1bb5d0f3a02646f1bdfc0b2360f70da18bb8f903bd8afacc57",
+      "public/wasm/21.1.6/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "21.1.7": {
+    "integrity": "sha512-00pPQzGvY0MfjfUMnoNtod0fRviz9WEU7A3pUb9XSaXek11f2iiamJvzpESxWyvRohxqxwLA8wNJ+Bakd3KCkg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.7.tgz",
+    "api": "legacy",
+    "files": {
+      "public/wasm/21.1.7/clang-format.js": "14d01f99f0e8d1974ae24b1d6b7e7b8494016ecfa6b382d823c5f4926eac4a46",
+      "public/wasm/21.1.7/clang-format.wasm": "95821291280ac14d3c7a2f38a02f281d4b3075aa3a0c598d75778cfbb290736c",
+      "public/wasm/21.1.7/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
   "21.1.8": {
     "integrity": "sha512-RA+6pPO4LEQpn3nrIUGzbC+Wzw88nMmfBINWccSSmng2M7UZPdIbk7mfMJZqjxIDhMEXJZb3Z+OufDm746LtFw==",
     "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-21.1.8.tgz",
@@ -27,6 +407,138 @@
       "public/wasm/21.1.8/clang-format.js": "14d01f99f0e8d1974ae24b1d6b7e7b8494016ecfa6b382d823c5f4926eac4a46",
       "public/wasm/21.1.8/clang-format.wasm": "51c2601bf63984940fca6edb347a85b3c40622a0d414bac55aa8aa05b40ea788",
       "public/wasm/21.1.8/entry.js": "df46d70acaaf83b386fc87c15be22eb62cc6fac6cd29a7dad42f795bb8da6d7f"
+    }
+  },
+  "22.1.0": {
+    "integrity": "sha512-l2p82yc/XzYPmZ/KM8o15s7s+mQtDBaqHmTQ3aiZLeDk9wj/9rT9fF41cfO/339xTw3LipzpZ5vjrGyEgwRTnA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.0.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.0/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.0/clang-format.wasm": "0d5ccf288e5e657fe1162f269e6ebe4de470a5a2d678973471d3fa15a5224a11",
+      "public/wasm/22.1.0/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.0/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.0/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.1": {
+    "integrity": "sha512-W2Svu8OZBO5+OeUCczcAwJS132bKRmeQy87d4IigBEQVDemvBzxcx4axFf6bbGA6Pkli0A107EiUr3Vql4SrzQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.1.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.1/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.1/clang-format.wasm": "59bb47d156ba9013d6dbd7ae205d11ef7f467df5af2be4b960c03c271df31474",
+      "public/wasm/22.1.1/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.1/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.1/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.2": {
+    "integrity": "sha512-YyqhaT9PekMQB2yBCF5qJ934nayXbnaZsEuyHCCFw7dKd1kFHB9VxVjFaj2xvu9oM9m/a9x6P2NV1HCTY0gUiA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.2.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.2/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.2/clang-format.wasm": "a2449aa57ba1ab89ee2f42aebc848df9b0338f21b3ed3024d9ffe4bdc4bea953",
+      "public/wasm/22.1.2/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.2/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.2/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.3": {
+    "integrity": "sha512-6tW2+MyhzGn2y+Qz6ac0FQOjriwM2Z/SJt7I07oZkRcurbx2z6Wa3Iu+gSMScMeo/JJe5uhiaCJRWT+hXdYTyQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.3.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.3/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.3/clang-format.wasm": "49cbaeeabfcf41b1fbe94b244a2e74ccca60c493df9a54bb60942474069f06cb",
+      "public/wasm/22.1.3/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.3/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.3/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.4": {
+    "integrity": "sha512-rnH8ZSJdXTZOJobufnekznppGpzY7pdygLQz7h/lXixOli/D1moFqtYGBYAAGXIdfd7VrEiBCAnn2eWMigAc4A==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.4.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.4/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.4/clang-format.wasm": "55dcc85a40de23be8e90d014852ed0ccc53582f4525c0b356991c9617eabb572",
+      "public/wasm/22.1.4/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.4/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.4/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.5": {
+    "integrity": "sha512-dNgXTY91V+Q4XUR3DpJV9FyK2k6l/zJoKzYqOj71oMM0E1GJ0vPtK06UZv04sK6e7ztbRVg9mgzn/uh5So3cZQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.5.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.5/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.5/clang-format.wasm": "29ae83cdaf0bd7ff19a620512c5374cbfedc45fa0a111710a8bfcf2c1b17b650",
+      "public/wasm/22.1.5/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.5/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.5/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.6": {
+    "integrity": "sha512-IZjt4xcksl6hl59JfGy7YVH1uZAj8otXStAyad4nK+LiRRRdGQi3ZEph4e+fZ0W65lvMlJb8+EGtRFJJaMG7WQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.6.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.6/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.6/clang-format.wasm": "426342e51b7198582f03e6b0bc11422b4334decc53162e57528cbf0563e974bf",
+      "public/wasm/22.1.6/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.6/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.6/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.7": {
+    "integrity": "sha512-nq3v7UcZnANCXmrxInOfQxySoSfbalcrMiG9VHxa6OMW5AR1ZHggm9jWRlCJOpLrmt5R1l+IxyHzRU7+NeU6QA==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.7.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.7/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.7/clang-format.wasm": "43e13a94e1c70fdfcbba35dc01c81c39b680a50b3040ad0b16dc9b4a66b6a5f1",
+      "public/wasm/22.1.7/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.7/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.7/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "22.1.8": {
+    "integrity": "sha512-MuDkCzEUmBCuC3MQcZGrJ8lI4MnDpwCuN63EMRpr/c0urCEq1S4E8qVddMjRf+Lrcl2gEZH+kKTWpXC2c7x+Zg==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-22.1.8.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/22.1.8/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/22.1.8/clang-format.wasm": "229d4a31223e124af1d61f259963fdd8265f3209e02c698be943d186c8c15706",
+      "public/wasm/22.1.8/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/22.1.8/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/22.1.8/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "23.1.0": {
+    "integrity": "sha512-Mjb0KPghsr+HH+GL42EvlEB1OcNZLUqlS5J/97kMuIhu703OYcrFm+r1kMxXuaufhvQgAHtxCouxNZXFqpIynQ==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-23.1.0.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/23.1.0/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/23.1.0/clang-format.wasm": "2f6f296db6f8c9d1075c13567d5f53723b935870d9becc4f77cb496e9d8fd28f",
+      "public/wasm/23.1.0/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/23.1.0/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/23.1.0/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
+    }
+  },
+  "23.1.1": {
+    "integrity": "sha512-SPA6H8DI/MOJAr0CfpbFBoqI5sfrimu3SlovuAAy36mq9vs9TOkS48lpUsNaPLeZzeQVEGe+pfbJHXKxiroP/g==",
+    "tarball": "https://registry.npmjs.org/@wasm-fmt/clang-format/-/clang-format-23.1.1.tgz",
+    "api": "web",
+    "files": {
+      "public/wasm/23.1.1/clang-format.js": "cc4e7aa351ad081f4bb8e0fb5a34d53b309206c517ec213a9197b257ba3a2b16",
+      "public/wasm/23.1.1/clang-format.wasm": "49d98626475dd2e22b9a3245b4bc0d7b1310db7f6c30176a89cc58d1e89b75bc",
+      "public/wasm/23.1.1/clang-format-binding.js": "6c4a1c5a07d95746c9712cc022b60eb2b02bc49d656c027df959a59c76a37872",
+      "public/wasm/23.1.1/clang-format-web.js": "c5b541fe0a8fc8f43f5c72efbb50bfd94de61d80db0e8983b3676ec31bf161b6",
+      "public/wasm/23.1.1/entry.js": "e04ddf2f00c2151bf080317356293d9f8f201465c65a2da40d41fc32953d1132"
     }
   }
 }

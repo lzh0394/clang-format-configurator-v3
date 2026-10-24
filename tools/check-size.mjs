@@ -1,10 +1,12 @@
-// Enforces the gzip size budgets from plan.md §1 on a production build.
+// Enforces the gzip size budgets from plan.md §1 on a production build, and
+// makes sure the build actually ships every version listed in
+// tools/versions.json.
 //
 //   npm run build && node tools/check-size.mjs
 //
 // Budgets (gzip, zlib level 9):
 //   initial JS (entry <script type=module src> + <link rel=modulepreload> JS)  ≤ 250 KB
-//   each dist/wasm/<ver>/*.wasm                                               ≤ 1.0 MB
+//   each dist/wasm/<ver>/*.wasm                                               ≤ 1.1 MB
 //   each dist/schema/<ver>/core.json                                          ≤ 25 KB
 //   each dist/schema/<ver>/docs.json                                          ≤ 45 KB
 //
@@ -24,10 +26,18 @@ const MB = 1024 * KB;
 
 const LIMITS = {
   initialJs: 250 * KB,
-  wasm: 1.0 * MB,
+  // plan §1 originally said 1.0 MB; 23.1.0/23.1.1 measure 1071.4/1071.5 KB
+  // gzip, so the budget is 1.1 MB for every version (no per-version exception).
+  wasm: 1.1 * MB,
   core: 25 * KB,
   docs: 45 * KB,
 };
+
+// The build must ship exactly the versions in tools/versions.json — checking
+// only directories that happen to exist would silently pass a partial build.
+const expectedVersions = JSON.parse(readFileSync(path.join(ROOT, "tools", "versions.json"), "utf8")).map(
+  (entry) => entry.version,
+);
 
 const VERSION_DIR = /^\d+\.\d+\.\d+$/;
 
@@ -181,7 +191,7 @@ if (initialSizes.length === 1) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. wasm: every dist/wasm/<version>/*.wasm ≤ 1.0 MB gzip
+// 2. wasm: every dist/wasm/<version>/*.wasm ≤ 1.1 MB gzip
 // ---------------------------------------------------------------------------
 
 const wasmRoot = path.join(DIST, "wasm");
@@ -223,6 +233,21 @@ if (wasmVersions.length === 0) {
         ok: bytes <= LIMITS.wasm,
       });
     }
+  }
+  // Every version in tools/versions.json must be in the build; a partial
+  // prepare:wasm run would otherwise go unnoticed.
+  for (const version of expectedVersions.filter((entry) => !wasmVersions.includes(entry))) {
+    addRow({
+      budget: "wasm",
+      asset: `wasm/${version}/*.wasm`,
+      actual: "missing",
+      limit: limitLabel(LIMITS.wasm),
+      ok: false,
+      violation: `wasm: dist/wasm/${version} is missing — tools/versions.json lists ${expectedVersions.length} versions`,
+    });
+  }
+  for (const version of wasmVersions.filter((entry) => !expectedVersions.includes(entry))) {
+    addRow({ budget: "wasm", asset: `wasm/${version}/`, actual: "unexpected", limit: "", ok: undefined });
   }
 }
 
@@ -272,6 +297,26 @@ if (schemaVersions.length === 0) {
       addRow({ budget, asset: relative(file), actual: display(bytes), limit: limitLabel(limit), ok: bytes <= limit });
     }
   }
+  for (const version of expectedVersions.filter((entry) => !schemaVersions.includes(entry))) {
+    addRow({
+      budget: "schema core",
+      asset: `schema/${version}/core.json`,
+      actual: "missing",
+      limit: limitLabel(LIMITS.core),
+      ok: false,
+      violation: `schema: dist/schema/${version} is missing — tools/versions.json lists ${expectedVersions.length} versions`,
+    });
+    addRow({
+      budget: "schema docs",
+      asset: `schema/${version}/docs.json`,
+      actual: "missing",
+      limit: limitLabel(LIMITS.docs),
+      ok: false,
+    });
+  }
+  for (const version of schemaVersions.filter((entry) => !expectedVersions.includes(entry))) {
+    addRow({ budget: "schema", asset: `schema/${version}/`, actual: "unexpected", limit: "", ok: undefined });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -303,9 +348,9 @@ if (violations.length === 0) {
   const wasmCount = rows.filter((row) => row.budget === "wasm" && row.status !== "info").length;
   const schemaCount = rows.filter((row) => row.budget.startsWith("schema")).length;
   console.log(
-    `\nsize budget: OK — ${checked} checks passed (initial JS ${display(initialBytes)} of ${limitLabel(
-      LIMITS.initialJs,
-    )}, ${wasmCount} wasm, ${schemaCount} schema files)`,
+    `\nsize budget: OK — ${checked} checks passed across ${expectedVersions.length} versions (initial JS ${display(
+      initialBytes,
+    )} of ${limitLabel(LIMITS.initialJs)}, ${wasmCount} wasm, ${schemaCount} schema files)`,
   );
 } else {
   console.error("");

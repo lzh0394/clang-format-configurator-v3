@@ -3,6 +3,10 @@
 //   node tools/prepare-assets.mjs             # everything, skipping cached work
 //   node tools/prepare-assets.mjs --refresh-rst
 //   node tools/prepare-assets.mjs --only=21.1.8
+//   node tools/prepare-assets.mjs --check     # nightly drift gate (see gen-schema)
+//
+// Native-dump versions (tools/versions.json "dump": "native") additionally need
+// a native clang-format binary in .cache/cf-native/<ver> or .cache/llvm/<ver>.
 
 import { spawnSync } from "node:child_process";
 import path from "node:path";

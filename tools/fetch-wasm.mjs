@@ -9,10 +9,13 @@
 // The wasm binaries are deliberately NOT committed; the lock file keeps the
 // download reproducible.
 //
-// Version notes (probed 2026-10-22):
-//   16.x/17.x  no dump_config export  -> cannot generate a schema from wasm
-//   18-21      single glue module, default init + named format/dump_config
-//   22+        split package: the web entry wraps createModule + binding
+// Version notes (probed 2026-10-24):
+//   16.x/17.x     no dump_config export -> schema defaults come from native
+//   18.1.0-7      no dump_config export either (only 18.1.8+ has it)
+//   18.1.8-21.x   single glue module, default init + named format/dump_config
+//   22+/23.x      split package: the web entry wraps createModule + binding;
+//                 dump_config works but emits shifted values (plan §3.1), so
+//                 gen-schema gets those defaults from a native binary too
 
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
