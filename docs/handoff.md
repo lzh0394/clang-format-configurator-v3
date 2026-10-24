@@ -242,9 +242,10 @@ v3 的 M0–M4 已全部交付；没有阻塞项。留作以后（按需，不�
 
 | 项 | 结果 |
 |---|---|
-| ci（M4 提交 `838d6e1`） | ✅ [40061594010](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40061594010)：setup-python + native 21.1.8 + `golden:gen --check` + typecheck/**298 单测** + build + **157 项** `check:size` + **64 条** e2e（chromium），1m20s 全绿（52 版本 wasm 缓存冷启动也只需下载 118 MB） |
-| deploy（M4 线上） | ✅ [40061594017](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40061594017)：build（含 64 条 e2e，1m42s）→ deploy（11s）→ smoke 对线上 URL 再跑整套 64 条（1m14s），全绿 |
-| 线上复跑（本地 Edge，全套） | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test` → **63 passed + 1 flaky**（perf 的冷版本切换在公网抖动下超时、retry 通过；与 M3 记录同类） |
+| ci（M4 代码最终提交 `1b0cdcf`） | ✅ [40062550829](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40062550829)：setup-python + native 21.1.8 + `golden:gen --check` + typecheck/**298 单测** + build + **157 项** `check:size` + **64 条** e2e（chromium，perf 独立 project 串行），1m28s 全绿 |
+| deploy（M4 最终线上） | ✅ [40062550843](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40062550843)：build（含 64 条 e2e，1m07s）→ deploy（18s）→ smoke 对线上 URL 再跑整套 64 条（1m07s），全绿 |
+| nightly（手动触发验证） | ✅ [40062227600](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40062227600)：`prepare:wasm` + `schema:check --allow-missing-native` 16s 通过（干净 checkout，无 native 二进制，RST 走网络），无 drift issue |
+| 线上复跑（本地 Edge，全套） | ✅ `PW_BASE_URL=... npx playwright test` → **63 passed + 1 flaky**（perf 冷切换在公网抖动、retry 通过；与 M3 记录同类）。另一次并行全量跑中 m4-a11y 的"方向键跨虚拟列表"因公网资源加载抖动失败一次，单跑通过——CI 的 deploy smoke 对线上整套 64 条全绿 |
 | 线上资源（M4） | ✅ 首页、`manifest.json`（`application/json`）、`icons/*.png`（`image/png`，192=7915 B）、`sw.js`（**v2**，8714 B）、`schema/index.json`（**52 版本**，default 21.1.8）、`wasm/16.0.6/entry.js`、`wasm/23.1.1/clang-format.wasm`（`application/wasm`）均 200；线上 manifest/安装横幅/SW 预缓存/分享链接/字号/52 版本 e2e 全部通过 |
 
 ### 历史（2026-10-24，M3 完成后）
