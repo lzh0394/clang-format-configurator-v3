@@ -244,10 +244,10 @@ v3 的 M0–M4 已全部交付；没有阻塞项。留作以后（按需，不�
 
 | 项 | 结果 |
 |---|---|
-| ci（M4 代码最终提交 `b5997aa`） | ✅ [40066989392](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40066989392)：setup-python + native 21.1.8 + `golden:gen --check` + typecheck/**298 单测** + build + **157 项** `check:size` + **65 条** e2e（chromium，perf 独立 project 串行），1m12s 全绿 |
-| deploy（M4 最终线上） | ✅ [40066989333](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40066989333)：build（含 65 条 e2e，1m44s）→ deploy（17s）→ smoke 对线上 URL 再跑整套 65 条（1m19s），全绿 |
+| ci（M4 代码最终提交 `114cc12`） | ✅ [40067786769](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40067786769)：setup-python + native 21.1.8 + `golden:gen --check` + typecheck/**298 单测** + build + **157 项** `check:size` + **66 条** e2e（chromium，perf 独立 project 串行），1m29s 全绿 |
+| deploy（M4 最终线上） | ✅ [40067786754](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40067786754)：build（含 66 条 e2e，1m22s）→ deploy（13s）→ smoke 对线上 URL 再跑整套 66 条（1m19s），全绿 |
 | nightly（手动触发验证） | ✅ [40062227600](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40062227600)：`prepare:wasm` + `schema:check --allow-missing-native` 16s 通过（干净 checkout，无 native 二进制，RST 走网络），无 drift issue |
-| 线上复跑（本地 Edge，全套） | ✅ `PW_BASE_URL=... npx playwright test` → **63 passed + 1 flaky**（perf 冷切换在公网抖动、retry 通过；与 M3 记录同类）。另一次并行全量跑中 m4-a11y 的"方向键跨虚拟列表"因公网资源加载抖动失败一次，单跑通过——CI 的 deploy smoke 对线上整套 65 条全绿；布局修复后单独对线上跑 "desktop columns…" → 1 passed |
+| 线上复跑（本地 Edge，全套） | ✅ `PW_BASE_URL=... npx playwright test` → **63 passed + 1 flaky**（perf 冷切换在公网抖动、retry 通过；与 M3 记录同类）。另一次并行全量跑中 m4-a11y 的"方向键跨虚拟列表"因公网资源加载抖动失败一次，单跑通过——CI 的 deploy smoke 对线上整套 66 条全绿；布局修复后单独对线上跑 "desktop columns…" 与 "narrow desktop…" 均 1 passed |
 | 线上资源（M4） | ✅ 首页、`manifest.json`（`application/json`）、`icons/*.png`（`image/png`，192=7915 B）、`sw.js`（**v2**，8714 B）、`schema/index.json`（**52 版本**，default 21.1.8）、`wasm/16.0.6/entry.js`、`wasm/23.1.1/clang-format.wasm`（`application/wasm`）均 200；线上 manifest/安装横幅/SW 预缓存/分享链接/字号/52 版本 e2e 全部通过 |
 
 ### 历史（2026-10-24，M3 完成后）
