@@ -1,0 +1,363 @@
+import { expect, test, type Browser, type Page } from "@playwright/test";
+
+import { shareUrlFor, type ShareState } from "../../src/lib/share-link";
+import {
+  APP_READY_TIMEOUT,
+  expectEditorText,
+  expectEditorTextContains,
+  openApp,
+  openSettings,
+  readEditorText,
+  setEditorText,
+} from "./helpers";
+
+// M4 acceptance (plan §9 optional row, docs/handoff.md §9):
+//   - share links: #s=... encodes the session, hash > localStorage, invalid
+//     hashes fall back to storage, the fragment is stripped after hydrating
+//   - interface font-size scaling: rem-based multiplier, independent from the
+//     editor font, persisted, virtual list still lays out correctly
+//   - all published wasm versions are selectable and actually format
+
+const STORAGE_KEY = "clang-format-configurator:v3";
+const CONFIG_YAML = "config-yaml";
+
+// ---------------------------------------------------------------------------
+// Page helpers
+// ---------------------------------------------------------------------------
+
+async function applyConfig(page: Page, yaml: string): Promise<void> {
+  await page.getByTestId("open-config").click();
+  await expect(page.getByTestId("config-drawer")).toBeVisible();
+  await setEditorText(page, CONFIG_YAML, yaml);
+  await expect(page.getByTestId("config-valid")).toBeVisible();
+  await page.getByTestId("config-apply").click();
+  await expect(page.getByTestId("config-drawer")).toBeHidden();
+}
+
+async function readStoredSession(page: Page): Promise<Record<string, unknown> | null> {
+  return page.evaluate((key) => {
+    const raw = localStorage.getItem(key);
+    if (raw === null) return null;
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  }, STORAGE_KEY);
+}
+
+async function expectStoredField(page: Page, key: string, value: unknown): Promise<void> {
+  await expect
+    .poll(async () => (await readStoredSession(page))?.[key], { timeout: 5_000 })
+    .toEqual(value);
+}
+
+/** Capture navigator.clipboard.writeText (headless Edge has no real clipboard). */
+async function stubClipboard(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const target = window as unknown as { __copiedShareLink?: string };
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          target.__copiedShareLink = text;
+        },
+      },
+    });
+  });
+}
+
+async function copiedShareLink(page: Page): Promise<string> {
+  const link = await page.evaluate(
+    () => (window as unknown as { __copiedShareLink?: string }).__copiedShareLink,
+  );
+  expect(link).toBeTruthy();
+  expect(link).toContain("#s=");
+  return link as string;
+}
+
+/** Open a fresh browser context whose localStorage already holds `session`. */
+async function openWithStoredSession(
+  browser: Browser,
+  origin: string,
+  session: Record<string, unknown>,
+): Promise<{ page: Page; close: () => Promise<void> }> {
+  const context = await browser.newContext({
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin,
+          localStorage: [{ name: STORAGE_KEY, value: JSON.stringify({ stateVersion: 1, ...session }) }],
+        },
+      ],
+    },
+  });
+  const page = await context.newPage();
+  return { page, close: () => context.close() };
+}
+
+// ---------------------------------------------------------------------------
+// Share links
+// ---------------------------------------------------------------------------
+
+test("copies a share link that restores the whole session from the URL hash", async ({ page, context }) => {
+  await stubClipboard(page);
+  await openApp(page);
+
+  await applyConfig(page, "BasedOnStyle: Google\nIndentWidth: 6\n");
+  await expect(page.getByTestId("modified-count")).toContainText("1 modified");
+  await setEditorText(page, "source", "int shared_fn(){return 1;}\n");
+  await expectEditorTextContains(page, "output", "int shared_fn() { return 1; }");
+
+  await page.getByTestId("copy-link").click();
+  await expect(page.getByTestId("notice")).toContainText("Share link copied");
+  const link = await copiedShareLink(page);
+  await page.getByTestId("notice-close").click();
+
+  // A different tab with empty storage hydrates entirely from the fragment.
+  const other = await context.newPage();
+  await other.goto(link);
+  await expect(other.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+  await expect(other.getByLabel("Style")).toHaveValue("Google");
+  await expect(other.getByTestId("modified-count")).toContainText("1 modified");
+  await expect.poll(() => readEditorText(other, "source"), { timeout: 10_000 }).toBe("int shared_fn(){return 1;}\n");
+  await expectEditorTextContains(other, "output", "int shared_fn() { return 1; }");
+
+  const notice = other.getByTestId("notice");
+  await expect(notice).toContainText("Loaded a shared configuration");
+  await expect(notice).toContainText("source code included");
+  // The fragment is stripped after hydrating so reloads use localStorage.
+  expect(new URL(other.url()).hash).toBe("");
+  await other.close();
+});
+
+test("a share link wins over the saved localStorage session", async ({ page, browser }) => {
+  await openApp(page);
+  const origin = new URL("./", page.url()).origin;
+
+  const shared: ShareState = {
+    version: "21.1.8",
+    style: "Google",
+    modified: { IndentWidth: 3 },
+    code: "int from_share(){return 3;}\n",
+  };
+  const stored = {
+    version: "21.1.8",
+    style: "GNU",
+    modified: { IndentWidth: 9 },
+    code: "int from_storage(){return 9;}\n",
+    theme: "dark",
+    editorFontSize: 18,
+    uiFontScale: 1,
+  };
+  const { page: sharedPage, close } = await openWithStoredSession(browser, origin, stored);
+  try {
+    // A query parameter forces a real navigation; a hash-only change would not
+    // reload the app and therefore would not exercise the hash-first restore.
+    await sharedPage.goto(shareUrlFor("./?shared=1", shared, page.url()));
+    await expect(sharedPage.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+
+    await expect(sharedPage.getByLabel("Style")).toHaveValue("Google");
+    await expect(sharedPage.getByTestId("modified-count")).toContainText("1 modified");
+    await expect.poll(() => readEditorText(sharedPage, "source"), { timeout: 10_000 }).toBe(
+      "int from_share(){return 3;}\n",
+    );
+    await expectEditorTextContains(sharedPage, "output", "int from_share() { return 3; }");
+    // The stored session (GNU / from_storage) was not applied.
+    await expect(sharedPage.getByLabel("Style")).not.toHaveValue("GNU");
+    // Theme/editor font still come from storage: the hash only carries the
+    // configuration (plan §5 priority is about configuration state).
+    expect(await sharedPage.locator("html").getAttribute("data-theme")).toBe("dark");
+  } finally {
+    await close();
+  }
+});
+
+test("an invalid share hash falls back to the saved session", async ({ page, browser }) => {
+  await openApp(page);
+  const origin = new URL("./", page.url()).origin;
+  const stored = {
+    version: "21.1.8",
+    style: "Mozilla",
+    modified: { IndentWidth: 9 },
+    code: "int from_storage(){return 9;}\n",
+    theme: "light",
+    editorFontSize: 13,
+    uiFontScale: 1,
+  };
+  const { page: fallback, close } = await openWithStoredSession(browser, origin, stored);
+  try {
+    await fallback.goto(`${new URL("./", page.url()).href}#s=%%%not-a-valid-share-link%%%`);
+    await expect(fallback.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+
+    await expect(fallback.getByLabel("Style")).toHaveValue("Mozilla");
+    await expect.poll(() => readEditorText(fallback, "source"), { timeout: 10_000 }).toBe(
+      "int from_storage(){return 9;}\n",
+    );
+    await expect(fallback.getByTestId("notice")).toHaveCount(0);
+  } finally {
+    await close();
+  }
+});
+
+test("share payloads decode before first paint (no flash of stored state)", async ({ page, browser }) => {
+  // The hash state must already be in the first render (App decodes it in the
+  // useState initializer); a stored session with different content is present
+  // and must not win.
+  await openApp(page);
+  const origin = new URL("./", page.url()).origin;
+  const stored = {
+    version: "21.1.8",
+    style: "GNU",
+    modified: {},
+    code: "int from_storage(){return 9;}\n",
+    theme: "light",
+    editorFontSize: 13,
+    uiFontScale: 1,
+  };
+  const shared: ShareState = {
+    version: "21.1.8",
+    style: "Chromium",
+    modified: {},
+    code: "int first_paint(){return 0;}\n",
+  };
+  const { page: sharedPage, close } = await openWithStoredSession(browser, origin, stored);
+  try {
+    await sharedPage.goto(shareUrlFor("./", shared, page.url()));
+    await expect(sharedPage.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+    await expect
+      .poll(() => readEditorText(sharedPage, "source"), { timeout: 10_000 })
+      .toBe("int first_paint(){return 0;}\n");
+    await expect(sharedPage.getByLabel("Style")).toHaveValue("Chromium");
+  } finally {
+    await close();
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Interface font-size scaling (M4, docs/todo.md)
+// ---------------------------------------------------------------------------
+
+function rootFontSize(page: Page): Promise<number> {
+  return page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).fontSize));
+}
+
+test("interface size scales the UI (not the editor) and persists", async ({ page }) => {
+  await openApp(page);
+  expect(await rootFontSize(page)).toBe(16);
+  const editorFont = await page.getByTestId("source").evaluate((element) => getComputedStyle(element).fontSize);
+
+  await openSettings(page);
+  await page.getByTestId("ui-font-scale").selectOption("1.15");
+  await page.keyboard.press("Escape");
+
+  await expect.poll(() => rootFontSize(page)).toBeCloseTo(18.4, 1);
+  // The editor keeps its own --font-size-editor (plan §5 字号解耦).
+  expect(await page.getByTestId("source").evaluate((element) => getComputedStyle(element).fontSize)).toBe(editorFont);
+
+  // Text inside the UI really grew (settings toggle is 13px at 100%).
+  await openSettings(page);
+  const toggleFont = await page
+    .getByTestId("settings-toggle")
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+  expect(toggleFont).toBeGreaterThan(13);
+  await page.keyboard.press("Escape");
+
+  // Virtual list rows still lay out without overlapping after re-measuring.
+  // The row heights are measured asynchronously (ResizeObserver behind
+  // @tanstack/react-virtual), so poll instead of sampling once.
+  const overlapCount = async (): Promise<number> => {
+    const rows = page.locator('[data-testid^="option-"]');
+    const boxes: { top: number; bottom: number }[] = [];
+    const count = await rows.count();
+    for (let index = 0; index < Math.min(count, 12); index += 1) {
+      const box = await rows.nth(index).boundingBox();
+      if (box !== null) boxes.push({ top: box.y, bottom: box.y + box.height });
+    }
+    let overlaps = 0;
+    for (let index = 1; index < boxes.length; index += 1) {
+      if (boxes[index]!.top < boxes[index - 1]!.bottom - 1) overlaps += 1;
+    }
+    return overlaps;
+  };
+  await expect.poll(overlapCount, { timeout: 5_000, message: "scaled rows must not overlap" }).toBe(0);
+  expect(await page.locator('[data-testid^="option-"]').count()).toBeGreaterThan(5);
+
+  // Search + export still work at the larger size.
+  await page.getByTestId("options-search").fill("Indent");
+  await expect(page.getByTestId("options-count")).toContainText(/\//u);
+  await expect(page.getByTestId("options-count")).not.toContainText(/169 \/ 169|189 \/ 189/u);
+  await page.getByTestId("open-export").click();
+  await expect(page.getByTestId("config-dialog")).toBeVisible();
+  await page.getByTestId("dialog-close").click();
+
+  await expectStoredField(page, "uiFontScale", 1.15);
+  await page.reload();
+  await expect(page.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
+  await expect.poll(() => rootFontSize(page)).toBeCloseTo(18.4, 1);
+
+  // Back to the standard tier.
+  await openSettings(page);
+  await expect(page.getByTestId("ui-font-scale")).toHaveValue("1.15");
+  await page.getByTestId("ui-font-scale").selectOption("1");
+  await page.keyboard.press("Escape");
+  await expect.poll(() => rootFontSize(page)).toBe(16);
+});
+
+// ---------------------------------------------------------------------------
+// Language switching example snippets (M4, plan §9 "C#/proto 代码示例")
+// ---------------------------------------------------------------------------
+
+test("switching the filename follows with the matching sample snippet", async ({ page }) => {
+  await openApp(page);
+  await expect(page.getByTestId("language")).toHaveText("C/C++");
+
+  // A pristine sample is replaced by the sample for the new language.
+  await page.getByLabel("Filename").fill("Program.cs");
+  await expect(page.getByTestId("language")).toHaveText("C#");
+  await expect.poll(() => readEditorText(page, "source"), { timeout: 10_000 }).toContain("namespace Demo");
+  await expectEditorTextContains(page, "output", "namespace Demo {");
+
+  await page.getByLabel("Filename").fill("service.proto");
+  await expect(page.getByTestId("language")).toHaveText("Protobuf");
+  await expect.poll(() => readEditorText(page, "source"), { timeout: 10_000 }).toContain('syntax = "proto3";');
+  await expectEditorTextContains(page, "output", "message Widget");
+
+  // Typed code is never replaced by a later filename change.
+  await setEditorText(page, "source", "int keep_me(){return 1;}\n");
+  await page.getByLabel("Filename").fill("main.cc");
+  await expect(page.getByTestId("language")).toHaveText("C/C++");
+  await expect.poll(() => readEditorText(page, "source"), { timeout: 10_000 }).toBe("int keep_me(){return 1;}\n");
+});
+
+// ---------------------------------------------------------------------------
+// All published wasm versions are selectable and usable
+// ---------------------------------------------------------------------------
+
+test("ships every published wasm version (16.0.6–23.1.1) and formats with the edges", async ({ page }) => {
+  await openApp(page);
+  await expect(page.getByLabel("Version").locator("option")).toHaveCount(52);
+  await expect(page.getByLabel("Version")).toHaveValue("21.1.8");
+
+  // Oldest version: schema comes from a native dump, formatting from wasm.
+  await page.getByLabel("Version").selectOption("16.0.6");
+  await expect(page.getByTestId("status")).toContainText("clang-format 16.0.6 ready", {
+    timeout: APP_READY_TIMEOUT,
+  });
+  await expectEditorTextContains(page, "output", "class Widget {");
+
+  // Newest version: same for the 23.x packaging.
+  await page.getByLabel("Version").selectOption("23.1.1");
+  await expect(page.getByTestId("status")).toContainText("clang-format 23.1.1 ready", {
+    timeout: APP_READY_TIMEOUT,
+  });
+  await expectEditorTextContains(page, "output", "class Widget {");
+
+  // Back to the latest version: the sample still formats.
+  await page.getByLabel("Version").selectOption("21.1.8");
+  await expect(page.getByTestId("status")).toContainText("clang-format 21.1.8 ready", {
+    timeout: APP_READY_TIMEOUT,
+  });
+  await expectEditorTextContains(page, "output", "class Widget {");
+});
