@@ -238,6 +238,15 @@ v3 的 M0–M4 已全部交付；没有阻塞项。留作以后（按需，不�
 | 离线/PWA | ✅ 断网刷新后 shell + 格式化可用；manifest/图标/SW 预缓存 e2e 通过 |
 | 单测覆盖 | 18 文件：config / config-state / config-io / schema-store / schema / config-diff / diagnostics / formatter-client / languages / examples / persisted-state / share-link / theme / service-worker / roving / focus-trap / useDocs / install |
 
+### CI / 部署（GitHub Actions，M4）
+
+| 项 | 结果 |
+|---|---|
+| ci（M4 提交 `838d6e1`） | ✅ [40061594010](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40061594010)：setup-python + native 21.1.8 + `golden:gen --check` + typecheck/**298 单测** + build + **157 项** `check:size` + **64 条** e2e（chromium），1m20s 全绿（52 版本 wasm 缓存冷启动也只需下载 118 MB） |
+| deploy（M4 线上） | ✅ [40061594017](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40061594017)：build（含 64 条 e2e，1m42s）→ deploy（11s）→ smoke 对线上 URL 再跑整套 64 条（1m14s），全绿 |
+| 线上复跑（本地 Edge，全套） | ✅ `PW_BASE_URL=https://lzh0394.github.io/clang-format-configurator-v3/ npx playwright test` → **63 passed + 1 flaky**（perf 的冷版本切换在公网抖动下超时、retry 通过；与 M3 记录同类） |
+| 线上资源（M4） | ✅ 首页、`manifest.json`（`application/json`）、`icons/*.png`（`image/png`，192=7915 B）、`sw.js`（**v2**，8714 B）、`schema/index.json`（**52 版本**，default 21.1.8）、`wasm/16.0.6/entry.js`、`wasm/23.1.1/clang-format.wasm`（`application/wasm`）均 200；线上 manifest/安装横幅/SW 预缓存/分享链接/字号/52 版本 e2e 全部通过 |
+
 ### 历史（2026-10-24，M3 完成后）
 
 | 项 | 结果 |
