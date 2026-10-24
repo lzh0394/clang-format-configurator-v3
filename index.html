@@ -7,6 +7,11 @@
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f7f9" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1216" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA (M4): relative URLs keep the manifest and icons inside the deployed
+         sub-path (VITE_BASE), e.g. https://host/<repo>/manifest.json. -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
     <title>clang-format configurator</title>
     <script>
       // Apply the persisted theme before first paint so an explicit dark/light

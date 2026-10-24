@@ -1,0 +1,41 @@
+{
+  "name": "clang-format configurator",
+  "short_name": "clang-format",
+  "description": "Build .clang-format styles and format code in the browser. Everything runs locally in WebAssembly, so it also works offline.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": ".",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#f6f7f9",
+  "background_color": "#f6f7f9",
+  "categories": ["developer", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/apple-touch-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 // Versioned localStorage persistence (plan §5 持久化, §9 M3).
 //
 // One JSON document under STORAGE_KEY:
-//   { stateVersion, version, style, modified, code, theme, editorFontSize }
+//   { stateVersion, version, style, modified, code, theme, editorFontSize, uiFontScale }
 //
 // `loadPersistedState` is synchronous and never throws. Failure modes are
 // reported through `problem` instead of exceptions:
@@ -37,6 +37,18 @@ export const STATE_VERSION = 1;
 export const DEFAULT_STYLE: StyleName = "LLVM";
 export const DEFAULT_THEME: ThemePreference = "system";
 export const DEFAULT_EDITOR_FONT_SIZE = 13;
+export const DEFAULT_UI_FONT_SCALE = 1;
+
+/**
+ * Interface font-size tiers (plan §9 M4, docs/todo.md). `uiFontScale` is a
+ * multiplier applied to the root font size by src/styles.css, so the whole UI
+ * scales while the editor keeps its independent `--font-size-editor`.
+ *
+ * An additive field with a well-defined default does not require a
+ * STATE_VERSION bump: older documents load with scale 1, and older builds
+ * simply ignore the unknown key (normalize() copies only known fields).
+ */
+export const UI_FONT_SCALES = [0.9, 1, 1.15] as const;
 
 /**
  * Range accepted by the persistence layer. The settings UI currently offers
@@ -65,6 +77,7 @@ export type PersistedState = {
   code: string;
   theme: ThemePreference;
   editorFontSize: number;
+  uiFontScale: number;
 };
 
 export type LoadProblem = "none" | "empty" | "corrupt" | "version-mismatch" | "unavailable";
@@ -89,6 +102,11 @@ export function isValidEditorFontSize(value: unknown): value is number {
     value >= EDITOR_FONT_SIZE_MIN &&
     value <= EDITOR_FONT_SIZE_MAX
   );
+}
+
+/** True for one of the UI font-size tiers; anything else falls back to 1. */
+export function isUiFontScale(value: unknown): value is number {
+  return typeof value === "number" && (UI_FONT_SCALES as readonly number[]).includes(value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -143,6 +161,8 @@ function normalize(value: unknown): PersistedState | null {
     editorFontSize: isValidEditorFontSize(value.editorFontSize)
       ? value.editorFontSize
       : DEFAULT_EDITOR_FONT_SIZE,
+    // Missing (documents written before M4) and invalid values both mean 100%.
+    uiFontScale: isUiFontScale(value.uiFontScale) ? value.uiFontScale : DEFAULT_UI_FONT_SCALE,
   };
 }
 

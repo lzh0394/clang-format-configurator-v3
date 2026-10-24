@@ -11,10 +11,12 @@ import { FormatterClient, FormatterSupersededError, type FormatterError } from "
 import {
   DEFAULT_EDITOR_FONT_SIZE,
   DEFAULT_THEME,
+  DEFAULT_UI_FONT_SCALE,
   STATE_VERSION,
   loadPersistedState,
   savePersistedState,
 } from "./lib/persisted-state";
+import { SHARE_MAX_CODE_LENGTH, decodeShareHash, shareUrlFor, type ShareState } from "./lib/share-link";
 import { registerServiceWorker, type ServiceWorkerHandle } from "./lib/service-worker";
 import { applyTheme, type ThemePreference } from "./lib/theme";
 import {
@@ -27,26 +29,14 @@ import {
 } from "./lib/schema";
 import { schemaStore } from "./lib/schema-store";
 import { CodeEditor } from "./editor/CodeEditor";
+import { DEFAULT_SAMPLE, getSampleCode, isKnownSample } from "./editor/examples";
 import { LANGUAGE_LABELS, languageForFilename } from "./editor/languages";
+import { InstallBanner } from "./pwa/InstallBanner";
 import styles from "./App.module.css";
 
 // The merge view is only needed when the user asks for a diff, so it is split
 // out of the first-load chunk (plan §2.1: merge view is a lazy-load valve).
 const DiffPane = lazy(() => import("./components/DiffPane").then((module) => ({ default: module.DiffPane })));
-
-const SAMPLE = `#include <iostream>
-#include <vector>
-
-class Widget{public:
-Widget(int id):id_(id){}
-int id()const{return id_;}
-void print()const{std::cout<<id_<<std::endl;}
-private:
-int id_;
-};
-
-int main(){std::vector<Widget> ws;ws.emplace_back(1);for(const auto&w:ws){w.print();}return 0;}
-`;
 
 type ErrorState = { message: string; detail: string };
 type Notice = { title: string; items: string[] };
@@ -59,21 +49,58 @@ const DEBOUNCE_MS = 250;
 /** Persist the session a little after the last edit. */
 const PERSIST_DEBOUNCE_MS = 400;
 
+/**
+ * Copy `text` to the clipboard. Returns false when neither the async clipboard
+ * API nor the legacy selection fallback works (e.g. a denied permission); the
+ * share notice then shows the link itself so it can be copied by hand.
+ */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (typeof navigator !== "undefined" && navigator.clipboard !== undefined) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fall through to the legacy path.
+  }
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.append(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    return copied;
+  } catch {
+    return false;
+  }
+}
+
 export default function App() {
   // Restore once, synchronously, so the first render already shows the saved
   // session (plan §5 持久化). Invalid/incompatible documents are reported once.
   const [restored] = useState(() => loadPersistedState());
+  // Share links win over localStorage (plan §5): decode before the first render
+  // so the session never flashes the stored state first.
+  const [shared] = useState<ShareState | null>(() =>
+    typeof window === "undefined" ? null : decodeShareHash(window.location.hash),
+  );
   const [versions, setVersions] = useState<VersionInfo[]>([]);
   const [version, setVersion] = useState("");
   const [schema, setSchema] = useState<SchemaCore | null>(null);
   const [config, dispatch] = useReducer(
     configReducer,
-    restored.state
-      ? { version: restored.state.version, style: restored.state.style, modified: restored.state.modified }
-      : initialConfigState(""),
+    shared
+      ? { version: shared.version, style: shared.style, modified: shared.modified }
+      : restored.state
+        ? { version: restored.state.version, style: restored.state.style, modified: restored.state.modified }
+        : initialConfigState(""),
   );
   const [filename, setFilename] = useState("main.cc");
-  const [code, setCode] = useState(() => restored.state?.code ?? SAMPLE);
+  const [code, setCode] = useState(() => shared?.code ?? restored.state?.code ?? DEFAULT_SAMPLE);
   const [output, setOutput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ErrorState | null>(null);
@@ -85,6 +112,9 @@ export default function App() {
   const [theme, setTheme] = useState<ThemePreference>(restored.state?.theme ?? DEFAULT_THEME);
   const [editorFontSize, setEditorFontSize] = useState<number>(
     restored.state?.editorFontSize ?? DEFAULT_EDITOR_FONT_SIZE,
+  );
+  const [uiFontScale, setUiFontScale] = useState<number>(
+    restored.state?.uiFontScale ?? DEFAULT_UI_FONT_SCALE,
   );
   const [largeInputPending, setLargeInputPending] = useState(false);
   const [diff, setDiff] = useState(false);
@@ -124,10 +154,11 @@ export default function App() {
         const first = index.versions[0];
         if (!first) throw new Error("no schema found — run `npm run prepare:assets` first");
         setVersions(index.versions);
-        // Prefer the persisted version when it is still shipped (plan §5).
-        const saved = restored.state?.version;
-        const known = saved !== undefined && index.versions.some((entry) => entry.version === saved);
-        setVersion(known && saved !== undefined ? saved : (index.default ?? first.version));
+        // Prefer the share link, then the persisted version, when still shipped
+        // (plan §5: hash > storage > default).
+        const preferred = shared?.version ?? restored.state?.version;
+        const known = preferred !== undefined && index.versions.some((entry) => entry.version === preferred);
+        setVersion(known && preferred !== undefined ? preferred : (index.default ?? first.version));
       })
       .catch((cause: Error) => {
         if (cancelled) return;
@@ -137,7 +168,13 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [restored]);
+  }, [restored, shared]);
+
+  /** Apply the interface font-size tier (plan §9 M4; CSS multiplier in styles.css). */
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.style.setProperty("--ui-scale", String(uiFontScale));
+  }, [uiFontScale]);
 
   /** Lazily create the formatter facade and listen for fatal worker failures. */
   const getClient = useCallback((): FormatterClient => {
@@ -326,6 +363,25 @@ export default function App() {
     });
   }, [restored]);
 
+  // A share link was hydrated. Confirm it once and drop the fragment so later
+  // edits persist normally instead of the same link winning on every reload;
+  // "Copy link" regenerates the fragment from the live session on demand.
+  useEffect(() => {
+    if (shared === null) return;
+    setNotice({
+      title: "Loaded a shared configuration",
+      items: [
+        `clang-format ${shared.version} · ${shared.style}${
+          shared.code !== null ? " · source code included" : ""
+        }`,
+      ],
+    });
+    if (typeof window === "undefined" || window.location.hash === "") return;
+    const url = new URL(window.location.href);
+    url.hash = "";
+    window.history.replaceState(null, "", url.toString());
+  }, [shared]);
+
   // Theme: explicit light/dark wins, "system" follows the OS via CSS (plan §5).
   useEffect(() => {
     applyTheme(theme);
@@ -370,6 +426,7 @@ export default function App() {
       code,
       theme,
       editorFontSize,
+      uiFontScale,
     });
     if (result === "ok") {
       persistProblemRef.current = null;
@@ -381,7 +438,7 @@ export default function App() {
       persistProblemRef.current = result;
       setPersistProblem(result);
     }
-  }, [version, config.style, config.modified, code, theme, editorFontSize]);
+  }, [version, config.style, config.modified, code, theme, editorFontSize, uiFontScale]);
 
   useEffect(() => {
     if (!version) return;
@@ -405,6 +462,19 @@ export default function App() {
 
   const handleOptionChange = useCallback((key: string, value: unknown) => {
     dispatch({ type: "setOption", key, value });
+  }, []);
+
+  /**
+   * Change the filename and follow it with the matching built-in sample while
+   * the editor still holds an untouched sample (M4, plan §9 "代码示例").
+   * Code the user typed is never replaced.
+   */
+  const changeFilename = useCallback((next: string) => {
+    setFilename(next);
+    const sample = getSampleCode(next);
+    if (sample !== null && isKnownSample(inputRef.current.code)) {
+      setCode(sample);
+    }
   }, []);
 
   const handleChildChange = useCallback((option: OptionDef, childKey: string, value: unknown) => {
@@ -452,6 +522,41 @@ export default function App() {
   const closeDialog = useCallback(() => {
     setDialog((current) => ({ ...current, open: false }));
   }, []);
+
+  /**
+   * Build a URL-hash share link for the current session (plan §5: hash > storage)
+   * and copy it. The source is included only when it fits a reasonable URL;
+   * very large documents are left out and the notice says so.
+   */
+  const copyShareLink = useCallback(async (): Promise<void> => {
+    if (!version) return;
+    const includeCode = code.length > 0 && code.length <= SHARE_MAX_CODE_LENGTH;
+    let url: string;
+    try {
+      url = shareUrlFor(window.location.href, {
+        version,
+        style: config.style,
+        modified: config.modified,
+        code: includeCode ? code : null,
+      });
+    } catch {
+      setNotice({
+        title: "Could not create a share link",
+        items: ["The current configuration is too large to encode in a URL."],
+      });
+      return;
+    }
+    const copied = await copyText(url);
+    setNotice({
+      title: copied ? "Share link copied" : "Share link ready",
+      items: [
+        includeCode
+          ? "The link includes the current source code."
+          : "The link includes the configuration only (the source is empty or too long).",
+        ...(copied ? [] : [url]),
+      ],
+    });
+  }, [version, config.style, config.modified, code]);
 
   const optionCount = schema?.options.length ?? 0;
   const modifiedCount = Object.keys(config.modified).length;
@@ -509,7 +614,7 @@ export default function App() {
             <span>Filename</span>
             <input
               value={filename}
-              onChange={(event) => setFilename(event.target.value)}
+              onChange={(event) => changeFilename(event.target.value)}
               spellCheck={false}
               size={12}
               aria-label="Filename"
@@ -541,6 +646,15 @@ export default function App() {
           <button
             type="button"
             className={styles.secondary}
+            onClick={() => void copyShareLink()}
+            disabled={disabled}
+            data-testid="copy-link"
+          >
+            Copy link
+          </button>
+          <button
+            type="button"
+            className={styles.secondary}
             onClick={() => setConfigOpen(true)}
             disabled={disabled}
             data-testid="open-config"
@@ -568,9 +682,13 @@ export default function App() {
             onThemeChange={setTheme}
             editorFontSize={editorFontSize}
             onFontSizeChange={setEditorFontSize}
+            uiFontScale={uiFontScale}
+            onUiFontScaleChange={setUiFontScale}
           />
         </div>
       </header>
+
+      <InstallBanner />
 
       {isMobile && (
         <nav className={styles.mobileTabs} role="tablist" aria-label="Panels">
@@ -738,6 +856,7 @@ export default function App() {
               onOptionChange={handleOptionChange}
               onChildChange={handleChildChange}
               onResetAll={handleResetAll}
+              remeasureKey={uiFontScale}
             />
           ) : (
             <aside className={styles.panelPlaceholder} aria-hidden="true">

@@ -10,7 +10,7 @@
   background: var(--danger-bg);
   border-bottom: 1px solid var(--danger-border);
   color: var(--danger-text);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .summaryRow {
@@ -28,7 +28,7 @@
 .dismiss {
   flex: none;
   padding: 0 6px;
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.1;
   color: inherit;
   cursor: pointer;
@@ -43,7 +43,7 @@
 }
 
 .details {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .detailsSummary {
@@ -63,6 +63,6 @@
   max-height: 9rem;
   overflow: auto;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 0.75rem;
   white-space: pre-wrap;
 }

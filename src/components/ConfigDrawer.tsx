@@ -34,6 +34,14 @@ import {
 } from "../lib/config-io";
 import type { SchemaCore, StyleName } from "../lib/schema";
 import { CodeEditor } from "../editor/CodeEditor";
+import {
+  isTopModal,
+  MODAL_PRIORITY,
+  queryTabStops,
+  registerModal,
+  resolveTabTarget,
+  unregisterModal,
+} from "./focus-trap";
 import styles from "./ConfigDrawer.module.css";
 
 export type ConfigDrawerProps = {
@@ -59,16 +67,6 @@ type ValidationState = {
 
 const VALIDATION_DEBOUNCE_MS = 150;
 
-const FOCUSABLE_SELECTOR = [
-  "button:not([disabled])",
-  "[href]",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  "[contenteditable='true']",
-  "[tabindex]:not([tabindex='-1'])",
-].join(", ");
-
 const EMPTY_VALIDATION: ValidationState = {
   text: "",
   error: null,
@@ -90,6 +88,11 @@ export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | nu
   const modeRef = useRef(mode);
   modeRef.current = mode;
 
+  // Keep the latest onClose without re-running the focus/registration effect
+  // (a re-run would yank focus back to the first control on every render).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   // Each open starts from the current configuration, resetting any unapplied edits.
   useEffect(() => {
     if (!open) return;
@@ -100,50 +103,47 @@ export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | nu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Initial focus moves into the drawer; closing returns it to the trigger.
+  // Modal lifecycle (M4, shared with ConfigDialog): register for keyboard
+  // ownership, move focus into the drawer, trap Tab, close on Escape and hand
+  // focus back to the trigger. Two open modals are ordered by paint priority,
+  // so only the top-most one traps.
   useEffect(() => {
     if (!open) return;
+    const modal = registerModal("config-drawer", MODAL_PRIORITY.drawer);
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const firstFocusable = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-    firstFocusable?.focus();
-    return () => previous?.focus();
-  }, [open]);
+    // Only steal focus when this drawer is the visible top layer; if a
+    // higher-priority surface is open, it keeps the keyboard.
+    if (isTopModal(modal)) queryTabStops(panelRef.current)[0]?.focus();
 
-  // Escape closes, Tab is trapped inside the drawer (it is modal).
-  useEffect(() => {
-    if (!open) return;
     const handleKeyDown = (event: KeyboardEvent): void => {
+      if (!isTopModal(modal)) return;
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        // Another modal may listen on document as well; only the top-most one
+        // reacts to this Escape.
+        event.stopImmediatePropagation();
+        onCloseRef.current();
         return;
       }
       if (event.key !== "Tab") return;
 
-      const panel = panelRef.current;
-      if (panel === null) return;
-      const focusables = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)];
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (first === undefined || last === undefined) return;
-
-      const active = document.activeElement;
-      if (!(active instanceof HTMLElement) || !panel.contains(active)) {
-        event.preventDefault();
-        (event.shiftKey ? last : first).focus();
-        return;
-      }
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      const stops = queryTabStops(panelRef.current);
+      const activeElement = document.activeElement;
+      const index = activeElement instanceof HTMLElement ? stops.indexOf(activeElement) : -1;
+      const target = resolveTabTarget({ index, count: stops.length, shiftKey: event.shiftKey });
+      if (target === null) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      stops[target]?.focus();
     };
+
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      unregisterModal(modal);
+      if (previous !== null && previous.isConnected) previous.focus();
+    };
+  }, [open]);
 
   // Debounced live validation. A fatal error is shown inline, warnings stay
   // recoverable and the empty document parses as "clear the configuration".

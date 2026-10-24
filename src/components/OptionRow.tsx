@@ -1,8 +1,15 @@
 // One row of the options panel (contract §4.2): key + badges, control, docs
 // toggle, per-row reset and the "inherited" hint. The row itself is never
 // clickable — every affordance is a native control or a button.
+//
+// M4: the row is the unit of the roving keyboard model. Exactly one row (the
+// active one) carries `tabIndex={0}`; it is a list item so screen readers know
+// how far through the (virtualized) option set they are, and it owns the
+// arrow/Home/End/PageUp/PageDown keys while it — not one of its controls — has
+// focus. Enter/Space on the row toggles its documentation.
 
-import type { JSX } from "react";
+import { useMemo } from "react";
+import type { JSX, KeyboardEvent as ReactKeyboardEvent } from "react";
 
 import {
   effectiveValue,
@@ -18,7 +25,8 @@ import {
   MapControl,
   StructListControl,
 } from "./controls";
-import type { DocsStatus } from "./useDocs";
+import { rovingTabIndex } from "./roving";
+import { prepareDocsHtml, type DocsStatus } from "./useDocs";
 import styles from "./OptionPanel.module.css";
 
 export type OptionRowProps = {
@@ -26,11 +34,21 @@ export type OptionRowProps = {
   option: OptionDef;
   style: StyleName;
   modified: Modified;
+  /** This is the single Tab stop of the virtualized list. */
+  active: boolean;
+  /** 1-based position of this row in the currently visible option set. */
+  posInSet: number;
+  /** Number of currently visible options (virtualization hides most rows). */
+  setSize: number;
   docsOpen: boolean;
   bodyOpen: boolean;
   docs: SchemaDocs | null;
   docsStatus: DocsStatus;
   docsError: string | null;
+  /** Arrow/Home/End/PageUp/PageDown pressed while the row itself has focus. */
+  onNavigate: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
+  /** Focus entered the row (the row itself or one of its controls). */
+  onFocusRow: (key: string) => void;
   onToggleDocs: (key: string) => void;
   onToggleBody: (key: string) => void;
   onRetryDocs: () => void;
@@ -66,11 +84,16 @@ export default function OptionRow({
   option,
   style,
   modified,
+  active,
+  posInSet,
+  setSize,
   docsOpen,
   bodyOpen,
   docs,
   docsStatus,
   docsError,
+  onNavigate,
+  onFocusRow,
   onToggleDocs,
   onToggleBody,
   onRetryDocs,
@@ -84,6 +107,8 @@ export default function OptionRow({
   const preset = option.defaults[style];
   const collapsible = type.kind === "map" || type.kind === "list";
   const docsHtml = docs === null ? undefined : docs[key];
+  // Render-layer docs fix (M4): focusable <pre> blocks and no leaked RST markers.
+  const docsMarkup = useMemo(() => (docsHtml === undefined ? "" : prepareDocsHtml(docsHtml)), [docsHtml]);
 
   const guard = OVERRIDE_GUARDS[key];
   const guardOption = guard === undefined ? undefined : schema.options.find((entry) => entry.key === guard.option);
@@ -96,6 +121,23 @@ export default function OptionRow({
   // conditionally to keep every reference resolvable.
   const bodyId = `option-body-${key}`;
   const docsId = `option-docs-${key}`;
+
+  // The active row is the list's Tab stop; the accessible name stays short
+  // because the row also contains several controls that are each announced.
+  const rowLabel = `${key}${option.deprecated ? ", deprecated" : ""}${overridden ? ", modified" : ""}`;
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>): void => {
+    // Only the row itself owns list navigation: arrow keys inside a number or
+    // text control must keep their native behaviour (caret/stepper), and Space
+    // on a button must activate the button.
+    if (event.target !== event.currentTarget) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onToggleDocs(key);
+      return;
+    }
+    onNavigate(event);
+  };
 
   let control: JSX.Element | null;
   if (type.kind === "map") {
@@ -151,7 +193,17 @@ export default function OptionRow({
   }
 
   return (
-    <div className={styles.row} data-testid={`option-${key}`}>
+    <div
+      className={styles.row}
+      data-testid={`option-${key}`}
+      role="listitem"
+      aria-label={rowLabel}
+      aria-setsize={setSize}
+      aria-posinset={posInSet}
+      tabIndex={rovingTabIndex(active)}
+      onKeyDown={handleKeyDown}
+      onFocus={() => onFocusRow(key)}
+    >
       <div className={styles.top}>
         <div className={styles.identity}>
           <span className={styles.key}>{key}</span>
@@ -238,7 +290,9 @@ export default function OptionRow({
               data-testid={`docs-content-${key}`}
               // Docs HTML is generated at build time from the LLVM RST sources
               // and committed with the schema; no runtime input is involved.
-              dangerouslySetInnerHTML={{ __html: docsHtml }}
+              // `prepareDocsHtml` only adds `tabindex` to <pre> blocks and
+              // normalizes leaked RST markers; it never decodes entities.
+              dangerouslySetInnerHTML={{ __html: docsMarkup }}
             />
           )}
           {docsStatus === "ready" && docsHtml === undefined && (

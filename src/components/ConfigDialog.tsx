@@ -2,6 +2,11 @@
 // App: `open` decides whether it renders and `tab` picks the initial tab. On a
 // successful import it hands the parsed result to App, which owns applying it,
 // closing the dialog and displaying warnings.
+//
+// M4: the dialog is a real modal now — Tab/Shift+Tab cycle inside the panel,
+// Escape closes it and focus returns to whatever opened it. The trap logic is
+// shared with ConfigDrawer (see focus-trap.ts); when both modals are open only
+// the one painted on top owns the keyboard.
 
 import {
   useCallback,
@@ -23,6 +28,14 @@ import {
   type ImportResult,
 } from "../lib/config-io";
 import type { SchemaCore, StyleName } from "../lib/schema";
+import {
+  isTopModal,
+  MODAL_PRIORITY,
+  queryTabStops,
+  registerModal,
+  resolveTabTarget,
+  unregisterModal,
+} from "./focus-trap";
 import styles from "./ConfigDialog.module.css";
 
 export type ConfigDialogProps = {
@@ -37,9 +50,6 @@ export type ConfigDialogProps = {
 
 type DialogTab = "import" | "export";
 type ImportFailure = { message: string; detail: string };
-
-const FOCUSABLE_SELECTOR =
-  "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 const COPIED_FEEDBACK_MS = 1600;
 
@@ -56,6 +66,11 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
   const yamlRef = useRef<HTMLTextAreaElement>(null);
   const copyTimerRef = useRef<number | null>(null);
 
+  // Keep the latest onClose without re-running the focus/registration effect
+  // (a re-run would yank focus back to the first control on every render).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   // Each open starts on the tab App asked for, with a clean import form.
   useEffect(() => {
     if (!open) return;
@@ -64,25 +79,45 @@ export default function ConfigDialog(props: ConfigDialogProps): JSX.Element | nu
     setImportError(null);
   }, [open, tab]);
 
-  // Initial focus moves into the modal; closing returns it to the trigger.
+  // Modal lifecycle: register for keyboard ownership, move focus in, trap Tab,
+  // close on Escape, and give focus back to the trigger on close (M4).
   useEffect(() => {
     if (!open) return;
+    const modal = registerModal("config-dialog", MODAL_PRIORITY.dialog);
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const firstFocusable = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-    firstFocusable?.focus();
-    return () => previous?.focus();
-  }, [open]);
+    // Only steal focus when this dialog is the visible top layer; if it opens
+    // behind a higher-priority modal (the drawer), that one keeps the keyboard.
+    if (isTopModal(modal)) queryTabStops(panelRef.current)[0]?.focus();
 
-  useEffect(() => {
-    if (!open) return;
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key !== "Escape") return;
+      if (!isTopModal(modal)) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        // The drawer (registered earlier or later) also listens on document;
+        // stop it from reacting to the same Escape after this modal closes.
+        event.stopImmediatePropagation();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const stops = queryTabStops(panelRef.current);
+      const activeElement = document.activeElement;
+      const index = activeElement instanceof HTMLElement ? stops.indexOf(activeElement) : -1;
+      const target = resolveTabTarget({ index, count: stops.length, shiftKey: event.shiftKey });
+      if (target === null) return;
       event.preventDefault();
-      onClose();
+      event.stopImmediatePropagation();
+      stops[target]?.focus();
     };
+
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      unregisterModal(modal);
+      if (previous !== null && previous.isConnected) previous.focus();
+    };
+  }, [open]);
 
   useEffect(() => () => {
     if (copyTimerRef.current !== null) window.clearTimeout(copyTimerRef.current);

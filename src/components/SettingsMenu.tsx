@@ -24,10 +24,23 @@ export type SettingsMenuProps = {
   onThemeChange: (theme: ThemePreference) => void;
   editorFontSize: number;
   onFontSizeChange: (size: number) => void;
+  uiFontScale: number;
+  onUiFontScaleChange: (scale: number) => void;
 };
 
 /** Same choices as the M2 header select; the persisted layer accepts 11–24. */
 const EDITOR_FONT_SIZES = [12, 13, 14, 16, 18, 20] as const;
+
+/**
+ * Interface font-size tiers (M4, docs/todo.md). Values mirror
+ * `UI_FONT_SCALES` in src/lib/persisted-state.ts; the CSS multiplier lives in
+ * src/styles.css (`--ui-scale`).
+ */
+const UI_FONT_SCALE_OPTIONS = [
+  { value: 0.9, label: "Compact (90%)" },
+  { value: 1, label: "Standard (100%)" },
+  { value: 1.15, label: "Large (115%)" },
+] as const;
 
 const THEME_LABELS: Record<ThemePreference, string> = {
   system: "System",
@@ -39,7 +52,7 @@ const FOCUSABLE_SELECTOR =
   "button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 export function SettingsMenu(props: SettingsMenuProps): JSX.Element {
-  const { theme, onThemeChange, editorFontSize, onFontSizeChange } = props;
+  const { theme, onThemeChange, editorFontSize, onFontSizeChange, uiFontScale, onUiFontScaleChange } = props;
 
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -164,6 +177,22 @@ export function SettingsMenu(props: SettingsMenuProps): JSX.Element {
               {EDITOR_FONT_SIZES.map((size) => (
                 <option key={size} value={size}>
                   {size}px
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span>Interface size</span>
+            <select
+              className={styles.select}
+              value={uiFontScale}
+              data-testid="ui-font-scale"
+              onChange={(event) => onUiFontScaleChange(Number(event.target.value))}
+            >
+              {UI_FONT_SCALE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>

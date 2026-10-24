@@ -11,10 +11,13 @@ import {
   DEFAULT_EDITOR_FONT_SIZE,
   DEFAULT_STYLE,
   DEFAULT_THEME,
+  DEFAULT_UI_FONT_SCALE,
   EDITOR_FONT_SIZE_MAX,
   EDITOR_FONT_SIZE_MIN,
   STATE_VERSION,
   STORAGE_KEY,
+  UI_FONT_SCALES,
+  isUiFontScale,
   loadPersistedState,
   savePersistedState,
   clearPersistedState,
@@ -57,6 +60,7 @@ const validState: PersistedState = {
   code: "class Widget{};\n",
   theme: "dark",
   editorFontSize: 18,
+  uiFontScale: 1.15,
 };
 
 const stored = (value: unknown): FakeStorage =>
@@ -112,6 +116,7 @@ describe("loadPersistedState", () => {
         code: null,
         theme: "blue",
         editorFontSize: "18",
+        uiFontScale: 1.5,
       }),
     );
 
@@ -124,6 +129,7 @@ describe("loadPersistedState", () => {
       code: "",
       theme: DEFAULT_THEME,
       editorFontSize: DEFAULT_EDITOR_FONT_SIZE,
+      uiFontScale: DEFAULT_UI_FONT_SCALE,
     });
   });
 
@@ -159,6 +165,26 @@ describe("loadPersistedState", () => {
     expect(loadSize(EDITOR_FONT_SIZE_MIN - 1)).toBe(DEFAULT_EDITOR_FONT_SIZE);
     expect(loadSize(EDITOR_FONT_SIZE_MAX + 1)).toBe(DEFAULT_EDITOR_FONT_SIZE);
     expect(loadSize(Number.NaN)).toBe(DEFAULT_EDITOR_FONT_SIZE);
+  });
+
+  it("treats a document written before M4 (no uiFontScale) as 100%", () => {
+    const { uiFontScale: _omitted, ...beforeM4 } = validState;
+    const result = loadPersistedState(stored(beforeM4));
+    expect(result.problem).toBe("none");
+    expect(result.state?.uiFontScale).toBe(DEFAULT_UI_FONT_SCALE);
+  });
+
+  it("accepts every documented UI scale and rejects everything else", () => {
+    for (const scale of UI_FONT_SCALES) {
+      expect(isUiFontScale(scale)).toBe(true);
+      expect(loadPersistedState(stored({ ...validState, uiFontScale: scale })).state?.uiFontScale).toBe(scale);
+    }
+    for (const invalid of [0, 0.5, 1.5, 2, "1.15", null, Number.NaN]) {
+      expect(isUiFontScale(invalid)).toBe(false);
+      expect(loadPersistedState(stored({ ...validState, uiFontScale: invalid })).state?.uiFontScale).toBe(
+        DEFAULT_UI_FONT_SCALE,
+      );
+    }
   });
 
   it("reports unavailable when getItem throws", () => {
@@ -208,11 +234,17 @@ describe("savePersistedState", () => {
 
   it("normalizes invalid fields before writing", () => {
     const storage = makeStorage();
-    const dirty = { ...validState, theme: "purple", editorFontSize: 999 } as unknown as PersistedState;
+    const dirty = {
+      ...validState,
+      theme: "purple",
+      editorFontSize: 999,
+      uiFontScale: 1.5,
+    } as unknown as PersistedState;
     expect(savePersistedState(dirty, storage)).toBe("ok");
     const written = JSON.parse(storage.data.get(STORAGE_KEY) ?? "null") as PersistedState;
     expect(written.theme).toBe(DEFAULT_THEME);
     expect(written.editorFontSize).toBe(DEFAULT_EDITOR_FONT_SIZE);
+    expect(written.uiFontScale).toBe(DEFAULT_UI_FONT_SCALE);
   });
 
   it("reports quota when the browser storage is full (by name or legacy code)", () => {

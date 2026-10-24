@@ -7,8 +7,9 @@
  * `self.registration.scope` (e.g. `https://host/<repo>/`) — never hard-code "/".
  *
  * Policy:
- *   install   precache the app shell (scope root) + favicon; do NOT skipWaiting,
- *             updates wait until the page asks them to activate.
+ *   install   precache the app shell (scope root) + manifest + icons + favicon;
+ *             do NOT skipWaiting, updates wait until the page asks them to
+ *             activate.
  *   activate  delete stale `cfc-*` caches, then claim clients.
  *   fetch     navigations: network-first, cached shell fallback, then a tiny
  *             synthetic offline page.
@@ -22,14 +23,30 @@
 "use strict";
 
 const CACHE_PREFIX = "cfc-";
-const CACHE_VERSION = "v1";
+// v2 (M4): the manifest and the PWA icons joined the precache list.
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
+
+/**
+ * Static files copied verbatim from public/ next to index.html: the web app
+ * manifest and the icons it references (plus the favicon). Each is resolved
+ * against the registration scope so sub-path deployments keep working.
+ */
+const SHELL_ASSETS = [
+  "manifest.json",
+  "favicon.svg",
+  "icons/icon-192.png",
+  "icons/icon-512.png",
+  "icons/icon-maskable-512.png",
+  "icons/apple-touch-icon-180.png",
+];
 
 const OFFLINE_HTML = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>Offline — clang-format configurator</title>
     <style>
       :root { color-scheme: light dark; }
@@ -40,20 +57,35 @@ const OFFLINE_HTML = `<!doctype html>
         place-items: center;
         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
       }
-      main { max-width: 34rem; padding: 2rem; }
+      main { max-width: 36rem; padding: 2rem; }
       h1 { font-size: 1.35rem; margin: 0 0 0.75rem; }
-      p { margin: 0 0 1.25rem; }
+      p { margin: 0 0 1rem; }
+      ul { margin: 0 0 1.25rem; padding-left: 1.25rem; }
+      li { margin: 0.15rem 0; }
       button { font: inherit; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; }
+      .hint { opacity: 0.75; font-size: 0.9rem; }
     </style>
   </head>
   <body>
     <main>
       <h1>You are offline</h1>
       <p>
-        The clang-format configurator has not been cached on this device yet.
-        Reconnect to the network and reload the page to install the offline copy.
+        The clang-format configurator runs entirely in your browser, so it keeps
+        working without a network connection — but this device has not stored a
+        copy of the app yet.
       </p>
-      <button type="button" onclick="location.reload()">Retry</button>
+      <p>Once the page has loaded one time, the following work offline:</p>
+      <ul>
+        <li>generating and importing <code>.clang-format</code> configurations,</li>
+        <li>formatting code with clang-format versions that were already used,</li>
+        <li>your saved session (options, code, theme), restored from this device.</li>
+      </ul>
+      <p class="hint">
+        Reconnect to the network and reload to store the offline copy. After
+        that you can also install the configurator as an app from your browser
+        menu.
+      </p>
+      <button type="button" onclick="location.reload()">Try again</button>
     </main>
   </body>
 </html>`;
@@ -68,9 +100,9 @@ function rootUrl() {
   return new URL("./", scopeUrl()).href;
 }
 
-/** Favicon lives next to index.html inside the scope. */
-function faviconUrl() {
-  return new URL("favicon.svg", scopeUrl()).href;
+/** Absolute URL of a static file that lives next to index.html. */
+function assetUrl(path) {
+  return new URL(path, scopeUrl()).href;
 }
 
 /** True when a fetch response may be stored in our cache. */
@@ -155,9 +187,11 @@ self.addEventListener("install", (event) => {
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       const shell = rootUrl();
-      // Precache individually: a missing favicon must not fail the installation.
+      // Precache individually: a missing icon must not fail the installation.
+      // The first entry is the shell, the rest are PWA assets (manifest, icons).
+      const urls = [shell, ...SHELL_ASSETS.map(assetUrl)];
       const results = await Promise.all(
-        [shell, faviconUrl()].map((url) =>
+        urls.map((url) =>
           cache
             .add(new Request(url, { cache: "reload" }))
             .then(() => true)
@@ -165,6 +199,9 @@ self.addEventListener("install", (event) => {
         ),
       );
       if (!results[0]) console.warn("[sw] could not precache the app shell", shell);
+      SHELL_ASSETS.forEach((path, index) => {
+        if (!results[index + 1]) console.warn("[sw] could not precache", path);
+      });
       // No self.skipWaiting() here: the page decides when an update activates.
     })(),
   );

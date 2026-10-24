@@ -1,5 +1,12 @@
 :root {
   color-scheme: light;
+  /* Interface font-size multiplier (plan §9 M4, docs/todo.md). App.tsx writes
+     the persisted tier (0.9 / 1 / 1.15) onto <html>; component font sizes are
+     rem-based so the whole UI scales without transform/zoom (which would
+     distort the virtual list's row measurements). 100% keeps the browser's
+     own default font size as the baseline. */
+  --ui-scale: 1;
+  font-size: calc(100% * var(--ui-scale, 1));
   --bg: #f6f7f9;
   --surface: #ffffff;
   --border: #d8dce3;
@@ -106,7 +113,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.45;
 }
 

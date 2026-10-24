@@ -1,0 +1,74 @@
+/* Install banner (M4 PWA). Colors come from the design tokens in
+   src/styles.css; this file only defines layout and the module's own classes.
+   The banner sits in the same slot as the other app-wide notices. */
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.75rem;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.primary {
+  padding: 4px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.primary:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.dismiss {
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.125rem;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.dismiss:hover {
+  color: var(--text);
+}
