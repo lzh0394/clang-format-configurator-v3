@@ -6,7 +6,7 @@
 ## 1. 一句话现状
 
 **M0–M4 全部完成，v3 完整交付**：骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/响应式/离线、a11y 闸门，以及 M4 的分享链接、PWA（manifest + 安装提示）、C#/Proto 等示例与语言扩展、全部 **52** 个 wasm 版本、界面字号缩放、虚拟列表 roving、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查。
-`npm run verify` 全绿（typecheck + **298 单测 / 18 文件** + build）；Playwright **65 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 8 M4 + 5 M4-PWA + 5 M4-a11y）在 base `/` 与 `/<repo>/` 子路径下各 **65 passed**（perf 在独立 project 里串行跑）；`npm run check:size` **157 项全过**（首屏 JS **224.5 KB gzip** / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；52/52 版本运行期自检 + 312/312 native vs wasm 对拍；格式化 p95 9–23 ms（预算 80 ms）；dist ≈130 MB。
+`npm run verify` 全绿（typecheck + **298 单测 / 18 文件** + build）；Playwright **66 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 9 M4 + 5 M4-PWA + 5 M4-a11y）在 base `/` 与 `/<repo>/` 子路径下各 **66 passed**（perf 在独立 project 里串行跑）；`npm run check:size` **157 项全过**（首屏 JS **224.5 KB gzip** / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；52/52 版本运行期自检 + 312/312 native vs wasm 对拍；格式化 p95 9–23 ms（预算 80 ms）；dist ≈130 MB。
 **nightly**：`schema:check --allow-missing-native` 每日跑，漂移只开 issue，不阻塞发布。
 
 ## 2. 链接
@@ -32,7 +32,7 @@ npm run dev              # http://127.0.0.1:5173
 ```powershell
 npm run verify           # typecheck + vitest + build（298 单测 / 18 文件）
 npm run check:size       # 需先 build；按 plan §1 检查 gzip 预算（157 项 / 52 版本）
-npx playwright test      # 本地用 Edge（channel=msedge），65 条，约 33 s
+npx playwright test      # 本地用 Edge（channel=msedge），66 条，约 33 s
 ```
 
 子路径构建（模拟 Pages）：
@@ -169,7 +169,7 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 12. **界面字号（M4）**：`uiFontScale` 0.9/1/1.15；根字号 `calc(100% * var(--ui-scale))`，组件字号全 rem；编辑器走独立 `--font-size-editor`。虚拟列表 `remeasureKey` 变化后在 rAF 中对已渲染行 `measureElement`（**不可用 `measure()`**，见 §4 的坑）。
 13. **键盘/焦点（M4）**：`roving.ts` 纯逻辑（isRovingNavigationKey/nextRovingIndex/pageStep/clampIndex/resolveActiveIndex/rovingTabIndex），OptionPanel 用一个 `activeKey` + `rangeExtractor` 强制把 active 行渲染进窗口；`focus-trap.ts` 提供 collectTabStops/resolveTabTarget + modal 栈（drawer z-index 110 > dialog 100），顶层 modal 消费 Escape/Tab 时 `stopImmediatePropagation()`，否则一次 Escape 会关两个。`useDocs.prepareDocsHtml` 在渲染层给 `<pre>` 加 `tabindex=0` 并清理 RST 泄漏标记（幂等，不改生成器）。
 14. **52 版本 schema（M4）**：`versions.json` 行可带 `"dump": "native"`；`gen-schema.mjs` 对 native 版本逐个 `--style=<Style> --dump-config`（二进制从 `.cache/cf-native/<ver>` 或 `.cache/llvm/<ver>` 找），仍用 RST 做类型/枚举/文档与校验闸门；`--check` 把结果写到 `.cache/schema-check` 并与 `public/schema` 逐文件比较；`--allow-missing-native` 跳过默认值、照验 docs/结构。`check-size.mjs` 读 `versions.json` 逐版本校验 wasm/core/docs，缺版本直接失败；wasm 预算 1.1 MB（23.x 上游变大）。
-15. **桌面三栏布局（M4 收尾）**：`main` 第二列 `minmax(0, 1fr)` + `.workbench/.pane/.editorHost { min-width: 0 }` 让 CM6 长行只在编辑器内部横向滚动；`.optionsArea` 有 `background: var(--surface)`、`.panel { width: 100% }` 保证左列铺满。改这两个文件后跑 m4 的 "desktop columns fill their tracks…"。
+15. **桌面三栏布局（M4 收尾）**：`main` 第二列 `minmax(0, 1fr)` + `.workbench/.pane/.editorHost { min-width: 0 }` 让 CM6 长行只在编辑器内部横向滚动；`.optionsArea` 有 `background: var(--surface)`、`.panel { width: 100% }` 保证左列铺满。**≤900px 且 >768px 时保持「选项面板在左、SOURCE 上右、FORMATTED 下右」**（`.panes` 在 900 断点内改单列两行；旧行为是把选项横跨整页放顶部）。改这两个文件后跑 m4 的 "desktop columns…" 与 "narrow desktop…" 用例。
 
 ## 7. 已知缺陷 / 有意的取舍
 
@@ -183,13 +183,13 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 - **nightly 不验 26 个 native-dump 版本的默认值**（需要 1.9 GB native；跳过时仍验 RST docs 与选项结构）。严格模式在本地/发布前跑 `npm run schema:check`。
 - 没有 ESLint/Prettier、没有 Dependabot、没有 per-PR 预览。
 
-## 8. e2e 覆盖清单（65 条）
+## 8. e2e 覆盖清单（66 条）
 
 - **smoke（4，M0）**：首屏格式化 / 换风格 / 换版本 / 改源码。
 - **m1（17，M1）**：纯 UI 生成配置、reset、Minimal/Full roundtrip、导入 warning/legacy、稀疏 map、struct list、list<string>、过滤 chips、对话框焦点、非法 YAML、文件加载、下载、复制、docs 懒加载、enum/bool 控件、override 警告。
 - **m2（12，M2）**：编辑器语义、Auto 关闭时 Ctrl/Cmd+Enter、语言徽标、字号、Diff 开关/真实高亮/在 diff 里编辑、抽屉实时校验/preview/apply/mode/下载/关闭、结构化错误面板。
 - **m3（11，M3）**：会话持久化恢复（option+code+theme+font）、版本持久化、损坏存档、stateVersion 不兼容、主题三档 + 系统深色、Settings 弹层行为/焦点、移动端 tabs、桌面↔移动 resize、跳过链接、离线 SW（controller→reload→caches→offline→reload→banner）、a11y 语义 smoke。
-- **m4（8，M4）**：分享链接复制→新标签恢复、hash 压过 storage、坏 hash 回退、首帧解码、界面字号缩放/持久化/行不重叠、文件名跟随示例（C#/Proto）、52 版本下拉 + 用 16.0.6/23.1.1 实际格式化、桌面三栏在 1600/1360/1280/1100 四个宽度下无横向溢出且面板铺满左列。
+- **m4（9，M4）**：分享链接复制→新标签恢复、hash 压过 storage、坏 hash 回退、首帧解码、界面字号缩放/持久化/行不重叠、文件名跟随示例（C#/Proto）、52 版本下拉 + 用 16.0.6/23.1.1 实际格式化、桌面三栏在 1600/1360/1280/1100 四个宽度下无横向溢出且面板铺满左列、769–900px 下「选项在左、SOURCE 上右、FORMATTED 下右」且回到 1100 仍是三栏并排。
 - **m4-pwa（5，M4）**：manifest 字段/scope/图标、SW 预缓存 manifest+图标、安装横幅出现→安装、dismiss 持久化、语言徽标。
 - **m4-a11y（5，M4）**：跨虚拟窗口方向键/Home/End/PageUp/PageDown、单一 Tab 停靠点与 Tab 进控件、ConfigDialog 焦点陷阱/Escape/焦点归还、docs `<pre>` 可聚焦 + RST 标记清理、两个 modal 只有顶层响应。
 - **golden（1）**：29 组 fixture 与 native 21.1.8 逐字节相同（wasm 在浏览器里跑）。
@@ -229,8 +229,8 @@ v3 的 M0–M4 已全部交付；没有阻塞项。留作以后（按需，不�
 | 项 | 结果 |
 |---|---|
 | `npm run verify` | ✅ typecheck 0 错 + **298 unit（18 文件）** + build |
-| `npx playwright test`（base `/`，production build） | ✅ **65 passed**（33.2 s；perf 在独立 project 里串行跑，cached 切换 76 ms） |
-| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **65 passed**（32.7 s；cached 切换 75 ms） |
+| `npx playwright test`（base `/`，production build） | ✅ **66 passed**（32.7 s；perf 在独立 project 里串行跑，cached 切换 77 ms） |
+| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **66 passed**（32.3 s；cached 切换 77 ms） |
 | `npm run check:size` | ✅ 157 项全过：初 JS **224.5 KB**（限 250）；52 个 wasm **902.4–1071.5 KB**（限 1.1 MB）；core 6.4–8.5 KB（限 25）；docs 19.3–24.6 KB（限 45） |
 | `node tools/gen-golden.mjs --check` | ✅ 29 组与 native 21.1.8 一致（M3 记录，未改 fixture） |
 | 黄金对拍（wasm vs native） | ✅ 29/29 逐字节相同 |

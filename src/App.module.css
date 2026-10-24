@@ -383,9 +383,12 @@
 }
 
 @media (max-width: 900px) {
+  /* Narrow screens keep the options panel on the left and stack the editors on
+     the right (source upper-right, formatted lower-right): three side-by-side
+     columns are too cramped before the mobile tabs take over at 768px. */
   .main {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(220px, 38vh) 1fr;
+    grid-template-columns: minmax(260px, 34vw) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
   }
 
   .panes {

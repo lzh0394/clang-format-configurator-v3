@@ -348,6 +348,70 @@ test("desktop columns fill their tracks without horizontal page overflow", async
   }
 });
 
+test("narrow desktop keeps options left and stacks source above formatted on the right", async ({ page }) => {
+  await openApp(page);
+
+  // Measure the pane wrappers (grid items), not the CodeMirror content: a long
+  // line makes the inner .cm-content wider than its pane, so its box is not a
+  // reliable layout probe.
+  const geometry = async (): Promise<{
+    options: { left: number; right: number };
+    source: { left: number; right: number; top: number; bottom: number };
+    formatted: { left: number; right: number; top: number; bottom: number };
+    scrollWidth: number;
+    clientWidth: number;
+  }> =>
+    page.evaluate(() => {
+      const pane = (testId: string): DOMRect => {
+        const content = document.querySelector(`[data-testid="${testId}"]`);
+        const section = content?.closest("section");
+        if (section === null || section === undefined) throw new Error(`${testId} pane is missing`);
+        return section.getBoundingClientRect();
+      };
+      const main = document.querySelector("main");
+      if (main === null) throw new Error("main is missing");
+      const options = main.firstElementChild?.getBoundingClientRect();
+      if (options === undefined) throw new Error("options area is missing");
+      const pick = (box: DOMRect): { left: number; right: number; top: number; bottom: number } => ({
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        bottom: box.bottom,
+      });
+      return {
+        options: { left: options.left, right: options.right },
+        source: pick(pane("source")),
+        formatted: pick(pane("output")),
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      };
+    });
+
+  // 769–900px: below the three-column breakpoint but above the mobile tabs.
+  for (const width of [900, 860, 820, 769]) {
+    await page.setViewportSize({ width, height: 900 });
+    const layout = await geometry();
+    // Options stays on the left; both panes are to its right...
+    expect(layout.source.left, `source should be right of options at ${width}px`).toBeGreaterThan(
+      layout.options.right,
+    );
+    expect(layout.formatted.left, `formatted should be right of options at ${width}px`).toBeGreaterThan(
+      layout.options.right,
+    );
+    // ...with source upper-right and formatted lower-right.
+    expect(layout.source.bottom, `source should sit above formatted at ${width}px`).toBeLessThanOrEqual(
+      layout.formatted.top + 1,
+    );
+    expect(layout.scrollWidth, `no page overflow at ${width}px`).toBeLessThanOrEqual(layout.clientWidth + 1);
+  }
+
+  // 901–1100px still uses three side-by-side columns (source left of formatted).
+  await page.setViewportSize({ width: 1100, height: 900 });
+  const wide = await geometry();
+  expect(wide.source.right).toBeLessThanOrEqual(wide.formatted.left + 1);
+  expect(wide.source.left).toBeGreaterThan(wide.options.right);
+});
+
 // ---------------------------------------------------------------------------
 // Language switching example snippets (M4, plan §9 "C#/proto 代码示例")
 // ---------------------------------------------------------------------------
