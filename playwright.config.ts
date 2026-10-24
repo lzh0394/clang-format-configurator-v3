@@ -18,7 +18,20 @@ export default defineConfig({
     trace: "retain-on-failure",
     video: "off",
   },
-  projects: [{ name: channel, use: channel === "chromium" ? {} : { channel } }],
+  // Two projects so the latency budgets never compete with the wasm-heavy rest
+  // of the suite for CPU. `perf` depends on the channel project, which makes
+  // Playwright run it only after every other test (and therefore mostly alone);
+  // with 52 versions the parallel suite was enough to push a 200 ms cached
+  // switch over budget on CI even though the same switch alone takes ~80 ms.
+  projects: [
+    { name: channel, use: channel === "chromium" ? {} : { channel }, testIgnore: ["**/perf.spec.ts"] },
+    {
+      name: "perf",
+      use: channel === "chromium" ? {} : { channel },
+      testMatch: ["**/perf.spec.ts"],
+      dependencies: [channel],
+    },
+  ],
   webServer: externalBaseUrl
     ? undefined
     : {

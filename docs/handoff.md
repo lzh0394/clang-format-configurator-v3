@@ -83,7 +83,7 @@ npm run golden:gen -- --check      # 只校验是否与 native 漂移（CI 用�
   - 导航 network-first：正常发版刷新即可看到新版本；更新横幅只有在 `sw.js` 变化时才出现。
 - **黄金对拍（M3）**：`tests/golden/golden-21.1.8.json` 是 **native 21.1.8 生成的提交物**；CI 用 `actions/setup-python@v7` + `pip install clang-format==21.1.8` 后跑 `node tools/gen-golden.mjs --check`（Linux 上重新生成 Windows 生成的 JSON，按 stdin/stdout 字节比较，理论上平台无关；如首跑出现漂移，按提示的 fixture 名排查，不要盲目重生成）。e2e 的 `golden.spec.ts` 在浏览器里用 wasm 跑同一组 fixture 并逐字节比较（29/29）。
 - **gzip 预算（M3）**：`tools/check-size.mjs` 口径是 zlib level 9，1 MB = 1024 KB；初 JS 只算 `dist/index.html` 里的入口 script + modulepreload，**不含**懒加载的 clike chunk（上屏实际约 +7.5 KB）也不含 wasm glue（plan §1 明确不含 wasm/schema）。CI 在 build 后跑。
-- **性能用例（M3）**：`tests/e2e/perf.spec.ts` 用 `retries: 1` 抵消并行 worker 噪声，但预算不放宽（p95 ≤80 ms、版本切换 ≤1.2 s / 200 ms）；在页面里直接 import wasm 测 `format()`，不走 UI 防抖。
+- **性能用例（M3/M4）**：`tests/e2e/perf.spec.ts` 在 `playwright.config.ts` 里是**独立的 `perf` project**，`dependencies: [channel]` 让它排在主套件全部结束之后串行跑——52 个版本后并行套件会抢占 CPU，缓存版本切换偶发 200–204 ms 而同类操作单独跑只要 64–95 ms，CI 因此红过一次；预算本身不放宽（p95 ≤80 ms、版本切换 ≤1.2 s / 200 ms），仍保留 `retries: 1`。在页面里直接 import wasm 测 `format()`，不走 UI 防抖。
 - **Windows 剪贴板**把换行归一成 CRLF：比较复制出来的 YAML 要 `replace(/\r\n/g,"\n")`；Edge 下载 `.clang-format` 的建议文件名是 `clang-format`（前导点被去掉）。
 - **CI 时长**：保留 Playwright 浏览器缓存、`npx playwright install chromium`（**不带 `--with-deps`**）、并发取消；M3 新增 setup-python + pip + `golden:gen --check` 约 +8–10 s，`check:size` 可忽略。
 - **网络**：`github.com`/`api.github.com` 偶发 DNS/TLS 抖动，**不要写重试循环**；API 还可能匿名限流（本次实测 403 rate limit），优先看 Actions 网页。
@@ -227,8 +227,8 @@ v3 的 M0–M4 已全部交付；没有阻塞项。留作以后（按需，不�
 | 项 | 结果 |
 |---|---|
 | `npm run verify` | ✅ typecheck 0 错 + **298 unit（18 文件）** + build |
-| `npx playwright test`（base `/`，production build） | ✅ **63 passed + 1 flaky**（30.2 s；flaky 是 perf 的 cached 版本切换并行噪声，单独跑通过） |
-| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **63 passed + 1 flaky**（29.6 s，同一 flaky） |
+| `npx playwright test`（base `/`，production build） | ✅ **64 passed**（31.4 s；perf 在独立 project 里串行跑，cached 切换 64 ms） |
+| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **64 passed**（31.5 s；cached 切换 75 ms） |
 | `npm run check:size` | ✅ 157 项全过：初 JS **224.5 KB**（限 250）；52 个 wasm **902.4–1071.5 KB**（限 1.1 MB）；core 6.4–8.5 KB（限 25）；docs 19.3–24.6 KB（限 45） |
 | `node tools/gen-golden.mjs --check` | ✅ 29 组与 native 21.1.8 一致（M3 记录，未改 fixture） |
 | 黄金对拍（wasm vs native） | ✅ 29/29 逐字节相同 |

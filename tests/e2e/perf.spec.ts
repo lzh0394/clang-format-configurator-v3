@@ -9,8 +9,9 @@ import { openApp } from "./helpers";
 // These run against the production preview (real wasm, real worker), but they
 // measure in-page work only: the format calls run directly in the page and the
 // version switch is timed from the select event to "ready + formatted output".
-// A single retry is allowed because the suite runs other wasm-heavy tests in
-// parallel; the budgets themselves are not relaxed.
+// playwright.config.ts puts this file in its own project that depends on the
+// main suite, so it runs after the wasm-heavy tests instead of competing with
+// them for CPU; the budgets themselves are not relaxed.
 
 test.describe.configure({ retries: 1 });
 
