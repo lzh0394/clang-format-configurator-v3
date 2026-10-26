@@ -11,7 +11,7 @@
 
 ![screenshot](docs/screenshot.png)
 
-当前进度：**M0–M4 全部完成**（骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/离线、分享链接、PWA、界面字号、全部 52 个版本、a11y 收尾、nightly 漂移检查）。开发状态、命令与踩过的坑见 [docs/handoff.md](docs/handoff.md)；设计与取舍的唯一事实来源是 [plan.md](plan.md)。
+当前进度：**M0–M4 全部完成**（骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/离线、分享链接、PWA、界面字号、软折行、全部 52 个版本、a11y 收尾、nightly 漂移检查）。开发状态、命令与踩过的坑见 [docs/handoff.md](docs/handoff.md)；设计与取舍的唯一事实来源是 [plan.md](plan.md)。
 
 ## 快速开始
 
@@ -29,7 +29,7 @@ npm run dev              # http://localhost:5173
 - **选项面板**：每个版本 147–209 个选项的虚拟列表（动态行高）、搜索（键名 + 文档全文，120 ms 防抖）、过滤 chips（全部 / 已修改 / 已废弃）、逐项显示「继承值 vs 修改值」与单行 reset；单一 Tab 停靠点 + ↑/↓/Home/End/PageUp/PageDown 的 roving 键盘模型（跨虚拟窗口可达）。
 - **五种控件**：bool / int / uint / string 标量、enum 下拉、map（结构体，稀疏修改）、`List of Strings`、`List of Structs`（增删条目、逐字段编辑）。
 - **只发送改动项**：内部状态是 `{version, style, modified}`，格式化 payload 是 `{BasedOnStyle, ...modified}`；默认值只用于显示，不会再像 v2 那样把 190 个默认值全量物化。
-- **CodeMirror 6 编辑器**：左栏可编辑源码、右栏只读格式化结果；语言随文件名（C/C++、Java、C#、Proto、Kotlin、Objective-C、JS/TS，`.clang-format` 为 YAML），Ctrl/Cmd+Enter 立即格式化，250 ms 防抖，编辑器字号 12–20 px 可调；文件名切到 C#/Proto/Java/Kotlin/JS/TS 时，若编辑器仍是未编辑的内置样例，会自动换成对应语言的示例。
+- **CodeMirror 6 编辑器**：左栏可编辑源码、右栏只读格式化结果；语言随文件名（C/C++、Java、C#、Proto、Kotlin、Objective-C、JS/TS，`.clang-format` 为 YAML），Ctrl/Cmd+Enter 立即格式化，250 ms 防抖，**长行默认软折行**（Settings 里可关），编辑器字号 12–20 px 可调；文件名切到 C#/Proto/Java/Kotlin/JS/TS 时，若编辑器仍是未编辑的内置样例，会自动换成对应语言的示例。
 - **分享链接**：`#s=<base64url(JSON)>` 编码会话（短键 `{k, v, s, m, c?}`），Copy link 一键复制；打开链接时 hash 优先于 localStorage，应用后自动清掉 fragment（之后编辑照常持久化）；code 超过 8 KB 时只分享配置，坏链接静默回退到本地存档。
 - **可安装 PWA**：`manifest.json` + 192/512/maskable/apple-touch 图标；可安装时显示安装横幅（可关闭，安装后隐藏），SW 预缓存 manifest 与图标，断网也能用。
 - **真实行级 diff**：`@codemirror/merge` 的 split 视图（不是 v2 的"左右并排"），变更行/片段高亮、两侧滚动同步、未变更区可折叠；按需加载，不进首屏。
@@ -41,13 +41,14 @@ npm run dev              # http://localhost:5173
 - **文档懒加载**：`docs.json` 首次搜索或首次展开某选项帮助时才拉取（~19–25 KB gzip），用构建期生成好的 HTML 渲染；渲染层给 `<pre>` 补 `tabindex=0` 并清理泄漏的 RST directive。
 - **wasm 在 Worker 里跑**：主线程不阻塞，一个版本一个实例，换版本 terminate 旧 worker。
 - **大输入保护**：>2 MB 源码先提示并需确认才格式化。
-- **会话持久化**：`{version, style, modified, code, theme, editorFontSize, uiFontScale}` 存在 localStorage（带状态版本号），刷新/重开自动恢复；不兼容或损坏的存档会被丢弃并提示，存储不可用/写满只告警不阻塞。
+- **会话持久化**：`{version, style, modified, code, theme, editorFontSize, uiFontScale, softWrap}` 存在 localStorage（带状态版本号），刷新/重开自动恢复；不兼容或损坏的存档会被丢弃并提示，存储不可用/写满只告警不阻塞。
 - **字号**：编辑器字号 12–20 px 与界面字号 90%/100%/115% 各自独立、都持久化；界面字号通过根字号 + rem 缩放全站 UI（设计基准为浏览器默认字号的 130%，即 Standard 100% 在 16px 浏览器下渲染为 20.8px；虚拟列表会重新测量行高），编辑器字号不跟着变。
+- **软折行**：源码、格式化结果、真实 diff 两侧、配置抽屉 YAML 四个 CodeMirror 编辑器共用同一个软折行开关，**默认开启**（长行在编辑器宽度内折行，不再出现横向滚动条）；Settings 菜单里的 "Soft wrap" 即时生效、持久化，关闭后恢复原有的编辑器内部横向滚动。切换只重配 CodeMirror 扩展，不重建 view，undo 历史与滚动位置不丢。
 - **主题与响应式**：跟随系统 / 浅色 / 深色三档（`data-theme` + 无闪白预置脚本），选择持久化；≤768 px 时双栏变为「Options / Code」选项卡，键盘左右方向键可切换；769–1100 px 仍保留选项面板在左，其中 769–900 px 会把源码与结果改为右上/右下排列（避免三栏过窄）。
 - **离线可用**：手写 Service Worker（`public/sw.js`，子路径安全）缓存 app shell 与已用版本 wasm/schema，断网后刷新仍能格式化；命中新版本时提示重载。
 - **可访问性**：跳过导航链接、控件都有可访问名称、chips `aria-pressed`、文档展开 `aria-expanded`、对话框 `aria-labelledby`、错误 `role="alert"`、格式化结果 polite live region、`prefers-reduced-motion` 生效、控件边框对比度按 WCAG 1.4.11 处理；ConfigDialog/ConfigDrawer 共用焦点陷阱（Tab 循环、Escape、焦点归还），两个 modal 同开时只有顶层响应。
 - **质量闸门**：`npm run check:size` 按 plan §1 检查首屏 JS/wasm/schema gzip 预算；`tests/golden/golden-21.1.8.json` 29 组由 **native clang-format 21.1.8** 生成，e2e 用 wasm 逐字节对拍（CI 再跑 `golden:gen --check` 防漂移），另有两项性能用例（format p95 ≤ 80 ms 与版本切换时限）。
-- **首屏 JS 224.6 KB gzip**（`check:size` 口径，预算 250 KB；上屏实际还要加 ~7.5 KB 的语言 chunk），单版本 wasm 902–1072 KB gzip。
+- **首屏 JS 224.7 KB gzip**（`check:size` 口径，预算 250 KB；上屏实际还要加 ~7.5 KB 的语言 chunk），单版本 wasm 902–1072 KB gzip。
 
 ## 脚本
 
@@ -87,10 +88,10 @@ tools/
   lib/tar.mjs            最小 ustar 读取（不引 tar 依赖）
 src/
   App.tsx                版本/风格/文件名 + 选项面板 + 编辑器/diff + 持久化/分享链接/PWA/字号 + 状态栏
-  editor/                CodeEditor（受控 CM6）、语言懒加载、示例代码、共享主题与字号变量
+  editor/                CodeEditor（受控 CM6）、soft-wrap（软折行扩展）、语言懒加载、示例代码、共享主题与字号变量
   components/            OptionPanel / OptionRow / controls（五种控件）/ ConfigDialog（快速导入导出）
                          ConfigDrawer（配置页抽屉）/ DiffPane（真实 split diff）/ ErrorPanel /
-                         SettingsMenu（主题与字号）/ useDocs / roving（键盘模型）/ focus-trap（焦点陷阱）
+                         SettingsMenu（主题、字号与软折行）/ useDocs / roving（键盘模型）/ focus-trap（焦点陷阱）
   pwa/                   install.ts（beforeinstallprompt 生命周期）+ InstallBanner
   lib/
     schema.ts            schema 类型、资源加载、buildStylePayload
@@ -109,7 +110,7 @@ src/
 tests/
   golden/                29 组 native clang-format 21.1.8 黄金输出（提交入库）
   e2e/                   smoke（M0）+ m1 + m2 + m3 + m4（分享/字号/版本/语言）
-                         + m4-pwa + m4-a11y + golden（wasm vs native）+ perf（p95）
+                         + m4-pwa + m4-a11y + soft-wrap（软折行）+ golden（wasm vs native）+ perf（p95）
 public/
   schema/<ver>/          core.json（选项 + 默认值）、docs.json（文档），已提交（52 个版本）
   schema/index.json      版本下拉的数据源

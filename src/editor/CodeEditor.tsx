@@ -18,6 +18,7 @@ import {
 } from "@codemirror/view";
 
 import { loadLanguageSupport, type EditorLanguage } from "./languages";
+import { softWrapExtensions } from "./soft-wrap";
 import { editorHighlightStyle, editorTheme } from "./theme";
 import styles from "./CodeEditor.module.css";
 
@@ -28,6 +29,8 @@ export type CodeEditorProps = {
   onChange?: (value: string) => void;
   language?: EditorLanguage;
   readOnly?: boolean;
+  /** Wrap long lines instead of scrolling horizontally (default on). */
+  softWrap?: boolean;
   ariaLabel: string;
   /** Applied to the `.cm-content` element so tests can target the editable area. */
   testId?: string;
@@ -57,6 +60,7 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
     onChange,
     language = "plain",
     readOnly = false,
+    softWrap = true,
     ariaLabel,
     testId,
     className,
@@ -78,6 +82,7 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
   const languageCompartment = useMemo(() => new Compartment(), []);
   const readOnlyCompartment = useMemo(() => new Compartment(), []);
   const attributesCompartment = useMemo(() => new Compartment(), []);
+  const softWrapCompartment = useMemo(() => new Compartment(), []);
   const submitKeymap = useMemo(
     () =>
       keymap.of([
@@ -120,6 +125,8 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
         languageCompartment.of([]),
         readOnlyCompartment.of(readOnlyExtensions(initialReadOnly)),
         attributesCompartment.of(EditorView.contentAttributes.of(contentAttributes(ariaLabel, testId, initialReadOnly))),
+        // Mount-time value; the effect below reconfigure it when the prop flips.
+        softWrapCompartment.of(softWrapExtensions(softWrap)),
         placeholder === undefined ? [] : placeholderExtension(placeholder),
         EditorView.updateListener.of((update) => {
           if (!update.docChanged || syncingRef.current) return;
@@ -179,6 +186,14 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
       ),
     });
   }, [readOnly, ariaLabel, testId, readOnlyCompartment, attributesCompartment]);
+
+  // Soft wrap is a preference, not an invariant: reconfigure the existing view
+  // so toggling it keeps undo history, selection and scroll position.
+  useEffect(() => {
+    viewRef.current?.dispatch({
+      effects: softWrapCompartment.reconfigure(softWrapExtensions(softWrap)),
+    });
+  }, [softWrap, softWrapCompartment]);
 
   return <div ref={hostRef} className={className ?? styles.host} />;
 }

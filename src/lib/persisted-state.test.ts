@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_EDITOR_FONT_SIZE,
+  DEFAULT_SOFT_WRAP,
   DEFAULT_STYLE,
   DEFAULT_THEME,
   DEFAULT_UI_FONT_SCALE,
@@ -61,6 +62,7 @@ const validState: PersistedState = {
   theme: "dark",
   editorFontSize: 18,
   uiFontScale: 1.15,
+  softWrap: false,
 };
 
 const stored = (value: unknown): FakeStorage =>
@@ -117,6 +119,7 @@ describe("loadPersistedState", () => {
         theme: "blue",
         editorFontSize: "18",
         uiFontScale: 1.5,
+        softWrap: "on",
       }),
     );
 
@@ -130,6 +133,7 @@ describe("loadPersistedState", () => {
       theme: DEFAULT_THEME,
       editorFontSize: DEFAULT_EDITOR_FONT_SIZE,
       uiFontScale: DEFAULT_UI_FONT_SCALE,
+      softWrap: DEFAULT_SOFT_WRAP,
     });
   });
 
@@ -187,6 +191,25 @@ describe("loadPersistedState", () => {
     }
   });
 
+  it("treats a document written before soft wrap (no softWrap) as enabled", () => {
+    const { softWrap: _omitted, ...beforeSoftWrap } = validState;
+    const result = loadPersistedState(stored(beforeSoftWrap));
+    expect(result.problem).toBe("none");
+    // The shipped default is on, so an old session starts wrapping.
+    expect(result.state?.softWrap).toBe(DEFAULT_SOFT_WRAP);
+    expect(DEFAULT_SOFT_WRAP).toBe(true);
+  });
+
+  it("accepts only booleans for softWrap and falls back to the default otherwise", () => {
+    expect(loadPersistedState(stored({ ...validState, softWrap: true })).state?.softWrap).toBe(true);
+    expect(loadPersistedState(stored({ ...validState, softWrap: false })).state?.softWrap).toBe(false);
+    for (const invalid of [0, 1, "false", "true", null, undefined, {}]) {
+      expect(loadPersistedState(stored({ ...validState, softWrap: invalid })).state?.softWrap).toBe(
+        DEFAULT_SOFT_WRAP,
+      );
+    }
+  });
+
   it("reports unavailable when getItem throws", () => {
     const storage = makeStorage();
     storage.getItem = () => {
@@ -239,12 +262,14 @@ describe("savePersistedState", () => {
       theme: "purple",
       editorFontSize: 999,
       uiFontScale: 1.5,
+      softWrap: "definitely",
     } as unknown as PersistedState;
     expect(savePersistedState(dirty, storage)).toBe("ok");
     const written = JSON.parse(storage.data.get(STORAGE_KEY) ?? "null") as PersistedState;
     expect(written.theme).toBe(DEFAULT_THEME);
     expect(written.editorFontSize).toBe(DEFAULT_EDITOR_FONT_SIZE);
     expect(written.uiFontScale).toBe(DEFAULT_UI_FONT_SCALE);
+    expect(written.softWrap).toBe(DEFAULT_SOFT_WRAP);
   });
 
   it("reports quota when the browser storage is full (by name or legacy code)", () => {

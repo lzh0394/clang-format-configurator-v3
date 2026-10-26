@@ -1,7 +1,7 @@
 // Versioned localStorage persistence (plan §5 持久化, §9 M3).
 //
 // One JSON document under STORAGE_KEY:
-//   { stateVersion, version, style, modified, code, theme, editorFontSize, uiFontScale }
+//   { stateVersion, version, style, modified, code, theme, editorFontSize, uiFontScale, softWrap }
 //
 // `loadPersistedState` is synchronous and never throws. Failure modes are
 // reported through `problem` instead of exceptions:
@@ -38,6 +38,15 @@ export const DEFAULT_STYLE: StyleName = "LLVM";
 export const DEFAULT_THEME: ThemePreference = "system";
 export const DEFAULT_EDITOR_FONT_SIZE = 13;
 export const DEFAULT_UI_FONT_SCALE = 1;
+
+/**
+ * Soft wrap is on by default: long lines in the source, formatted, config and
+ * diff editors wrap instead of forcing horizontal scrolling. Like
+ * `uiFontScale`, this is an additive field with a well-defined default, so
+ * documents written before it existed load with wrapping enabled and do not
+ * need a STATE_VERSION bump (plan §5 编辑器与 diff/持久化).
+ */
+export const DEFAULT_SOFT_WRAP = true;
 
 /**
  * Interface font-size tiers (plan §5 持久化/字号). `uiFontScale` is a
@@ -78,6 +87,7 @@ export type PersistedState = {
   theme: ThemePreference;
   editorFontSize: number;
   uiFontScale: number;
+  softWrap: boolean;
 };
 
 export type LoadProblem = "none" | "empty" | "corrupt" | "version-mismatch" | "unavailable";
@@ -163,6 +173,9 @@ function normalize(value: unknown): PersistedState | null {
       : DEFAULT_EDITOR_FONT_SIZE,
     // Missing (documents written before M4) and invalid values both mean 100%.
     uiFontScale: isUiFontScale(value.uiFontScale) ? value.uiFontScale : DEFAULT_UI_FONT_SCALE,
+    // Missing (documents written before soft wrap) and non-boolean values both
+    // mean "on": wrapping is the shipped default for every editor.
+    softWrap: typeof value.softWrap === "boolean" ? value.softWrap : DEFAULT_SOFT_WRAP,
   };
 }
 

@@ -107,6 +107,19 @@
   margin: 0;
 }
 
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.checkbox input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
 .field {
   display: flex;
   flex-direction: column;

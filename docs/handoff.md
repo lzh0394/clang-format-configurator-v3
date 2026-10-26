@@ -1,12 +1,12 @@
 # 交接文档（M0–M4 完成，v3 完整交付）
 
 > 新会话先读本文件，再读 [`plan.md`](../plan.md)。plan.md 是设计与取舍的唯一事实来源；本文只记状态、命令、坑和待办。
-> 最后更新：2026-10-26（精简文档：删除已完成里程碑的历史记录，未排期事项移交 [`todo.md`](todo.md)）。
+> 最后更新：2026-10-26（精简文档：删除已完成里程碑的历史记录，未排期事项移交 [`todo.md`](todo.md)；同日晚些时候增补默认开启的软折行）。软折行涉及 `src/editor/soft-wrap.ts`、`src/editor/CodeEditor.tsx`、`src/components/{DiffPane,SettingsMenu,ConfigDrawer}.tsx`（+ `SettingsMenu.module.css`）、`src/App.tsx`、`src/lib/persisted-state.ts`（+ 测试）、`tests/e2e/soft-wrap.spec.ts`、`plan.md`/`README.md`/`docs/handoff.md`。
 
 ## 1. 一句话现状
 
-**M0–M4 全部完成，v3 完整交付**：骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/响应式/离线、a11y 闸门，以及 M4 的分享链接、PWA（manifest + 安装提示）、C#/Proto 等示例与语言扩展、全部 **52** 个 wasm 版本、界面字号缩放、虚拟列表 roving、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查。
-`npm run verify` 全绿（typecheck + **298 单测 / 18 文件** + build）；Playwright **66 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 9 M4 + 5 M4-PWA + 5 M4-a11y）在 base `/` 与 `/<repo>/` 子路径下各 **66 passed**（perf 在独立 project 里串行跑）；`npm run check:size` **157 项全过**（首屏 JS **224.6 KB gzip** / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；52/52 版本运行期自检 + 312/312 native vs wasm 对拍；格式化 p95 9–23 ms（预算 80 ms）；dist ≈130 MB。
+**M0–M4 全部完成，v3 完整交付**：骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/响应式/离线、a11y 闸门，以及 M4 的分享链接、PWA（manifest + 安装提示）、C#/Proto 等示例与语言扩展、全部 **52** 个 wasm 版本、界面字号缩放、虚拟列表 roving、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查；2026-10-26 增补**默认开启的软折行**。
+`npm run verify` 全绿（typecheck + **300 单测 / 18 文件** + build）；Playwright **70 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 9 M4 + 5 M4-PWA + 5 M4-a11y + 4 soft-wrap）在 base `/` 与 `/<repo>/` 子路径下各 **70 passed**（perf 在独立 project 里串行跑）；`npm run check:size` **157 项全过**（首屏 JS **224.7 KB gzip** / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；52/52 版本运行期自检 + 312/312 native vs wasm 对拍；格式化 p95 9–23 ms（预算 80 ms）；dist ≈130 MB。
 **nightly**：`schema:check --allow-missing-native` 每日跑，漂移只开 issue，不阻塞发布。
 
 ## 2. 链接
@@ -30,9 +30,9 @@ npm run dev              # http://127.0.0.1:5173
 验证（提交前跑，不需要外网）：
 
 ```powershell
-npm run verify           # typecheck + vitest + build（298 单测 / 18 文件）
+npm run verify           # typecheck + vitest + build（300 单测 / 18 文件）
 npm run check:size       # 需先 build；按 plan §1 检查 gzip 预算（157 项 / 52 版本）
-npx playwright test      # 本地用 Edge（channel=msedge），66 条，约 33 s
+npx playwright test      # 本地用 Edge（channel=msedge），70 条，约 43 s
 ```
 
 子路径构建（模拟 Pages）：
@@ -112,7 +112,8 @@ src/
   App.module.css       布局（桌面双栏；≤768px 单栏+tabs）+ skip link/横幅样式
   main.tsx / styles.css  design tokens（浅/深两套、--ui-scale、--font-size-editor、--syntax-*、--border-control）
   editor/
-    CodeEditor.tsx      受控 CM6 编辑器：value/onChange/language/readOnly/testId/onSubmit
+    CodeEditor.tsx      受控 CM6 编辑器：value/onChange/language/readOnly/softWrap/testId/onSubmit
+    soft-wrap.ts        软折行扩展：EditorView.lineWrapping 的 Compartment 封装（默认开启）
     languages.ts        文件名→语言映射（含 kotlin/objc/js/ts）+ lazy 语言包，带缓存
     examples.ts         各语言示例代码 + getSampleCode/isKnownSample（M4）
     theme.ts            共享 CM6 主题 + 语法高亮（全部走 CSS 变量）
@@ -126,19 +127,19 @@ src/
     ConfigDrawer.tsx    配置页抽屉（与 ConfigDialog 共用焦点陷阱）
     DiffPane.tsx        真实 split diff（M2）
     ErrorPanel.tsx      结构化错误面板（M2）
-    SettingsMenu.tsx    主题三档 + 编辑器字号 + 界面字号（M3/M4，Settings 弹出层）
+    SettingsMenu.tsx    主题三档 + 编辑器字号 + 界面字号 + 软折行（M3/M4/SW，Settings 弹出层）
     useDocs.ts          docs 懒加载 hook + prepareDocsHtml（M4 修 docs pre/标记）
   lib/
     schema.ts / schema-store.ts / config.ts / config-state.ts / config-io.ts / config-diff.ts / diagnostics.ts
     share-link.ts       URL hash 分享链接编解码（纯逻辑，M4）
     formatter-client.ts worker 封装：串行化、latest-wins、supersede、20s 超时、onFatal
-    persisted-state.ts  localStorage 持久化（stateVersion=1；uiFontScale 为兼容增字段）
+    persisted-state.ts  localStorage 持久化（stateVersion=1；uiFontScale/softWrap 为兼容增字段）
     theme.ts            ThemePreference、resolveTheme、applyTheme（data-theme + color-scheme）
     service-worker.ts   SW 注册/更新/在线离线事件（prod-only，可注入环境测试）
   worker/              formatter.worker.ts（唯一 wasm 实例、串行化、console 诊断捕获）+ protocol
 tests/
   golden/              29 组 native clang-format 21.1.8 黄金输出（提交入库）
-  e2e/                 helpers + smoke + m1 + m2 + m3 + m4 + m4-pwa + m4-a11y + golden + perf
+  e2e/                 helpers + smoke + m1 + m2 + m3 + m4 + m4-pwa + m4-a11y + soft-wrap + golden + perf
 public/
   schema/<ver>/        已提交（core.json + docs.json），52 个版本；index.json 驱动版本下拉
   manifest.json        PWA manifest（相对 start_url/scope）
@@ -155,7 +156,7 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 
 ## 6. 已实现的行为与实现细节（读代码前必须知道）
 
-1. **持久化（`persisted-state.ts` + `App.tsx`）**：状态文档 `{stateVersion, version, style, modified, code, theme, editorFontSize, uiFontScale}`，`STORAGE_KEY="clang-format-configurator:v3"`，`STATE_VERSION=1`。`loadPersistedState` 同步、不抛异常：`empty/unavailable` 静默，`corrupt/version-mismatch` → 丢弃 + 一次性 notice（"Saved session was discarded"），单字段非法只降级为默认。`savePersistedState` 自身 stamp 版本号，quota/unavailable 返回状态码，App 只提示一次（`persist-banner`）。保存 400 ms 防抖；`pagehide`/卸载用 ref 稳定回调 flush（**不要让 flush effect 依赖每次编辑都变的函数**，否则每敲一个键都会同步写 localStorage）。
+1. **持久化（`persisted-state.ts` + `App.tsx`）**：状态文档 `{stateVersion, version, style, modified, code, theme, editorFontSize, uiFontScale, softWrap}`，`STORAGE_KEY="clang-format-configurator:v3"`，`STATE_VERSION=1`。`loadPersistedState` 同步、不抛异常：`empty/unavailable` 静默，`corrupt/version-mismatch` → 丢弃 + 一次性 notice（"Saved session was discarded"），单字段非法只降级为默认。`savePersistedState` 自身 stamp 版本号，quota/unavailable 返回状态码，App 只提示一次（`persist-banner`）。保存 400 ms 防抖；`pagehide`/卸载用 ref 稳定回调 flush（**不要让 flush effect 依赖每次编辑都变的函数**，否则每敲一个键都会同步写 localStorage）。
 2. **版本恢复**：版本列表加载后优先用存档里的 version（仍在 `schema/index.json` 里才用），否则用默认版本；`reconcileModified` 丢弃目标 schema 不认识/已废弃的键，丢弃时把键名收进 notice（最多列 12 个）。
 3. **主题（`theme.ts` + `SettingsMenu` + `styles.css`）**：三档 system/light/dark；显式档设 `html[data-theme=...]` + 内联 `color-scheme`，system 移除两者交给 `prefers-color-scheme`。CSS 词令顺序：`:root` 浅色基色 → `@media dark { :root:not([data-theme=light]) }` → `:root[data-theme=dark]`。`index.html` 预置脚本读 storage 的 `theme` 提前应用（防闪白）。**没有 matchMedia 监听**：system 档完全交给 CSS，切系统主题即时生效。
 4. **响应式（`App.tsx` + `App.module.css`）**：`matchMedia("(max-width: 768px)")` 控制 `isMobile`；移动端渲染 `role="tablist"` 的两个 tab（`tab-options`/`tab-code`，默认 Code），main 上加 `mainOptions`/`mainCode` 类隐藏另一面板；←/→ 切换并转移焦点。CSS 断点：1100px/900px 是布局细化，768px 才是选项卡。
@@ -170,6 +171,7 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 13. **键盘/焦点（M4）**：`roving.ts` 纯逻辑（isRovingNavigationKey/nextRovingIndex/pageStep/clampIndex/resolveActiveIndex/rovingTabIndex），OptionPanel 用一个 `activeKey` + `rangeExtractor` 强制把 active 行渲染进窗口；`focus-trap.ts` 提供 collectTabStops/resolveTabTarget + modal 栈（drawer z-index 110 > dialog 100），顶层 modal 消费 Escape/Tab 时 `stopImmediatePropagation()`，否则一次 Escape 会关两个。`useDocs.prepareDocsHtml` 在渲染层给 `<pre>` 加 `tabindex=0` 并清理 RST 泄漏标记（幂等，不改生成器）。
 14. **52 版本 schema（M4）**：`versions.json` 行可带 `"dump": "native"`；`gen-schema.mjs` 对 native 版本逐个 `--style=<Style> --dump-config`（二进制从 `.cache/cf-native/<ver>` 或 `.cache/llvm/<ver>` 找），仍用 RST 做类型/枚举/文档与校验闸门；`--check` 把结果写到 `.cache/schema-check` 并与 `public/schema` 逐文件比较；`--allow-missing-native` 跳过默认值、照验 docs/结构。`check-size.mjs` 读 `versions.json` 逐版本校验 wasm/core/docs，缺版本直接失败；wasm 预算 1.1 MB（23.x 上游变大）。
 15. **桌面三栏布局（M4 收尾）**：`main` 第二列 `minmax(0, 1fr)` + `.workbench/.pane/.editorHost { min-width: 0 }` 让 CM6 长行只在编辑器内部横向滚动；`.optionsArea` 有 `background: var(--surface)`、`.panel { width: 100% }` 保证左列铺满。**≤900px 且 >768px 时保持「选项面板在左、SOURCE 上右、FORMATTED 下右」**（`.panes` 在 900 断点内改单列两行）。改这两个文件后跑 m4 的 "desktop columns…" 与 "narrow desktop…" 用例。
+16. **软折行（2026-10-26 产品增补）**：`softWrap` 默认 `true`（`DEFAULT_SOFT_WRAP`，Settings 菜单 checkbox `data-testid="soft-wrap"`）；源码/结果（`CodeEditor`）、split diff 两侧（`DiffPane`）、配置抽屉 YAML（`ConfigDrawer` → `CodeEditor`）共用。实现只有一条：`src/editor/soft-wrap.ts` 的 `softWrapExtensions(enabled)` 返回 `EditorView.lineWrapping` 或空数组，放进各自 `new Compartment()`，运行时 `compartment.reconfigure(...)` **不重建 view**（undo 历史、选区、滚动位置都保留）；判定开启的 DOM 特征是 `.cm-content` 上的 `cm-lineWrapping` class（contentAttributes facet 会与 data-testid 的 attributes 合并，不要改成 editorAttributes）。DiffPane 里一个 compartment 同时用于 a/b 两侧，切换时两侧分别 dispatch；MergeView 会因高度变化重新测量行块与 spacer。持久化是向后兼容增字段（旧存档缺 `softWrap` 按 true），`STATE_VERSION` 仍为 1。回归：`tests/e2e/soft-wrap.spec.ts`（默认开启 + 长行实际折行/无横向滚动 + 关闭后恢复 + 刷新保持 + diff/抽屉跟随）。
 
 ## 7. 已知缺陷 / 有意的取舍
 
@@ -183,7 +185,7 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 - **nightly 不验 26 个 native-dump 版本的默认值**（需要 1.9 GB native；跳过时仍验 RST docs 与选项结构）。严格模式在本地/发布前跑 `npm run schema:check`。
 - 没有 ESLint/Prettier、没有 Dependabot、没有 per-PR 预览。
 
-## 8. e2e 覆盖清单（66 条）
+## 8. e2e 覆盖清单（70 条）
 
 - **smoke（4，M0）**：首屏格式化 / 换风格 / 换版本 / 改源码。
 - **m1（17，M1）**：纯 UI 生成配置、reset、Minimal/Full roundtrip、导入 warning/legacy、稀疏 map、struct list、list<string>、过滤 chips、对话框焦点、非法 YAML、文件加载、下载、复制、docs 懒加载、enum/bool 控件、override 警告。
@@ -192,6 +194,7 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 - **m4（9，M4）**：分享链接复制→新标签恢复、hash 压过 storage、坏 hash 回退、首帧解码、界面字号缩放/持久化/行不重叠、文件名跟随示例（C#/Proto）、52 版本下拉 + 用 16.0.6/23.1.1 实际格式化、桌面三栏在 1600/1360/1280/1100 四个宽度下无横向溢出且面板铺满左列、769–900px 下「选项在左、SOURCE 上右、FORMATTED 下右」且回到 1100 仍是三栏并排。
 - **m4-pwa（5，M4）**：manifest 字段/scope/图标、SW 预缓存 manifest+图标、安装横幅出现→安装、dismiss 持久化、语言徽标。
 - **m4-a11y（5，M4）**：跨虚拟窗口方向键/Home/End/PageUp/PageDown、单一 Tab 停靠点与 Tab 进控件、ConfigDialog 焦点陷阱/Escape/焦点归还、docs `<pre>` 可聚焦 + RST 标记清理、两个 modal 只有顶层响应。
+- **soft-wrap（4，2026-10-26 增补）**：默认开启（source/output 双栏都带 `cm-lineWrapping`，Settings checkbox 勾选）；300+ 字符长行实际折行（`.cm-line` 高度 >1.5 倍单行、scroller 无横向溢出），关闭后即时恢复单行高度与横向滚动，DOM 探针证明是活 view 重配而非重挂载；`softWrap` false→刷新、true→刷新两次恢复；diff 打开时切换两侧同步折行、关闭 diff 后主编辑器仍保持；配置抽屉重新挂载的 YAML 编辑器跟随开关（默认 on / 关闭后 off）。
 - **golden（1）**：29 组 fixture 与 native 21.1.8 逐字节相同（wasm 在浏览器里跑）。
 - **perf（2）**：format p95 ≤80 ms；版本切换冷 ≤1.2 s / 缓存 ≤200 ms。
 
@@ -204,7 +207,8 @@ v3 的 M0–M4 已全部交付，没有阻塞项。按需事项（不承诺）�
 - `plan.md` 是设计与取舍的唯一事实来源；实现偏离时先改 plan 再改代码。
 - 提交信息用 `area: summary`（`feat:` / `test:` / `docs:` / `ci:`），一次提交一件事。
 - 加版本：`tools/versions.json` 加一行（wasm 没有 `dump_config` 就加 `"dump": "native"`，并把同版本 native 二进制放到 `.cache/cf-native/<ver>` 或 `.cache/llvm/<ver>`）→ `npm run prepare:assets -- --only=<ver>` → 提交 `public/schema/<ver>` 与 lock → push。CI 不重跑 schema 生成（只 `prepare:wasm`）。
-- **改持久化**：storage key / 不兼容 shape 变化必须 bump `STATE_VERSION`，并同步 `index.html` 的预置主题脚本（只依赖 `parsed.theme`）与 `persisted-state.test.ts`；**新增带默认值的字段**（如 `uiFontScale`）是向后兼容的，不 bump，但仍要更新 normalize/测试。
+- **改持久化**：storage key / 不兼容 shape 变化必须 bump `STATE_VERSION`，并同步 `index.html` 的预置主题脚本（只依赖 `parsed.theme`）与 `persisted-state.test.ts`；**新增带默认值的字段**（如 `uiFontScale`、`softWrap`）是向后兼容的，不 bump，但仍要更新 normalize/测试。
+- **改软折行**：源码/结果/diff 两侧/config-yaml 四个编辑器共用 App 的 `softWrap`（Settings checkbox `soft-wrap`），都走 `src/editor/soft-wrap.ts` 的 Compartment 重配；新增 CodeMirror 宿主时若不透传该 prop 会退回“默认开启”（CodeEditor 默认 `softWrap=true`），与全局开关不一致。e2e 用 `.cm-content` 的 `cm-lineWrapping` class 判定开启，改实现时保持这个可观测特征。
 - **改分享链接**：`share-link.ts` 的载荷 `k` 是格式版本；字段语义变化要 bump `k` 并保留旧格式解码，同时更新 `share-link.test.ts` 与 m4 e2e。
 - **改界面字号/字体**：组件 CSS 字号一律 rem（`--font-size-editor` 例外），改后跑 m4 的 "interface size" 用例；虚拟列表 remeasure 只能用 `measureElement`（见 §4）。
 - **改 PWA**：manifest 保持相对 URL（子路径安全）；改 SW 预缓存列表要同步 `public/sw.js` 与 `service-worker.test.ts`，并 bump `CACHE_VERSION`。
@@ -217,6 +221,18 @@ v3 的 M0–M4 已全部交付，没有阻塞项。按需事项（不承诺）�
 - 网络抖动时不写重试循环；GitHub API 匿名限流时直接看 Actions 网页。
 
 ## 11. 最近验证记录
+
+### 本地（2026-10-26，软折行增补）
+
+| 项 | 结果 |
+|---|---|
+| `npm run verify` | ✅ typecheck 0 错 + **300 unit（18 文件）** + build |
+| `npx playwright test`（base `/`，production build） | ✅ **70 passed**（42.7 s；新增 soft-wrap 4 条，perf 在独立 project 串行） |
+| `npx playwright test`（`VITE_BASE=/clang-format-configurator-v3/`） | ✅ **70 passed**（42.9 s） |
+| `npm run check:size` | ✅ 157 项全过：初 JS **224.7 KB**（限 250）；52 wasm、104 schema 全过 |
+| 性能 | ✅ format p95 **14.6 / 15.0 ms**（限 80）；版本切换冷 **114–130 ms**、缓存 **93–113 ms** |
+| 目检（1280×800，Edge） | ✅ 长行折行成 7 个视觉行且 `scrollWidth == clientWidth`；diff 两侧同步折行后 `int b = 1;` 仍在两侧对齐；关闭开关后恢复单行 + 横向滚动；Settings 菜单新增 "Soft wrap" 位置正常 |
+| 单测范围 | 新增 persisted-state 2 条：旧存档缺 `softWrap` → 默认 true；非布尔值回退默认 + 保存时归一 |
 
 ### 本地（2026-10-24，M4 完成后）
 

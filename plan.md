@@ -166,11 +166,11 @@ type Res = { t: "ready"; ms: number } | { t: "ok"; id: number; code: string; ms:
 
 **选项面板**：搜索框（键名 + 文档全文，防抖 120 ms）、过滤 chips（全部 / 已修改 / 已废弃）、虚拟列表（TanStack Virtual）、每行显示"继承值 vs 修改值"、`BraceWrapping`/`SpaceBeforeParensOptions` 的 override 警告、折叠文档用 `dangerouslySetInnerHTML`（内容只来自构建期生成的 schema，不接受运行时输入）。
 
-**编辑器与 diff**：CodeMirror 6，左栏可编辑源码，右栏只读格式化结果，`@codemirror/merge` 的 split 视图做真实行级 diff（v2 的 "Diff mode" 其实只是左右并排，不算 diff）。输入防抖 250 ms；Ctrl/Cmd+Enter 立即格式化；"auto-format" 开关保留。
+**编辑器与 diff**：CodeMirror 6，左栏可编辑源码，右栏只读格式化结果，`@codemirror/merge` 的 split 视图做真实行级 diff（v2 的 "Diff mode" 其实只是左右并排，不算 diff）。输入防抖 250 ms；Ctrl/Cmd+Enter 立即格式化；"auto-format" 开关保留。**长行默认软折行**（`EditorView.lineWrapping`，源码 / 格式化结果 / diff 两侧 / 配置抽屉 YAML 一致），可在 Settings 的 "Soft wrap" 关闭并持久化；切换走 Compartment 运行时重配，不重建 view。
 
 **配置页**：抽屉式，CM6 YAML 编辑器 + 基于 schema 的实时校验 + 上传/下载 + Apply/Close；底部显示"相对于当前风格会新增/删除哪些键"的预览。
 
-**持久化**：localStorage 保存 `{version, style, modified, code, theme, editorFontSize, uiFontScale}`（带 schema 版本号，不兼容时丢弃并提示）；分享链接把会话编码进 URL hash（`#s=<base64url(JSON)>`，载荷用短键 `{k, v, s, m, c?}`，`k` 是载荷格式版本；`c`（code）≤8 KB 才带，编码后 ≤48 KB）。优先级 **hash > storage**：首次渲染前解码，应用后 `history.replaceState` 清掉 fragment（避免每次刷新都被同一条链接覆盖），"Copy link" 再从当前会话重新生成；无效/截断的 hash 静默回退到 storage。界面字号缩放（`uiFontScale`，0.9/1/1.15 三档，相对设计基准）作为**向后兼容的增字段**不 bump `STATE_VERSION`，旧存档按 1.0 加载；设计基准为浏览器默认字号的 **130%**（`styles.css` 的根字号，组件字号全部 rem）。
+**持久化**：localStorage 保存 `{version, style, modified, code, theme, editorFontSize, uiFontScale, softWrap}`（带 schema 版本号，不兼容时丢弃并提示）；分享链接把会话编码进 URL hash（`#s=<base64url(JSON)>`，载荷用短键 `{k, v, s, m, c?}`，`k` 是载荷格式版本；`c`（code）≤8 KB 才带，编码后 ≤48 KB）。优先级 **hash > storage**：首次渲染前解码，应用后 `history.replaceState` 清掉 fragment（避免每次刷新都被同一条链接覆盖），"Copy link" 再从当前会话重新生成；无效/截断的 hash 静默回退到 storage。界面字号缩放（`uiFontScale`，0.9/1/1.15 三档，相对设计基准）与软折行偏好（`softWrap`，默认 true）都作为**向后兼容的增字段**不 bump `STATE_VERSION`，旧存档按 1.0 / 开启加载；界面字号设计基准为浏览器默认字号的 **130%**（`styles.css` 的根字号，组件字号全部 rem）。
 
 **主题/响应式/可访问性**：跟随系统 + 手动切换；桌面为选项面板 + 双栏编辑器，1100/900 px 是布局细化（≤900 px 时编辑器上下叠放、选项仍在左），≤768 px 改为「选项 / 代码」选项卡；所有控件有 label，错误用 `role="alert"` + `aria-live`。
 
@@ -205,9 +205,9 @@ type Res = { t: "ready"; ms: number } | { t: "ok"; id: number; code: string; ms:
 
 四道闸门，任何一道失败都不发布：
 
-- **单元（Vitest）**：298 条 / 18 文件，覆盖 schema 归一化、默认值合并、`modified` 差分、导出/导入往返与字节幂等、legacy `AlignConsecutive*` 转换、Minimal/Full 导出、持久化、分享链接、SW、roving 与焦点陷阱。
+- **单元（Vitest）**：300 条 / 18 文件，覆盖 schema 归一化、默认值合并、`modified` 差分、导出/导入往返与字节幂等、legacy `AlignConsecutive*` 转换、Minimal/Full 导出、持久化（含软折行默认值）、分享链接、SW、roving 与焦点陷阱。
 - **黄金对拍**：`tests/golden/golden-21.1.8.json`（29 组 fixture，覆盖 7 种风格与边界输入）由 **native** clang-format 21.1.8 生成（CI 里 `pip install clang-format==21.1.8`，该 PyPI 包带原生二进制，`golden:gen --check` 防提交物漂移）；e2e 用 wasm 跑同一组 fixture 逐字节比较——这是"wasm 与原生一致"的守门员。
-- **E2E（Playwright）**：66 条（smoke + M1/M2/M3/M4 + PWA + a11y + golden + perf），覆盖纯 UI 生成配置、diff、错误面板、持久化/主题/离线、分享链接、界面字号、52 版本切换与桌面布局；perf 用例在独立 project 里串行跑。
+- **E2E（Playwright）**：70 条（smoke + M1/M2/M3/M4 + PWA + a11y + soft-wrap + golden + perf），覆盖纯 UI 生成配置、diff、错误面板、持久化/主题/离线、分享链接、界面字号与软折行、52 版本切换与桌面布局；perf 用例在独立 project 里串行跑。
 - **体积与性能预算**：`check:size` 按 §1 检查首屏 JS 与每版本 wasm/schema 的 gzip；`perf.spec.ts` 检查格式化 p95 与版本切换时限，超限即失败。
 - **CI**：GitHub Actions，`npm ci` + `prepare:wasm`（wasm 走缓存）+ 黄金校验 + typecheck + unit + build + `check:size` + e2e；main 绿了自动发布到 GitHub Pages（见 8.1）。
 

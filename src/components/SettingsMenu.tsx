@@ -26,6 +26,9 @@ export type SettingsMenuProps = {
   onFontSizeChange: (size: number) => void;
   uiFontScale: number;
   onUiFontScaleChange: (scale: number) => void;
+  /** Wrap long editor lines instead of scrolling horizontally (default on). */
+  softWrap: boolean;
+  onSoftWrapChange: (enabled: boolean) => void;
 };
 
 /** Same choices as the M2 header select; the persisted layer accepts 11–24. */
@@ -55,7 +58,16 @@ const FOCUSABLE_SELECTOR =
   "button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 export function SettingsMenu(props: SettingsMenuProps): JSX.Element {
-  const { theme, onThemeChange, editorFontSize, onFontSizeChange, uiFontScale, onUiFontScaleChange } = props;
+  const {
+    theme,
+    onThemeChange,
+    editorFontSize,
+    onFontSizeChange,
+    uiFontScale,
+    onUiFontScaleChange,
+    softWrap,
+    onSoftWrapChange,
+  } = props;
 
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -211,6 +223,16 @@ export function SettingsMenu(props: SettingsMenuProps): JSX.Element {
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              checked={softWrap}
+              data-testid="soft-wrap"
+              onChange={(event) => onSoftWrapChange(event.target.checked)}
+            />
+            <span>Soft wrap</span>
           </label>
 
           <label className={styles.field}>

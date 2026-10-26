@@ -17,6 +17,7 @@ import { Compartment, EditorState, Prec, type Extension } from "@codemirror/stat
 import { drawSelection, EditorView, keymap, lineNumbers } from "@codemirror/view";
 
 import { loadLanguageSupport, type EditorLanguage } from "../editor/languages";
+import { softWrapExtensions } from "../editor/soft-wrap";
 import { editorHighlightStyle, editorTheme } from "../editor/theme";
 import styles from "./DiffPane.module.css";
 
@@ -30,6 +31,12 @@ export type DiffPaneProps = {
   onChange: (code: string) => void;
   /** Ctrl/Cmd+Enter inside the left editor. */
   onSubmit?: () => void;
+  /**
+   * Wrap long lines on both sides (default on), matching the standalone
+   * editors. The merge view aligns lines with spacers, so wrapping stays
+   * coherent: chunk boundaries are re-measured when the setting changes.
+   */
+  softWrap?: boolean;
 };
 
 // The contract test ids / a11y attributes must land on `.cm-content` of each
@@ -72,7 +79,7 @@ function baseExtensions(): Extension[] {
  * `height: 100%` (or flex) container.
  */
 export function DiffPane(props: DiffPaneProps): JSX.Element {
-  const { code, output, language, onChange, onSubmit } = props;
+  const { code, output, language, onChange, onSubmit, softWrap = true } = props;
 
   const hostRef = useRef<HTMLDivElement>(null);
   const mergeRef = useRef<MergeView | null>(null);
@@ -89,6 +96,10 @@ export function DiffPane(props: DiffPaneProps): JSX.Element {
 
   const sourceLanguage = useMemo(() => new Compartment(), []);
   const outputLanguage = useMemo(() => new Compartment(), []);
+  // One compartment instance is shared by both sides: each editor's state has
+  // its own entry for it, and the effect below dispatches the same value to
+  // both. Sharing keeps the "both sides wrap or neither" invariant obvious.
+  const softWrapCompartment = useMemo(() => new Compartment(), []);
 
   // `defaultKeymap` binds Mod-Enter to `insertBlankLine`, so the submit binding
   // must be given higher precedence to win (and return false when unhandled so
@@ -121,6 +132,7 @@ export function DiffPane(props: DiffPaneProps): JSX.Element {
       ...baseExtensions(),
       SOURCE_ATTRIBUTES,
       sourceLanguage.of([]),
+      softWrapCompartment.of(softWrapExtensions(softWrap)),
       submitKeymap,
       EditorView.updateListener.of((update) => {
         // Only user edits reach onChange; programmatic doc syncs set the flag.
@@ -133,6 +145,7 @@ export function DiffPane(props: DiffPaneProps): JSX.Element {
       ...baseExtensions(),
       OUTPUT_ATTRIBUTES,
       outputLanguage.of([]),
+      softWrapCompartment.of(softWrapExtensions(softWrap)),
       EditorState.readOnly.of(true),
       EditorView.editable.of(false),
     ];
@@ -153,7 +166,9 @@ export function DiffPane(props: DiffPaneProps): JSX.Element {
       mergeRef.current = null;
       merge.destroy();
     };
-  }, [sourceLanguage, outputLanguage, submitKeymap]);
+    // Mount-only for `softWrap`: the dedicated effect below reconfigures both
+    // sides when the preference changes, so the view is never recreated.
+  }, [sourceLanguage, outputLanguage, softWrapCompartment, submitKeymap]);
 
   // Controlled sync: push external source changes into the left document.
   useEffect(() => {
@@ -202,6 +217,17 @@ export function DiffPane(props: DiffPaneProps): JSX.Element {
       cancelled = true;
     };
   }, [language, sourceLanguage, outputLanguage]);
+
+  // Soft wrap is a preference shared with the standalone editors: flip it on
+  // both sides in place. MergeView re-measures line blocks after the resulting
+  // height change, so its alignment spacers are refined instead of drifting.
+  useEffect(() => {
+    const merge = mergeRef.current;
+    if (merge === null) return;
+    const extension = softWrapExtensions(softWrap);
+    merge.a.dispatch({ effects: softWrapCompartment.reconfigure(extension) });
+    merge.b.dispatch({ effects: softWrapCompartment.reconfigure(extension) });
+  }, [softWrap, softWrapCompartment]);
 
   return (
     <div

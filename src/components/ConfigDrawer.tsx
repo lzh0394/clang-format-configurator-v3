@@ -51,6 +51,8 @@ export type ConfigDrawerProps = {
   modified: Modified;
   onClose: () => void;
   onApply: (result: ImportResult) => void;
+  /** Wrap long YAML lines instead of scrolling horizontally (default on). */
+  softWrap?: boolean;
 };
 
 type ImportFailure = { message: string; detail: string };
@@ -75,7 +77,7 @@ const EMPTY_VALIDATION: ValidationState = {
 };
 
 export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | null {
-  const { open, schema, style, modified, onClose, onApply } = props;
+  const { open, schema, style, modified, onClose, onApply, softWrap = true } = props;
 
   const [mode, setMode] = useState<ExportMode>("minimal");
   const [text, setText] = useState("");
@@ -312,6 +314,7 @@ export default function ConfigDrawer(props: ConfigDrawerProps): JSX.Element | nu
               ariaLabel="Configuration YAML"
               testId="config-yaml"
               className={styles.editor}
+              softWrap={softWrap}
             />
           </div>
 

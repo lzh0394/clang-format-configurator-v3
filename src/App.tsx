@@ -10,6 +10,7 @@ import type { ImportResult } from "./lib/config-io";
 import { FormatterClient, FormatterSupersededError, type FormatterError } from "./lib/formatter-client";
 import {
   DEFAULT_EDITOR_FONT_SIZE,
+  DEFAULT_SOFT_WRAP,
   DEFAULT_THEME,
   DEFAULT_UI_FONT_SCALE,
   STATE_VERSION,
@@ -116,6 +117,7 @@ export default function App() {
   const [uiFontScale, setUiFontScale] = useState<number>(
     restored.state?.uiFontScale ?? DEFAULT_UI_FONT_SCALE,
   );
+  const [softWrap, setSoftWrap] = useState<boolean>(restored.state?.softWrap ?? DEFAULT_SOFT_WRAP);
   const [largeInputPending, setLargeInputPending] = useState(false);
   const [diff, setDiff] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
@@ -427,6 +429,7 @@ export default function App() {
       theme,
       editorFontSize,
       uiFontScale,
+      softWrap,
     });
     if (result === "ok") {
       persistProblemRef.current = null;
@@ -438,7 +441,7 @@ export default function App() {
       persistProblemRef.current = result;
       setPersistProblem(result);
     }
-  }, [version, config.style, config.modified, code, theme, editorFontSize, uiFontScale]);
+  }, [version, config.style, config.modified, code, theme, editorFontSize, uiFontScale, softWrap]);
 
   useEffect(() => {
     if (!version) return;
@@ -684,6 +687,8 @@ export default function App() {
             onFontSizeChange={setEditorFontSize}
             uiFontScale={uiFontScale}
             onUiFontScaleChange={setUiFontScale}
+            softWrap={softWrap}
+            onSoftWrapChange={setSoftWrap}
           />
         </div>
       </header>
@@ -879,6 +884,7 @@ export default function App() {
                 language={language}
                 onChange={setCode}
                 onSubmit={() => void runFormat()}
+                softWrap={softWrap}
               />
             </Suspense>
           ) : (
@@ -898,6 +904,7 @@ export default function App() {
                   ariaLabel="Source code"
                   testId="source"
                   onSubmit={() => void runFormat()}
+                  softWrap={softWrap}
                 />
               </section>
 
@@ -916,6 +923,7 @@ export default function App() {
                   ariaLabel="Formatted output"
                   testId="output"
                   placeholder="formatted output appears here…"
+                  softWrap={softWrap}
                 />
               </section>
             </div>
@@ -969,6 +977,7 @@ export default function App() {
           modified={config.modified}
           onClose={() => setConfigOpen(false)}
           onApply={handleDrawerApply}
+          softWrap={softWrap}
         />
       )}
     </div>
