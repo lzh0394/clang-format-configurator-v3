@@ -454,7 +454,7 @@ test("copy puts the exported YAML on the clipboard", async ({ page, context, bro
 // Docs expand: lazy docs.json load and build-time HTML rendering
 // ---------------------------------------------------------------------------
 
-test("docs expand lazily loads and renders the option documentation", async ({ page }) => {
+test("docs expand lazily loads the documentation and colour-codes the toggle", async ({ page }) => {
   const failed: string[] = [];
   page.on("response", (response) => {
     if (response.status() >= 400) failed.push(`${response.status()} ${response.url()}`);
@@ -464,11 +464,33 @@ test("docs expand lazily loads and renders the option documentation", async ({ p
   // No search yet: docs have not been fetched, the expand button must load them.
   const row = await findOptionRow(page, "IndentWidth");
   await expect(row).toBeVisible();
-  await page.getByTestId("docs-IndentWidth").click();
+
+  const docsButton = page.getByTestId("docs-IndentWidth");
+  const buttonColors = () =>
+    docsButton.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { background: style.backgroundColor, color: style.color };
+    });
+  const closed = await buttonColors();
+  await expect(docsButton).toHaveAttribute("aria-expanded", "false");
+
+  await docsButton.click();
 
   const docs = page.getByTestId("docs-content-IndentWidth");
   await expect(docs).toBeVisible({ timeout: 15_000 });
   await expect(docs).toContainText(/indent/i);
+
+  // The toggle keeps its "Docs" label, so the open state is colour-coded: the
+  // chip turns accent-filled (#2563eb in the light palette) and keeps that
+  // fill on hover until the docs block is collapsed again.
+  await expect(docsButton).toHaveAttribute("aria-expanded", "true");
+  await expect.poll(async () => (await buttonColors()).background).toBe("rgb(37, 99, 235)");
+  expect((await buttonColors()).color).not.toBe(closed.color);
+
+  await docsButton.click();
+  await expect(docs).toBeHidden();
+  await expect.poll(async () => (await buttonColors()).background).toBe(closed.background);
+
   expect(failed).toEqual([]);
 });
 

@@ -230,7 +230,10 @@ export default function OptionRow({
           )}
           <button
             type="button"
-            className={styles.iconButton}
+            // The toggle keeps its "Docs" label, so the open state is signalled
+            // by colour: accent-filled while this row's documentation is open
+            // (see .iconButton.docsButtonOpen in OptionPanel.module.css).
+            className={docsOpen ? `${styles.iconButton} ${styles.docsButtonOpen}` : styles.iconButton}
             data-testid={`docs-${key}`}
             aria-expanded={docsOpen}
             aria-controls={docsOpen ? docsId : undefined}
