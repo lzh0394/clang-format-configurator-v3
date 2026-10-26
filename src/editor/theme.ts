@@ -1,6 +1,6 @@
 // Shared CodeMirror theme. All colours and the font size come from CSS custom
 // properties (see src/styles.css), so the editors follow the app theme and the
-// `--font-size-editor` setting without a second theming system (todo.md §1).
+// `--font-size-editor` setting without a second theming system (plan §5 字号).
 
 import { HighlightStyle } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";

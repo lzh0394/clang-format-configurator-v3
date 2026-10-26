@@ -1,4 +1,4 @@
-// Tests for `.clang-format` import / export (M1 contract §3).
+// Tests for `.clang-format` import / export (plan §4).
 //
 // The focused cases use a small hand-built schema so every rule is easy to
 // assert precisely; the roundtrip cases use the real committed 21.1.8 schema

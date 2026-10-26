@@ -1,4 +1,4 @@
-// One row of the options panel (contract §4.2): key + badges, control, docs
+// One row of the options panel (plan §5): key + badges, control, docs
 // toggle, per-row reset and the "inherited" hint. The row itself is never
 // clickable — every affordance is a native control or a button.
 //

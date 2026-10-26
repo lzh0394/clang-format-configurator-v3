@@ -1,17 +1,18 @@
 # Clang-format Configurator v3 — 纯前端重建方案
 
-> 状态：待评审 · 目标产物：`C:\workspaces\clang-format-configurator-v3`
+> 状态：M0–M4 已交付（2026-10-24）· 目标产物：`C:\workspaces\clang-format-configurator-v3`
 > 依据：对 v2（https://github.com/Wirena/clang-format-configurator-v2）的源码审查与线上实测
+> 本文只记设计与取舍；当前状态、命令、坑与验证记录见 [`docs/handoff.md`](docs/handoff.md)，未排期事项见 [`docs/todo.md`](docs/todo.md)。
 
 ## 0. 已确定的前提
 
 | 决策 | 结论 |
 |---|---|
-| 版本范围 | 16.0.6 – 23.1.1，**全部 52 个已发布 wasm 版本**（M0 首批 8 个按 minor 取最新 patch，M4 补齐其余 44 个）：16.x/17.x/22.x/23.x 的 schema 默认值走同版本 native dump，运行期格式化仍用 wasm（§3.1） |
+| 版本范围 | 16.0.6 – 23.1.1，**全部 52 个已发布 wasm 版本**：16.x/17.x/22.x/23.x 的 schema 默认值走同版本 native dump，运行期格式化仍用 wasm（§3.1） |
 | 后端 | **完全没有**。静态站点 + 浏览器内 wasm |
-| 老版本 7–15 | 不支持；页面上留一条指向 v2 的说明链接 |
+| 老版本 7–15 | 不支持（没有 wasm 构建）；README 致谢里给出 v2 链接 |
 | 代码位置 | `C:\workspaces\clang-format-configurator-v3`，全新仓库（v2 的 clone 仅作参考，不 fork） |
-| 技术栈 | Vite（起项目取当前 major）+ React 19 + TypeScript + CodeMirror 6 + TanStack Virtual；样式 CSS Modules；状态 `useReducer`；Vitest + Playwright（详见 §2.1） |
+| 技术栈 | Vite + React 19 + TypeScript + CodeMirror 6 + TanStack Virtual；样式 CSS Modules；状态 `useReducer`；Vitest + Playwright（详见 §2.1） |
 | 数据来源 | 选项 schema 由 LLVM RST 文档 + wasm 的 `--dump-config` 生成；**不需要编译 LLVM、不需要 Docker** |
 
 ## 1. 目标与验收标准
@@ -27,7 +28,7 @@
 | 版本切换可用时间 | 冷切换 ≤ 1.2 s；已缓存 ≤ 200 ms |
 | 一致性 | 29 组 fixture 在 native clang-format 21.1.8 与 wasm 上**逐字节相同** |
 | 导出幂等 | `.clang-format` 导出 → 再导入 → 再导出，字节相同 |
-| 功能对齐 | v2 的用户可见功能全部保留（除版本范围），并修复第 6 节列出的 7 个缺陷 |
+| 功能对齐 | v2 的用户可见功能全部保留（除版本范围），并修复第 6 节列出的 v2 已知缺陷 |
 | 可访问性 | 键盘可完成全流程；对比度 AA；`prefers-reduced-motion` 生效 |
 
 ## 2. 架构
@@ -54,14 +55,14 @@
 
 ### 2.1 技术栈：选型与被否方案
 
-选型的四个硬约束：纯静态无服务器、8 个 wasm 大资源、190 个选项的交互密度、首屏 ≤ 250 KB gzip。任何一项不满足即出局。
+选型的四个硬约束：纯静态无服务器、52 个 wasm 大资源、147–209 个选项的交互密度、首屏 ≤ 250 KB gzip。任何一项不满足即出局。
 
 | 层 | 选型 | 负责什么 | 被否的方案 |
 |---|---|---|---|
-| 构建 | Vite（当前 major；草案写的 6 只是落笔时的版本） | dev/build、`base` 注入、Worker 与资源 URL | CRA（已停更，v2 的 6 MB bundle 即其产物）、webpack（配置成本）、Next/Astro（无 SSR 需求，wasm 只能在客户端） |
+| 构建 | Vite | dev/build、`base` 注入、Worker 与资源 URL | CRA（已停更，v2 的 6 MB bundle 即其产物）、webpack（配置成本）、Next/Astro（无 SSR 需求，wasm 只能在客户端） |
 | UI | React 19 | 选项面板、编辑器编排、状态派生 | Preact（省 ~30 KB 但要补生态，留作超预算时的 `compat` 别名兜底）、Svelte（整体重写） |
 | 编辑器 | CodeMirror 6 | 可编辑源码、只读结果、行级 diff | Monaco（2 MB+，自带 worker 体系，diff 是实例级 API）、Ace（v2 的选择，diff 需自研） |
-| 长列表 | TanStack Virtual | 190 行 + 动态行高（展开文档会变高） | `react-window`（以固定行高为主，动态测量要手写） |
+| 长列表 | TanStack Virtual | 147–209 行 + 动态行高（展开文档会变高） | `react-window`（以固定行高为主，动态测量要手写） |
 | 计算 | clang-format wasm（Emscripten，单线程），跑在 Worker 内 | 真正的格式化，主线程不阻塞 | 后端 exec（v2 方案，需服务器）、WebContainer（过重） |
 | 数据 | 构建期生成的 JSON schema | 选项定义、七风格默认值、文档 | 运行时抓 RST 解析（慢、不可控、CI 依赖上游） |
 | YAML | `yaml`（eemeli） | 导入 `.clang-format`、带行列号报错 | `js-yaml`（无 CST，unknown key 定位弱） |
@@ -72,22 +73,12 @@
 
 四个决定值得单独说明：
 
-- **CM6 而非 Monaco**：`@codemirror/merge` 给的是**文档级** diff（可折叠未变更区、可嵌入 unified 视图）；Monaco 的 diff 绑定编辑器实例，塞进现有双栏要绕着走。CM6 还能按需组装语言包（只需 C/C++/C#/Java/Proto）。
+- **CM6 而非 Monaco**：`@codemirror/merge` 给的是**文档级** diff（可折叠未变更区、可嵌入 unified 视图）；Monaco 的 diff 绑定编辑器实例，塞进现有双栏要绕着走。CM6 还能按需组装语言包（C/C++、C#、Java、Kotlin、Objective-C、Proto、JS/TS，`.clang-format` 走 YAML）。
 - **没有组件库**：`IncludeCategories`、`RawStringFormats` 这类结构体数组编辑器组件库覆盖不了，最后仍要手写；五种控件自己写更快，也省掉 100 KB+ 与样式覆盖成本。
 - **Worker 不用 Comlink**：协议需要"新请求到达即丢弃过期 id"（§5），这正是 RPC 封装会藏起来的控制权，裸 `postMessage` + 30 行协议文件更好调试。
 - **不引 React Compiler**：构建复杂度换不到这个体量的收益。
 
-**首屏预算怎么花**（M0 用 `rollup-plugin-visualizer` 实测后定稿）：
-
-| 项 | 估算 gzip |
-|---|---|
-| react + react-dom 19 | ~45 KB |
-| CM6 core + C++ 语言包 | ~90–110 KB |
-| `yaml` | ~20 KB |
-| 业务代码 | ~40 KB |
-| 合计 | ~200 KB（余量 ~50 KB） |
-
-余量不厚，两个预设阀门：merge 视图与非常用语言包一律懒加载；真超预算就 `react` → `preact/compat` 别名替换（CM6 与 TanStack Virtual 不直接用 React 内部 API，风险低）。
+**首屏预算的两个阀门**：merge 视图与非常用语言包一律懒加载；实际首屏 JS 224.6 KB gzip（预算 250 KB，见 README），真超预算就把 `react` 换成 `preact/compat` 别名（CM6 与 TanStack Virtual 不直接用 React 内部 API，风险低）。
 
 **与部署耦合的两点**：
 
@@ -98,12 +89,7 @@
 
 ## 3. 资源流水线（替换掉 Docker + 30 分钟编译）
 
-`tools/versions.json` 是唯一事实来源：
-
-```json
-[{ "version": "21.1.8", "tag": "llvmorg-21.1.8", "pkg": "@wasm-fmt/clang-format@21.1.8" },
- { "version": "20.1.7", "tag": "llvmorg-20.1.7", "pkg": "@wasm-fmt/clang-format@20.1.7" }]
-```
+`tools/versions.json` 是唯一事实来源：52 条 `{version, tag, pkg}` 记录（默认 21.1.8；wasm 没有可用 `dump_config` 的版本额外带 `"dump": "native"`）。
 
 - **fetch-wasm.mjs**：查 `registry.npmjs.org` 拿 tarball URL + `dist.integrity`，校验 sha512 后解出运行时文件到 `public/wasm/<ver>/`，并生成统一入口 `entry.js`（见 §3.1）。幂等：`tools/wasm.lock.json` 记录每个文件的 sha256，命中即跳过。
 - **gen-schema.mjs**，对每个版本：
@@ -121,14 +107,13 @@
 | 版本段 | 打包形态 | `dump_config` | 结论 |
 |---|---|---|---|
 | 16.0.6 / 17.0.6 | 单 glue，只有 `format`/`version` | **无** | 拿不到 per-style 默认值；要支持只能用 native clang-format 兜底 |
-| 18.1.8 – 21.1.8 | 单 glue，default init + 命名导出 | 有，输出正确 | 首批采用 |
-| 22.x / 23.x | 拆成 glue + `clang-format-binding.js` + `clang-format-web.js` | 有，但**值域错位** | 暂不可用 |
+| 18.1.8 – 21.1.8 | 单 glue，default init + 命名导出 | 有，输出正确 | wasm dump 可用 |
+| 22.x / 23.x | 拆成 glue + `clang-format-binding.js` + `clang-format-web.js` | 有，但**值域错位** | wasm dump 不可用；schema 默认值改由同版本 native dump 生成 |
 
 - **22/23 的 dump 错位**：`AlignAfterOpenBracket: true`（枚举位置输出布尔）、`Cpp11BracedListStyle: AlignFirstComment`（布尔位置输出枚举名）。CLI 构建同样错，不是调用方式问题，是上游构建的问题。**M4 已解决**：这些版本的 schema 默认值改由同版本 native clang-format `--dump-config` 生成（22.1.6/22.1.7 不在 PyPI，用 LLVM 官方 release 二进制），运行期格式化仍用 wasm；实测 26 个 native-dump 版本（16、17、18.1.0–18.1.7、22、23）的 CLI 输出与 wasm **312/312 次逐字节相同**。
 - **22+ 的入口差异**已抹平：`fetch-wasm.mjs` 按包内是否存在 `clang-format-web.js` 选择入口，生成 `entry.js` 统一导出（default init + `format`/`dump_config`/`version`），worker 与 gen-schema 都只 import `entry.js`。
 - **大小写**：`RawStringFormats[].BasedOnStyle` 的默认值输出为小写（`google`），枚举校验按大小写不敏感处理。
-- **体积**（实测）：单版本 wasm 2.16–2.45 MB 原始 / 0.92–0.97 MB gzip；schema core 6.8–7.7 KB gzip、docs 21.5–23.2 KB gzip——都在 §1 的预算内。
-- **M4 已落地版本**：全部 52 个（16.0.6 – 23.1.1）；默认仍 21.1.8。26 个没有可用 wasm `dump_config` 的版本在 `versions.json` 里标 `"dump": "native"`，schema 由同版本 native 二进制逐风格 dump（PyPI 缺 22.1.6/22.1.7，用 LLVM release 二进制）。
+- **体积**（实测）：单版本 wasm 2.16–2.45 MB 原始 / 902–1072 KB gzip；schema core 6.4–8.5 KB gzip、docs 19.3–24.6 KB gzip——都在 §1 的预算内。
 
 ## 4. 数据契约
 
@@ -177,7 +162,7 @@ type Res = { t: "ready"; ms: number } | { t: "ok"; id: number; code: string; ms:
 - `format` 期间临时接管 `console.error`/`console.warn`，把 LLVM 诊断拼进 `detail`；结束后还原。若未来 glue 暴露 `Module.printErr`，优先用它。
 - worker `onerror` / `messageerror` → 重建 worker + 顶部提示条，不白屏。
 
-**Schema Store**：`fetch + Cache Storage`（缓存键含 schema hash），内存 LRU 保留 3 个版本；`docs.json` 在首次展开某选项帮助时才拉取。
+**Schema Store**：按版本 `fetch` `core.json`/`docs.json`，内存 LRU 保留 3 个版本，进行中请求去重、失败不缓存（UI 可重试）；`docs.json` 在首次展开某选项帮助时才拉取。HTTP 层缓存交给 Service Worker。
 
 **选项面板**：搜索框（键名 + 文档全文，防抖 120 ms）、过滤 chips（全部 / 已修改 / 已废弃）、虚拟列表（TanStack Virtual）、每行显示"继承值 vs 修改值"、`BraceWrapping`/`SpaceBeforeParensOptions` 的 override 警告、折叠文档用 `dangerouslySetInnerHTML`（内容只来自构建期生成的 schema，不接受运行时输入）。
 
@@ -185,15 +170,15 @@ type Res = { t: "ready"; ms: number } | { t: "ok"; id: number; code: string; ms:
 
 **配置页**：抽屉式，CM6 YAML 编辑器 + 基于 schema 的实时校验 + 上传/下载 + Apply/Close；底部显示"相对于当前风格会新增/删除哪些键"的预览。
 
-**持久化**：localStorage 保存 `{version, style, modified, code, theme, editorFontSize, uiFontScale}`（带 schema 版本号，不兼容时丢弃并提示）；分享链接把 `{version, style, modified, code?}` 编码进 URL hash（`#s=<base64url(JSON)>`，载荷带 `k` 版本号；code ≤8 KB 才带，编码后 ≤48 KB）。优先级 **hash > storage**：首次渲染前解码，应用后 `history.replaceState` 清掉 fragment（避免每次刷新都被同一条链接覆盖），"Copy link" 再从当前会话重新生成；无效/截断的 hash 静默回退到 storage。界面字号缩放（`uiFontScale`，0.9/1/1.15 三档，相对设计基准）作为**向后兼容的增字段**不 bump `STATE_VERSION`，旧存档按 1.0 加载；设计基准为浏览器默认字号的 **130%**（2026-10-25 从 100% 提到 125%，2026-10-26 再上调一档到 130%）。
+**持久化**：localStorage 保存 `{version, style, modified, code, theme, editorFontSize, uiFontScale}`（带 schema 版本号，不兼容时丢弃并提示）；分享链接把会话编码进 URL hash（`#s=<base64url(JSON)>`，载荷用短键 `{k, v, s, m, c?}`，`k` 是载荷格式版本；`c`（code）≤8 KB 才带，编码后 ≤48 KB）。优先级 **hash > storage**：首次渲染前解码，应用后 `history.replaceState` 清掉 fragment（避免每次刷新都被同一条链接覆盖），"Copy link" 再从当前会话重新生成；无效/截断的 hash 静默回退到 storage。界面字号缩放（`uiFontScale`，0.9/1/1.15 三档，相对设计基准）作为**向后兼容的增字段**不 bump `STATE_VERSION`，旧存档按 1.0 加载；设计基准为浏览器默认字号的 **130%**（`styles.css` 的根字号，组件字号全部 rem）。
 
-**主题/响应式/可访问性**：跟随系统 + 手动切换；≥1024 px 双栏，<768 px 改为"选项 / 代码"选项卡；所有控件有 label，错误用 `role="alert"` + `aria-live`。
+**主题/响应式/可访问性**：跟随系统 + 手动切换；桌面为选项面板 + 双栏编辑器，1100/900 px 是布局细化（≤900 px 时编辑器上下叠放、选项仍在左），≤768 px 改为「选项 / 代码」选项卡；所有控件有 label，错误用 `role="alert"` + `aria-live`。
 
 ## 6. 与 v2 的行为差异（明确取舍）
 
 | v2 | v3 | 原因 |
 |---|---|---|
-| 25 个版本（7.0.1–21.1.8） | 52 个（16.0.6 – 23.1.1，全部已发布 wasm 构建） | 无 wasm 构建；页面上给出 v2 链接 |
+| 25 个版本（7.0.1–21.1.8） | 52 个（16.0.6 – 23.1.1，全部已发布 wasm 构建） | 7–15 没有 wasm 构建；README 致谢里给出 v2 链接 |
 | 服务端 25 个 ELF + 8080 端口 + 证书 | 无 | 架构简化 |
 | `BasedOnStyle` 含 `InheritParentConfig` | 从列表移除 | 没有文件系统父目录，语义不成立（实测会静默退回 LLVM） |
 | `Language` 作为普通选项 | 从 UI 隐藏 | 与"代码片段语言 + 文件名"重复 |
@@ -210,21 +195,21 @@ type Res = { t: "ready"; ms: number } | { t: "ok"; id: number; code: string; ms:
 |---|---|
 | wasm 下载失败 / 离线首次访问 | 顶部提示 + 重试按钮；选项面板仍可用（能生成配置，只是看不到效果） |
 | Service Worker 已缓存该版本 | 完全离线可用 |
-| 非 UTF-8 文件上传 | 用 `TextDecoder('utf-8', {fatal:true})` 校验，失败则明确提示"浏览器内无法无损处理非 UTF-8 源文件"，并提供"按 Latin-1 解读"的显式选项 |
-| 输入 > 2 MB | 警告并要求确认；worker 内仍同步执行，UI 显示进度 |
+| 输入 > 2 MB | 警告并要求确认（Format anyway）；确认后仍在 worker 内格式化 |
 | wasm trap / OOM | worker 重建 + 提示；保留用户状态 |
-| schema 与 wasm 版本不匹配 | schema 文件名带 hash，worker 只接受与当前 schema 同版本的 wasm |
-| 版本没有对应 wasm 资源 | 下拉框置灰 + tooltip 说明 |
+| schema 与 wasm 版本不匹配 | schema 与 wasm 都按版本目录存放，worker 只加载当前选中版本的资源；换版本时 terminate 旧 worker 再重建 |
+| 版本没有对应 wasm 资源 | 版本列表来自 `schema/index.json`，资源缺失按下载失败处理（顶部提示 + 重试） |
 | 部署在 `/<repo>/` 子路径下 | 构建期注入 `VITE_BASE`，运行期只用 `import.meta.env.BASE_URL` 拼路径；发布后对真实 URL 跑 smoke |
 
 ## 8. 测试与 CI
 
-- **单元（Vitest）**：schema 归一化、默认值合并、`modified` 差分、导出/导入往返、legacy `AlignConsecutive` 转换、Minimal/Full 两种导出。
-- **组件**：选项行渲染（scalar/enum/map/list/struct-list 五种）、override 警告、搜索过滤。
-- **黄金对拍**：`tests/golden/*.json`（24 组代码 + 风格），期望输出由 **native** clang-format 21.1.8 生成（CI 里 `pip install clang-format==21.1.8`，该 PyPI 包带原生二进制）。CI 用 wasm 跑同样 fixture 并逐字节比较——这是"wasm 与原生一致"的守门员。
-- **E2E（Playwright）**：冷启动 → 选 Chromium → 改 IndentWidth → 输出变化 → 导出配置 → 重载恢复状态；错误路径（配置页写错键 → 看到 LLVM 诊断）；版本切换；离线模式。
-- **性能预算**：构建后脚本检查 gzip 体积上限，超限即失败。
-- **CI**：GitHub Actions，`npm ci` + `prepare:assets`（wasm 走缓存）+ typecheck + lint + unit + 黄金对拍 + build + e2e；main 绿了自动发布到 GitHub Pages（见 8.1）。
+四道闸门，任何一道失败都不发布：
+
+- **单元（Vitest）**：298 条 / 18 文件，覆盖 schema 归一化、默认值合并、`modified` 差分、导出/导入往返与字节幂等、legacy `AlignConsecutive*` 转换、Minimal/Full 导出、持久化、分享链接、SW、roving 与焦点陷阱。
+- **黄金对拍**：`tests/golden/golden-21.1.8.json`（29 组 fixture，覆盖 7 种风格与边界输入）由 **native** clang-format 21.1.8 生成（CI 里 `pip install clang-format==21.1.8`，该 PyPI 包带原生二进制，`golden:gen --check` 防提交物漂移）；e2e 用 wasm 跑同一组 fixture 逐字节比较——这是"wasm 与原生一致"的守门员。
+- **E2E（Playwright）**：66 条（smoke + M1/M2/M3/M4 + PWA + a11y + golden + perf），覆盖纯 UI 生成配置、diff、错误面板、持久化/主题/离线、分享链接、界面字号、52 版本切换与桌面布局；perf 用例在独立 project 里串行跑。
+- **体积与性能预算**：`check:size` 按 §1 检查首屏 JS 与每版本 wasm/schema 的 gzip；`perf.spec.ts` 检查格式化 p95 与版本切换时限，超限即失败。
+- **CI**：GitHub Actions，`npm ci` + `prepare:wasm`（wasm 走缓存）+ 黄金校验 + typecheck + unit + build + `check:size` + e2e；main 绿了自动发布到 GitHub Pages（见 8.1）。
 
 ### 8.1 部署到 GitHub Pages
 
@@ -236,145 +221,43 @@ type Res = { t: "ready"; ms: number } | { t: "ok"; id: number; code: string; ms:
 | 触发 | push 到 `main`（忽略 `**.md`、`docs/**`）+ `workflow_dispatch` 手动重发 |
 | 权限 | `contents: read`、`pages: write`、`id-token: write`，并挂 `environment: github-pages` |
 | 构建频率 | 自定义 workflow **不受** 10 次/小时软限制约束（官方文档明确排除）；部署仍有 10 分钟超时 |
-| 体积 | 52 版本实测 dist ≈ 130 MB（wasm 118 MB + schema 11.6 MB + app/图标），仍远低于 1 GB 站点上限；首屏 JS 224.5 KB gzip |
+| 体积 | 52 版本实测 dist ≈ 130 MB（wasm 118 MB + schema 11.9 MB + app/图标），仍远低于 1 GB 站点上限；首屏 JS 224.6 KB gzip |
 
 **四个必须处理的点**：
 
 1. **子路径**：项目页在 `https://<user>.github.io/<repo>/`，构建期 `base` 必须是 `/<repo>/`（CI 注入 `VITE_BASE`，本地默认 `/`）。运行期所有路径——schema `fetch`、wasm `locateFile`、worker URL、Service Worker scope——一律用 `import.meta.env.BASE_URL` 拼接；写死 `/schema/...` 会"本地正常、部署后 404"，这是这类站点最常见的翻车点。
 2. **wasm 不在仓库里**：CI 用 `actions/cache`，key 为 `hashFiles('tools/versions.json')`；`prepare:assets` 本身幂等，命中缓存即跳过。fork PR 只能读 default 分支的缓存，冷跑多花约 2–4 分钟（52 个 tarball，约 118 MB）。
 3. **schema 不在 CI 重抓**：schema 已入库，CI 不访问 `raw.githubusercontent.com`，因此部署不会被上游网络或 RST 改动卡住。上游漂移检查放 nightly：重新生成到临时目录 + `git diff --exit-code`，失败只开 issue，不阻塞发布。**已落地**：`.github/workflows/nightly.yml` 每日跑 `npm run schema:check -- --allow-missing-native`（26 个 native-dump 版本跳过默认值、仍校验 RST 文档与结构），漂移时开/更新 tracking issue。
-4. **E2E 要覆盖真实部署路径**：本地 e2e 用 `base=/` 跑业务逻辑；发布完成后再对 `steps.deploy.outputs.page_url` 跑一小组 smoke（能加载、能格式化一次、能切版本），这是唯一能发现 base／资源路径错误的测试。Page 没有 per-PR 预览环境，PR 用 Playwright trace + 截图 artifact 代替。
+4. **E2E 要覆盖真实部署路径**：本地 e2e 用 `base=/` 跑业务逻辑；发布完成后再对 `steps.deploy.outputs.page_url` 跑整套 e2e（deploy 的 smoke job），这是唯一能发现 base／资源路径错误的测试。
 
-```yaml
-name: deploy
-on:
-  push:
-    branches: [main]
-    paths-ignore: ['**.md', 'docs/**']
-  workflow_dispatch:
+**补充约定**（工作流本体以 `.github/workflows/{ci,deploy,nightly}.yml` 为准，本文件不复制 YAML）：
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
-jobs:
-  ship:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with: { node-version: 22, cache: npm }
-      - uses: actions/cache@v6
-        with:
-          path: public/wasm
-          key: wasm-${{ hashFiles('tools/versions.json') }}
-          restore-keys: wasm-
-      - run: npm ci
-      - run: npm run prepare:assets          # schema 已入库，只补 wasm
-      - run: npm run verify                  # typecheck + lint + unit + golden
-      - run: npm run build
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/
-      - run: npm run check:size
-      - run: npx playwright install --with-deps chromium
-      - run: npx playwright test             # webServer 起 vite preview
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/
-      - uses: actions/upload-pages-artifact@v5
-        with: { path: dist }
-      - id: deploy
-        uses: actions/deploy-pages@v5
-      - run: npx playwright test e2e/smoke.spec.ts
-        env:
-          PW_BASE_URL: ${{ steps.deploy.outputs.page_url }}
-```
-
-Notes：
-
-- 单个 job 串行跑完约 2.5–4 分钟（缓存命中时），不需要拆 job；PR 校验与 main 发布复用同一份步骤，**不要**拆成两条 workflow 各 build 一遍。
-- 上面的 `VITE_BASE` 假设是普通项目仓库（`/<repo>/`）。若仓库本身就是 `<user>.github.io`（用户主页），base 应为 `/`；两种都覆盖的写法是用 `actions/configure-pages@v5` 的 `base_path` 输出，而不是自己拼仓库名。
+- **`VITE_BASE` 假设是普通项目仓库**（`/<repo>/`）。若仓库本身就是 `<user>.github.io`（用户主页），base 应为 `/`；两种都覆盖的写法是用 `actions/configure-pages@v5` 的 `base_path` 输出，而不是自己拼仓库名。
 - `playwright.config.ts` 里 `baseURL` 与 `webServer` 都从 `VITE_BASE` 派生（`http://127.0.0.1:4173${VITE_BASE}`），否则 preview 下子路径直接 404。
 - action 版本按 2026-10 的 majors 写；建议 pin 到 commit SHA 并开 Dependabot，第三方 action 是供应链入口。
 - **兜底**：组织策略若禁 `pages: write`，退回 `gh-pages` 分支 + `peaceiris/actions-gh-pages`；再不行换 Cloudflare Pages，构建命令不变。
-- **已落地**：`.github/workflows/ci.yml`（build + e2e，按子路径构建）与 `deploy.yml`（build → deploy → smoke 对真实 URL 再跑一遍）；本地与线上均验证通过。
 
 ## 9. 里程碑
 
-| 阶段 | 内容 | 验收 | 估时 |
-|---|---|---|---|
-| **M0** 骨架与流水线 | Vite/TS/CI 脚手架、`versions.json`、fetch-wasm、gen-schema（先跑通 3 个版本）、最小页面 + worker 完成一次格式化 | `npm run dev` 能格式化，`npm run build` 产出静态包 | 0.5–1 天 |
-| **M1** 选项引擎与 UI | schema store、虚拟列表、五种控件、`modified` 模型、Minimal/Full 导出、配置导入 | 能不碰编辑器、纯靠 UI 生成一份可用的 `.clang-format` | 1.5–2 天 |
-| **M2** 编辑器 / diff / 错误 | CM6、split diff、防抖、错误面板、快捷键、语言切换 | 输入代码即时看到格式化与差异；故意写错选项能读到 LLVM 原文 | 1–1.5 天 |
-| **M3** 打磨与上线 | 持久化、响应式、a11y、离线、性能预算、黄金对拍、部署配置、README/NOTICE | 全部验收指标达标，站点静态部署成功 | 1–1.5 天 |
-| **M4**（可选，2026-10-24 已完成） | 分享链接（URL hash）、PWA manifest/安装提示、C#/proto 示例与更多语言后缀、按 minor 补齐全部 52 个版本、界面字号缩放、虚拟列表 roving 键盘模型、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查 | 见下方 M4 状态 | 按需（实际约 1 天） |
+| 阶段 | 内容 | 验收 |
+|---|---|---|
+| **M0** 骨架与流水线 | Vite/TS/CI 脚手架、`versions.json`、fetch-wasm、gen-schema（先跑通 3 个版本）、最小页面 + worker 完成一次格式化 | `npm run dev` 能格式化，`npm run build` 产出静态包 |
+| **M1** 选项引擎与 UI | schema store、虚拟列表、五种控件、`modified` 模型、Minimal/Full 导出、配置导入 | 能不碰编辑器、纯靠 UI 生成一份可用的 `.clang-format` |
+| **M2** 编辑器 / diff / 错误 | CM6、split diff、防抖、错误面板、快捷键、语言切换 | 输入代码即时看到格式化与差异；故意写错选项能读到 LLVM 原文 |
+| **M3** 打磨与上线 | 持久化、响应式、a11y、离线、性能预算、黄金对拍、部署配置、README/NOTICE | 全部验收指标达标，站点静态部署成功 |
+| **M4** 增量打磨 | 分享链接（URL hash）、PWA manifest/安装提示、C#/proto 示例与更多语言后缀、全部 52 个版本、界面字号缩放、虚拟列表 roving 键盘模型、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查 | 见 `docs/handoff.md` §11 的验证记录 |
 
-**M3 完成即视为 v3 可交付**；M4 是增量打磨，不阻塞发布。M4 完成后 v3 的完整范围见下方 M4 状态。
-
-**M0 状态（2026-10-22，已完成）**：`npm run dev` 与 `npm run build` 均能格式化；Playwright 冒烟 4 条全绿（Edge，含 `/<repo>/` 子路径构建）；3 个版本 schema 生成并通过类型校验；首屏 JS 71 KB gzip。**已建仓库并跑通 CI 与 Pages 发布**：<https://github.com/lzh0394/clang-format-configurator-v3>，线上 <https://lzh0394.github.io/clang-format-configurator-v3/>，部署后 smoke 对真实 URL 通过。遗留项：16/17 缺 `dump_config`、22/23 dump 值域错位（§3.1）。
-
-**M1 状态（2026-10-23，已完成）**：选项引擎与 UI 按本节验收落地——schema store（LRU 3 版本 + docs 懒加载，失败可重试）、`modified` 模型（只发改动项；16 个 map 选项存稀疏 patch，显示值 = `modified[key] ?? defaults[style][key]`；版本切换自动剔除目标 schema 不认识的键）、虚拟化选项面板（189 行、动态行高、键名+文档搜索、全部/已修改/已废弃 chips、五种控件、逐项继承值/reset、`BraceWrapping`/`SpaceBeforeParensOptions` 的 override 警告与一键修正）、Minimal/Full 导出、带 schema 校验与 warning 的导入、legacy `AlignConsecutive*` / `SortIncludes` / `AlignTrailingComments` 转换。验收证据：纯 UI 生成 `.clang-format` 的 e2e 通过；**导出→导入→导出字节相同**（minimal/full，单测 78 条 + e2e 双向覆盖）；`npm run verify` 全绿（typecheck + 100 单测 + build）；Playwright 21 条（4 M0 smoke + 17 M1）在 base `/` 与 `/<repo>/` 子路径构建下全绿；首屏 JS 120.1 KB gzip（预算 250 KB）。新增运行时依赖 `@tanstack/react-virtual`、`yaml`（后者从 devDependencies 移动）。M1 的并行开发契约（接口/测试 id/归属）随完成后删除，实现细节见 `docs/handoff.md`。
-
-**M2 状态（2026-10-24，已完成）**：编辑器 / diff / 错误 / 配置页按本节验收落地。
-- **CM6 双栏编辑器**：左可编辑、右只读；语言随文件名（C/C++、Java、C#、Proto，`.clang-format`/`.yaml` 为 YAML），代码语言用 CM6 legacy stream modes（clike/protobuf）按需加载；Ctrl/Cmd+Enter 立即格式化、auto-format 保留、防抖 300→**250 ms**；编辑器字号 12–20 px（CSS 变量 `--font-size-editor`，写死的 13 px 改为变量派生）。
-- **真实 split diff**：`@codemirror/merge` 的 MergeView（变更行/变更片段高亮、两侧滚动同步、未变更区可折叠），**按需懒加载**（Diff 开关）；首屏因此不含 merge 代码。
-- **Worker 协议升级**：请求串行化 + latest-wins（新请求替换尚未开始的排队请求，主线程侧 `FormatterSupersededError` 静默丢弃）、格式化期间接管 `console.error/warn` 把 LLVM 诊断并入 `detail`、20 s 格式化超时与 `fatal` 错误分类、worker `onerror`/`onmessageerror` 后自动重建 + 顶部横幅（自动重试一次，之后手动 Restart formatter）。
-- **结构化错误面板**：首行摘要（`role="alert"`）+ 可展开的 LLVM 诊断原文（`<details>`）；错误可 dismiss，且不再阻塞后续格式化。
-- **配置页抽屉**：CM6 YAML 编辑器、基于 schema 的 150 ms 实时校验（致命语法错误带行列号；未知键/非法值降级为 warning）、Minimal/Full 模式、上传/下载 `.clang-format`、Apply/Close，以及底部"相对当前配置新增/删除/修改了哪些键 + BasedOnStyle 变更"的预览。M1 的 Import/Export 对话框保留为快速入口（两者共用同一解析/序列化路径）。
-- **失败路径**：>2 MB 输入先警告并要求确认（Format anyway）；worker trap/OOM/超时通过 fatal 分类 + 重建处理，用户状态保留。
-- **验收证据**：`npm run verify` 全绿（typecheck + **146 单测**（+46：worker client/diagnostics/config-diff/languages）+ build）；Playwright **33 条**（4 smoke + 17 M1 + 12 M2）在 base `/` 与 `/<repo>/` 子路径构建下各全绿；首屏 JS **222.9 KB gzip**（不含 wasm glue；预算 250 KB，其中 CM6 约 +103 KB）；"故意写错选项能读到 LLVM 原文"通过配置抽屉写入 schema 合法但 clang-format 非法的值（如 `ColumnLimit: 1e21`）达成——未知键在 schema 层就被降级为 warning（§6 取舍），不会发到 wasm。
-- **M2 遗留**：>2 MB 输入与 worker 崩溃横幅没有 e2e（前者需要 2 MB 级键盘输入太慢，后者无自然触发路径，仅有单测覆盖队列/超时/重建）；抽屉的"从文件加载"仅由 M1 对话框的同类用例覆盖。docs 里 RST code-block 渲染仍是 M1 的老问题。
-
-**M3 状态（2026-10-24，已完成）**：打磨与上线按本节验收落地，**M3 完成即 v3 交付**。
-- **持久化**：localStorage（key `clang-format-configurator:v3`，带 `stateVersion`）保存 `{version, style, modified, code, theme, editorFontSize}`，400 ms 防抖 + `pagehide` 落盘；刷新/重开恢复；`index.html` 里 5 行预置脚本先应用主题避免闪白；损坏或状态版本不兼容的存档整体丢弃并在界面提示，个别字段非法则降级为默认值；存储不可用/写满只告警一次、不阻塞使用。
-- **主题**：跟随系统 / 浅色 / 深色（`html[data-theme]` + 内联 `color-scheme`，system 时移除属性交给 `prefers-color-scheme`），三档都在 Settings 菜单里，选择持久化；颜色仍是 CSS 变量，两套调色板由 `styles.css` 统一定义。
-- **响应式**：<768 px 时双栏变为「Options / Code」选项卡（默认 Code），键盘 ←/→ 可切换；桌面仍为选项面板 + 双栏编辑器。
-- **可访问性**：跳过导航链接；控件都有可访问名称；chips `aria-pressed`、文档展开/收起 `aria-expanded` + `aria-controls`、对话框 `aria-labelledby` 指向可见标题、错误 `role="alert"`、格式化结果用 visually-hidden 的 polite live region 播报（避免每 250 ms 抖动）；可滚动 `<pre>` 可聚焦；`prefers-reduced-motion` 全局生效；新增 `--border-control` 修 WCAG 1.4.11 的控件边框对比（`--border` 仍只做装饰分隔线），`--syntax-comment` 提到 5.27:1。
-- **离线**：手写 `public/sw.js`（Vite 原样拷进 dist，scope 全由 `registration.scope` 推导，子路径安全）；install 预缓存 shell，activate 清旧 `cfc-*` 缓存并 claim；导航 network-first → 缓存 shell → 离线页；同源静态资源 stale-while-revalidate；`{type:"SKIP_WAITING"}` 交给 UI 触发更新，更新提示与离线提示各有横幅。注册模块 prod + 安全上下文才启用，dev 下完全惰性。
-- **质量闸门**：`tools/check-size.mjs`（`npm run check:size`）按 §1 检查首屏 JS ≤250 KB、每版 wasm ≤1.1 MB（M4 起；23.x 上游构建增大约 4.6%）、core ≤25 KB、docs ≤45 KB，且 build 必须齐全 52 个版本；`tests/golden/golden-21.1.8.json` **29 组**（覆盖 7 种风格、C++/Java/C#/Proto 与空文件/CRLF/tabs/unicode/raw string/include 排序等边界）由 **native clang-format 21.1.8** 生成，e2e 用 wasm 逐字节对拍，CI 还用 pip 装 native 跑 `gen-golden --check` 防漂移；`tools/gen-golden.mjs` 可重新生成。
-- **验收证据**：`npm run verify` 全绿（typecheck + **197 单测 / 12 文件** + build）；Playwright **47 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf）在 base `/` 与 `/<repo>/` 子路径构建下各全绿（约 26–27 s，需独占 4173 端口/`test-results` 运行）；`check:size` 10 项全过（首屏 JS **219.4 KB gzip**；wasm 941.9 / 984.6 / 990.3 KB；core 6.8–7.7 KB；docs 21.5–23.2 KB）；黄金对拍 **29/29** 与 native 21.1.8 逐字节相同；性能实测 **p95 18.6–22.7 ms**（20 KB 代码，预算 80 ms），版本切换**冷 99–116 ms（偶发 214 ms）/ 已缓存 86–144 ms**（预算 1.2 s / 200 ms）；离线（断网刷新后仍能格式化）、主题持久化、损坏存档降级都有 e2e。
-- **M3 遗留（M4 已处理标注）**：SW 更新横幅没有 e2e（需要两次部署间换 sw.js 才能触发；更新生命周期有 20 条单测）；持久化失败横幅（quota/unavailable）无 e2e（单测覆盖）；~~虚拟列表无 roving 键盘模型~~、~~ConfigDialog 未加焦点陷阱~~、~~docs HTML 的 `<pre>` 不可聚焦~~、~~界面字号整体缩放~~ 已在 M4 完成；M2 的 >2 MB 与崩溃横幅 e2e 缺口照旧。
-
-**M4 状态（2026-10-24，已完成）**：可选增量的六项全部落地，v3 完整交付 = M3 + M4。
-- **分享链接**：`#s=<base64url({k,v,s,m,c?})>`；Hash 优先于 localStorage（首帧前解码），应用后 `history.replaceState` 清 fragment，Copy link 用当前会话重新生成；code 只在 ≤8 KB 时进链接，超长时只分享配置并在提示里说明；无效/截断/超长 hash 一律回退 storage，不崩溃。纯逻辑单测 11 条，e2e 覆盖复制→新标签恢复、hash 压过 storage、坏 hash 回退。
-- **PWA**：`public/manifest.json`（相对 `start_url:.` / `scope:./`，子路径安全）+ 4 个 PNG 图标（192/512 any、512 maskable、180 apple-touch，Pillow 生成，单个 <30 KB）+ `index.html` link；SW `CACHE_VERSION` v2 预缓存 shell/manifest/图标/favicon，离线兜底页重写为可操作说明；`src/pwa/install.ts`（可注入环境、无 React，19 条单测）+ `InstallBanner`（beforeinstallprompt → 可安装横幅，dismiss 持久化，安装后隐藏），`main.tsx` 在 render 前创建单例避免漏事件。e2e 5 条（manifest/图标/scope、SW 预缓存、横幅出现/安装、dismiss 持久化、语言徽标）。
-- **示例与语言**：`src/editor/examples.ts` 提供 C++（与原内联样例逐字节相同）/C#/Proto/Java/Kotlin/JS/TS 样例；文件名切到有样例的语言且编辑器仍是未编辑的样例时自动跟随（用户输入过就不覆盖）。`languages.ts` 新增 kotlin/objc/objcpp/js/ts 后缀与 C 系扩展名，未知回落 plaintext，懒加载结构不变。
-- **全部 52 个版本**：`tools/versions.json` 52 行、默认 21.1.8；`public/schema` 52×core/docs + index（105 文件，11.6 MB raw / 1.52 MB gzip）；26 个 wasm 无可用 `dump_config` 的版本用同版本 native dump 兜底（22.1.6/7 不在 PyPI，改用 LLVM release 二进制），运行期格式化仍用 wasm；`wasm.lock.json` 52 条/178 文件 sha256 复验；`fetch-wasm` 幂等。**native CLI vs wasm 逐字节 312/312 通过**；19.1.1 的 npm 包 `version()` 只报 19.1.0（上游标签错，format 与 native 19.1.1 一致），`core.build` 保留上游真实值，UI 状态栏用的是选中版本号。
-- **界面字号缩放**：`uiFontScale` 三档 0.9/1/1.15（`UI_FONT_SCALES`，向后兼容增字段，不 bump `STATE_VERSION`）；`:root { font-size: calc(130% * var(--ui-scale)) }`（设计基准 = 浏览器默认字号的 130%，2026-10-25 按产品要求先放大到 125%、2026-10-26 再上调到 130%；Standard 100% 即 20.8px，三档都相对该基准）+ 全站 CSS 字号 px→rem，编辑器字号仍独立走 `--font-size-editor`；Settings 菜单加 "Interface size"，即时生效并持久化。虚拟列表收到 `remeasureKey` 后 rAF 里对已渲染行逐个 `measureElement` 重测（`measure()` 会因旧 measurementsCache 把 delta 算成 0，已避开）；e2e 覆盖字号变化、编辑器不受影响、行不重叠、搜索/导出可用、刷新保持。
-- **a11y / 交互遗留**：虚拟列表 roving 键盘模型（单一 Tab 停靠点、↑↓/Home/End/PageUp/PageDown、跨虚拟窗口 `rangeExtractor` 保证停靠点、搜索/过滤/版本切换收敛、`role=list/listitem` + `aria-setsize/posinset`）；ConfigDialog 与 ConfigDrawer 共用焦点陷阱（Tab 循环、Escape、焦点归还、modal 栈按 z-index 决定 top，修掉一次 Escape 同关两个 modal）；docs HTML 渲染层归一化（`<pre>` 加 `tabindex=0`、清理泄漏的 RST directive/marker，转义正确，搜索索引用同一份文本）。新增单测 53 条（roving 22 / focus-trap 16 / useDocs 15）+ e2e 5 条。
-- **nightly 漂移检查**：`tools/gen-schema.mjs --check` 重生成到 `.cache/schema-check` 并逐文件比对（`--allow-missing-native` 时 26 个 native-dump 版本跳过默认值、仍验 RST 文档与结构）；`.github/workflows/nightly.yml` 每日跑，失败只开/更新 issue。已验证干净 checkout（无 `.cache`）会自动重拉 52 个 RST，篡改 index 会非 0 退出。
-- **桌面布局修整（M4 收尾）**：`main` 的第二列改为 `minmax(0, 1fr)`，`.workbench`/`.pane`/`.editorHost` 加 `min-width: 0`，选项面板 `width: 100%`——修掉 CodeMirror 长行把整页撑出横向滚动、以及选项面板没铺满左侧网格列时露出的灰带；**≤900px（到 768px 移动端 tabs 之前）选项面板留在左侧，SOURCE 在上右、FORMATTED 在下右**（不再把选项面板横跨整页放到顶部）。e2e 在 1600/1360/1280/1100 断言面板与列同宽、无横向溢出，并在 900/860/820/769 断言「选项在左、源码上右、结果下右」。
-- **验收证据**：`npm run verify` 全绿（typecheck + **298 单测 / 18 文件** + build）；Playwright **66 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 9 M4 + 5 M4-PWA + 5 M4-a11y）在 base `/` 与 `/<repo>/` 子路径构建下各 **66 passed**（perf 在独立 project 里排到主套件之后串行跑，避免 52 版本下 CPU 抢占造成的假阳性；预算未放宽）；`check:size` **157 项全过**（首屏 JS 224.5 KB / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；52/52 版本运行期自检 + 312/312 native 对拍；dist ≈130 MB。CI [40067786769](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40067786769) 与 deploy（build→deploy→对线上 URL 跑整套 e2e）[40067786754](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40067786754) 全绿；nightly 手动验证 [40062227600](https://github.com/lzh0394/clang-format-configurator-v3/actions/runs/40062227600) 通过。
-- **M4 遗留 / 明确不做**：快速导入/导出对话框与配置抽屉仍并存（有意保留两个入口，M2 交接已说明；收敛会改变 M1 的 e2e 契约）；docs 生成器把 RST 表格单元格压平成文本，单元格内代码块仍无 `<pre>` 语义（需改 `tools/lib/rst.mjs`，渲染层归一化已兼容）；SW 更新横幅、>2 MB、崩溃横幅的 e2e 缺口照旧；安装横幅 dismiss 永久持久化（无设置项重置）；19.1.1 的 `core.build` 上游标签错保持原样。
-
-**估时口径**：单人、熟悉 React/TS、无会议，1 天 = 6 h 净编码；不含 review 往返、CI 排队、部署调试。基准不是"写多少行代码"，而是 v2 的可见功能清单——每条标成**照搬 / 重写 / 新增**三档分别加权，漏项比写得慢更容易让工期翻倍。每项拆到 ≤4 h 再估，给"乐观–最可能"区间；悲观情况不摊进区间，而是单列成 §10 的回退路径（平摊出来的 buffer 最后都会被吃掉，还看不出是哪一项超了）。
-
-**校准**：按拆解重算，P50 ≈ 6.2 天（M0 1.0 / M1 2.2 / M2 1.3 / M3 1.7），P80 ≈ 8.5 天。上表的 5–6 天是"零返工、零等待"的乐观值，当 P30 看更合适：M1（虚拟列表行高 + 五种控件 + 配置页抽屉）与 M3（a11y + SW + 250 KB 预算）的下界偏紧。日历时间再乘 1.3–1.5；M0 结束后用实测值重估一次 M1–M3。
+**状态**：M0–M4 均已完成（2026-10-24）——M3 完成即 v3 可交付，M4 为增量打磨。实现细节、当前状态、坑与遗留项见 [`docs/handoff.md`](docs/handoff.md)。
 
 ## 10. 风险与明确不做
 
 **风险**
 
 1. `@wasm-fmt/clang-format` 的构建可能带补丁 → 用黄金对拍兜底；若发现行为差异，锁定到验证过的版本号，或在仓库内自建 wasm。
-2. CM6 集成（尤其 merge view）比 Ace 复杂 → 若 M2 超期，退回 Ace + 自研行级 diff，功能不变。
-3. 老版本用户流失 → 页面上明确提示并链接 v2；README 说明自建老版本 wasm 的路径。
-4. npm registry / raw.githubusercontent 在 CI 不可达 → schema 已提交，wasm 走缓存或镜像；构建可降级为"只带已有资源"。
-5. **wasm 构建的 `dump-config` 回归** → 16/17/18.1.0–18.1.7/22/23 的 wasm 没有可用的 `dump_config`（§3.1）。M4 起这些版本的 schema 默认值由**同版本 native clang-format** dump 生成并提交（运行期仍用 wasm），并有 312/312 的逐字节对拍兜底；schema 生成内置的类型校验闸门继续拦截任何新版本的形状/值域错误。
+2. npm registry / raw.githubusercontent 在 CI 不可达 → schema 已提交，wasm 走缓存或镜像；构建可降级为"只带已有资源"。
+3. **wasm 构建的 `dump-config` 回归** → 16/17/18.1.0–18.1.7/22/23 的 wasm 没有可用的 `dump_config`（§3.1）。这些版本的 schema 默认值由**同版本 native clang-format** dump 生成并提交（运行期仍用 wasm），并有 312/312 的逐字节对拍兜底；schema 生成内置的类型校验闸门继续拦截任何新版本的形状/值域错误。
 
 **不做**：后端格式化、账号体系、7–15 版本、服务端存储分享、遥测、i18n、Monaco 编辑器；nightly 不做 1.9 GB native 二进制的全严格重建（严格 `npm run schema:check` 留在本地/发布前）。
 
 **授权**：代码 MIT；`NOTICE` 中标注 docstring 来自 LLVM 文档（Apache-2.0 WITH LLVM-exception）、wasm 构建来自 `@wasm-fmt/clang-format`（MIT）。
 
-## 附：v2 现状（用于对照）
-
-- 前端：React 17 + CRA 5，`config.json` 4.7 MB 内联进 bundle，6.0 MB 未压缩 JS，25 个版本 schema 全量加载。
-- 后端：Go 1.17 + `exec` 25 个原生 ELF，`-style={...}` 走命令行参数，stdin/stdout 传代码；无超时、无 body 上限、CORS `*`。
-- 构建：Docker + 全量编译 LLVM × 25（约 30 分钟），二进制不入库，生产 Dockerfile 为空。
-- 已知缺陷：文本变更无防抖、`WriteHeader` 早于 `Content-Type`、测试用例参数名写成 `filename`（handler 要求 `filext`）、`prepare.sh` 少管道符与未定义 `start` 变量、"Remove duplicates" 未测试。

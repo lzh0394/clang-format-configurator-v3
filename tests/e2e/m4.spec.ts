@@ -11,7 +11,7 @@ import {
   setEditorText,
 } from "./helpers";
 
-// M4 acceptance (plan §9 optional row, docs/handoff.md §9):
+// M4 acceptance (plan §9 M4 row):
 //   - share links: #s=... encodes the session, hash > localStorage, invalid
 //     hashes fall back to storage, the fragment is stripped after hydrating
 //   - interface font-size scaling: rem-based multiplier, independent from the
@@ -236,7 +236,7 @@ test("share payloads decode before first paint (no flash of stored state)", asyn
 });
 
 // ---------------------------------------------------------------------------
-// Interface font-size scaling (M4, docs/todo.md)
+// Interface font-size scaling (M4, plan §5 界面字号)
 // ---------------------------------------------------------------------------
 
 function rootFontSize(page: Page): Promise<number> {

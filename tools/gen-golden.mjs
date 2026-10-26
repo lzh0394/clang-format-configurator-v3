@@ -542,7 +542,7 @@ function formatFixture(binary, fixture) {
 /** Structural checks so the fixture set cannot silently lose coverage. */
 function validateFixtures() {
   if (fixtures.length < 24) {
-    fail(`at least 24 fixture groups are required (plan.md §1), found ${fixtures.length}`);
+    fail(`at least 24 fixture groups are required (plan.md §1 expects the 29 committed), found ${fixtures.length}`);
   }
 
   const names = new Set();

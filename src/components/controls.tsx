@@ -1,4 +1,4 @@
-// The five control families of the options panel (contract §4.3):
+// The five control families of the options panel (plan §4):
 // scalar (bool/int/uint/string), enum, map, list<string> and list<struct>.
 //
 // Every control is a controlled component: the displayed value is derived from

@@ -1,4 +1,4 @@
-/* Options panel (contract §4.4). Only scoped module classes; colors come from
+/* Options panel (plan §5). Only scoped module classes; colors come from
    the CSS variables declared in src/styles.css. The panel fills a flex column
    and owns its own scroll area so the virtualizer can measure it. */
 

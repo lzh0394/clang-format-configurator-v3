@@ -1,19 +1,18 @@
 # TODO / 待办清单
 
-> 记录尚未排期或跨里程碑的功能想法。设计与取舍的唯一事实来源是 [`plan.md`](../plan.md)，当前状态与交接信息在 [`handoff.md`](handoff.md)；本文件只收"以后要做的事"。
-> 最后更新：2026-10-26（界面字号设计基准 125% → 130%）
+> 记录尚未排期或跨里程碑的功能想法。设计与取舍的唯一事实来源是 [`plan.md`](../plan.md)，当前状态、命令与实现细节在 [`handoff.md`](handoff.md)；本文件只收"以后要做的事"，已完成项不在此追踪。
+> 最后更新：2026-10-26（清理已完成项，仅保留未排期事项）
 
-## 1. 字体大小调节（已完成，保留设计记录）
+## 按需（不承诺）
 
-- **状态**：M2 完成编辑器字号（12–20 px，`--font-size-editor`），M4 完成**界面字号**（Settings 菜单里的 Interface size：Compact 90% / Standard 100% / Large 115%，三档相对设计基准，`--ui-scale`，随会话持久化；编辑器与界面字号互不影响）。**2026-10-25 把设计基准从浏览器默认的 100% 提到 125%，2026-10-26 按产品要求再上调一档到 130%**：三档数值与持久化值都不变，整体界面比最初大 30%（Standard 100% 在 16px 浏览器下渲染为 20.8px）。三项验收（即时变化/刷新保持/三种字号下列表行高正确）都有 e2e 覆盖（`tests/e2e/m4.spec.ts` 的 "interface size scales the UI (not the editor) and persists"）。
-- **实现要点（改字号前必读）**：
-  - 根字号 `:root { font-size: calc(130% * var(--ui-scale, 1)) }`（130% = 设计基准，2026-10-26 从 125% 上调、最初为 100%；整体字号改基准只改这一处，三档 `uiFontScale` 保持相对百分比），组件字号全部 rem；`transform/zoom` 会破坏虚拟列表行高计算，不要用。
-  - 改字号后虚拟列表要对已渲染行调 `virtualizer.measureElement(el)` 重测；**不要调 `virtualizer.measure()`**（清 cache 但保留旧 measurementsCache，delta 会算成 0，行按估算高度重叠）。
-  - 持久化字段 `uiFontScale` 是向后兼容的增字段，`STATE_VERSION` 仍为 1；旧存档按 1.0 加载。
-- **未做**：连续比例（85%–120%）而不是三档；"恢复默认"目前通过选回 Standard 实现。
+- 收敛快速导入/导出对话框与配置抽屉：两者有意并存，收敛会改变 M1 的 e2e 契约，收益不足以抵消回归风险（见 `handoff.md` §7）。
+- 改 `tools/lib/rst.mjs`，让 RST 表格单元格里的代码块有 `<pre>` 语义（渲染层归一化已兼容，不阻塞）。
+- 加"重置安装提示"入口；给 SW 更新横幅、>2 MB 输入、worker 崩溃横幅补 e2e（现有单测覆盖，见 `handoff.md` §7）。
+- 仓库是否长期 public、是否要 per-PR 预览（GitHub Pages 不支持，需 Cloudflare Pages）。
+- 界面字号：连续比例（85%–120%）代替 90%/100%/115% 三档；提供显式的"恢复默认"入口。
+- 若上游修了 16/17/18.1.0–18.1.7/22/23 的 wasm `dump_config`，可去掉 `versions.json` 里的 `"dump": "native"` 与 native 构建步骤（其余版本不受影响）。
 
-## 2. M4 已完成项（保留追踪）
+## 已知上游缺陷（非本项目可修）
 
-- 分享链接（URL hash）、PWA manifest/安装提示、C#/Proto 等示例与更多语言后缀、全部 52 个 wasm 版本、界面字号缩放、虚拟列表 roving 键盘模型、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查 → 见 `plan.md` 的 M4 状态与 `handoff.md` §6/§12。
-- M4 遗留（按需）：收敛快速导入/导出与配置抽屉（有意保留两个入口）、RST 表格单元格代码块的 `<pre>` 语义（需改 `tools/lib/rst.mjs`）、安装提示 dismiss 的重置入口、SW 更新横幅/>2 MB/崩溃横幅的 e2e 缺口（见 `handoff.md` §7）。
-- 已知缺陷（上游）：19.1.1 的 npm wasm `version()` 报 19.1.0；16/17/18.1.0–18.1.7/22/23 的 wasm 没有可用 `dump_config`（schema 走同版本 native dump，已解决）。
+- 19.1.1 的 npm wasm `version()` 报 19.1.0（上游标签错）；格式化行为与 native 19.1.1 一致，`core.build` 保留上游值，UI 状态栏显示选中版本。
+- 22.x / 23.x 的 wasm `dump_config` 值域错位（CLI 构建同样错）：schema 默认值已改由同版本 native dump 生成，运行期格式化仍用 wasm。

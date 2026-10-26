@@ -1,4 +1,4 @@
-// Import / Export dialog (plan §5, contract §5.1). The dialog is controlled by
+// Import / Export dialog (plan §5). The dialog is controlled by
 // App: `open` decides whether it renders and `tab` picks the initial tab. On a
 // successful import it hands the parsed result to App, which owns applying it,
 // closing the dialog and displaying warnings.

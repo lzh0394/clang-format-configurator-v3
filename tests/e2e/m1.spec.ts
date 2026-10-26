@@ -3,7 +3,7 @@ import { parse as parseYaml } from "yaml";
 
 import { expectEditorTextToMatch, openApp as openReadyApp } from "./helpers";
 
-// M1 acceptance (plan §9, contract §5.2): a usable `.clang-format` can be built
+// M1 acceptance (plan §9): a usable `.clang-format` can be built
 // through the UI alone, export -> import -> export is byte-identical, and every
 // control type renders correctly.
 //
@@ -16,7 +16,7 @@ import { expectEditorTextToMatch, openApp as openReadyApp } from "./helpers";
 // ---------------------------------------------------------------------------
 
 async function openApp(page: Page): Promise<void> {
-  // The shared helper waits for the wasm formatter's first result (contract §5.2).
+  // The shared helper waits for the wasm formatter's first result (plan §5).
   await openReadyApp(page);
   await warmDocs(page);
 }

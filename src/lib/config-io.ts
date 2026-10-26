@@ -1,4 +1,4 @@
-// Import / export of `.clang-format` YAML (plan §4, M1 contract §3).
+// Import / export of `.clang-format` YAML (plan §4).
 //
 // Export writes `BasedOnStyle` plus either the sparse `modified` map ("minimal")
 // or every option with an effective value ("full"). Import validates the YAML

@@ -38,7 +38,7 @@ test("wasm 21.1.8 matches the native golden fixtures byte for byte", async ({ pa
 
   const golden = loadGolden();
   expect(golden.clangFormatVersion).toBe("21.1.8");
-  // plan §1 requires at least 24 fixture groups; the committed set has 29.
+  // plan §1 expects 29 fixture groups; the lower bound keeps a trimmed local set usable.
   expect(golden.fixtures.length).toBeGreaterThanOrEqual(24);
   expect(golden.fixtures.length).toBe(29);
 

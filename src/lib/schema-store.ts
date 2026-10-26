@@ -1,8 +1,7 @@
 // Runtime schema store (plan §5): schema JSON is fetched once per version and
-// cached in a small LRU (default 3 versions == the number of shipped versions),
-// docs are fetched lazily the first time a row's documentation is opened or a
-// search needs their text. In-flight requests are de-duplicated and failures
-// are not cached, so the UI can retry.
+// cached in a small LRU (default 3 versions), docs are fetched lazily the first
+// time a row's documentation is opened or a search needs their text. In-flight
+// requests are de-duplicated and failures are not cached, so the UI can retry.
 
 import { loadDocs, loadSchema, type SchemaCore, type SchemaDocs } from "./schema";
 

@@ -32,7 +32,7 @@ export type SettingsMenuProps = {
 const EDITOR_FONT_SIZES = [12, 13, 14, 16, 18, 20] as const;
 
 /**
- * Interface font-size tiers (M4, docs/todo.md). Values mirror
+ * Interface font-size tiers (M4, plan §5 界面字号). Values mirror
  * `UI_FONT_SCALES` in src/lib/persisted-state.ts; they are relative to the
  * design baseline, which src/styles.css renders at 130% of the browser's
  * default font size (so Standard shows as 100% while rendering 20.8px on a

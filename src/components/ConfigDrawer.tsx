@@ -1,4 +1,4 @@
-// Slide-over configuration drawer (plan §5 配置页, M2 §9 item 6).
+// Slide-over configuration drawer (plan §5 配置页).
 //
 // Edits the `.clang-format` YAML directly: the text is initialized from
 // `serializeConfig` every time the drawer opens, validated live (debounced)

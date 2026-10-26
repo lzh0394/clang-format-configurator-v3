@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { APP_READY_TIMEOUT, openApp } from "./helpers";
 
-// M4 acceptance (plan §9 items 2 and 3): the PWA layer (manifest + icons,
+// M4 acceptance (plan §9 M4 row): the PWA layer (manifest + icons,
 // service-worker precache, install banner) and the extra filename/language
 // mappings. Plain browser tests only; no wasm byte comparisons here.
 //

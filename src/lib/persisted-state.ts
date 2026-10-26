@@ -40,7 +40,7 @@ export const DEFAULT_EDITOR_FONT_SIZE = 13;
 export const DEFAULT_UI_FONT_SCALE = 1;
 
 /**
- * Interface font-size tiers (plan §9 M4, docs/todo.md). `uiFontScale` is a
+ * Interface font-size tiers (plan §5 持久化/字号). `uiFontScale` is a
  * multiplier applied to the root font size by src/styles.css, so the whole UI
  * scales while the editor keeps its independent `--font-size-editor`.
  *

@@ -126,7 +126,7 @@ function normalizeDocsText(text: string): string {
 
 /**
  * Render-layer fix for the build-time docs HTML (M3 legacy "docs `<pre>` is not
- * focusable", plan M4 §9.5):
+ * focusable", plan §9 M4):
  *
  * - every `<pre>` becomes a tab stop so the horizontal scroll area is reachable
  *   with the keyboard;

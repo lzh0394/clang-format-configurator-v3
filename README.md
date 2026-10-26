@@ -23,14 +23,14 @@ npm run dev              # http://localhost:5173
 
 `public/schema/` 已提交进仓库；`public/wasm/` 不提交，由 `prepare:assets` 按 `tools/wasm.lock.json` 复现。
 
-## 已实现（M0 + M1 + M2 + M3 + M4）
+## 已实现
 
 - **全部 52 个已发布版本**（16.0.6 – 23.1.1，默认 21.1.8）× **7 种风格**，版本列表由生成的 `schema/index.json` 驱动，加版本不用改代码；16/17/18.1.0–18.1.7/22/23 的 schema 默认值来自同版本 native clang-format 的 dump（运行期格式化仍用 wasm）。
 - **选项面板**：每个版本 147–209 个选项的虚拟列表（动态行高）、搜索（键名 + 文档全文，120 ms 防抖）、过滤 chips（全部 / 已修改 / 已废弃）、逐项显示「继承值 vs 修改值」与单行 reset；单一 Tab 停靠点 + ↑/↓/Home/End/PageUp/PageDown 的 roving 键盘模型（跨虚拟窗口可达）。
 - **五种控件**：bool / int / uint / string 标量、enum 下拉、map（结构体，稀疏修改）、`List of Strings`、`List of Structs`（增删条目、逐字段编辑）。
 - **只发送改动项**：内部状态是 `{version, style, modified}`，格式化 payload 是 `{BasedOnStyle, ...modified}`；默认值只用于显示，不会再像 v2 那样把 190 个默认值全量物化。
 - **CodeMirror 6 编辑器**：左栏可编辑源码、右栏只读格式化结果；语言随文件名（C/C++、Java、C#、Proto、Kotlin、Objective-C、JS/TS，`.clang-format` 为 YAML），Ctrl/Cmd+Enter 立即格式化，250 ms 防抖，编辑器字号 12–20 px 可调；文件名切到 C#/Proto/Java/Kotlin/JS/TS 时，若编辑器仍是未编辑的内置样例，会自动换成对应语言的示例。
-- **分享链接**：`#s=<base64url(JSON)>` 编码 `{version, style, modified, code?}`，Copy link 一键复制；打开链接时 hash 优先于 localStorage，应用后自动清掉 fragment（之后编辑照常持久化）；code 超过 8 KB 时只分享配置，坏链接静默回退到本地存档。
+- **分享链接**：`#s=<base64url(JSON)>` 编码会话（短键 `{k, v, s, m, c?}`），Copy link 一键复制；打开链接时 hash 优先于 localStorage，应用后自动清掉 fragment（之后编辑照常持久化）；code 超过 8 KB 时只分享配置，坏链接静默回退到本地存档。
 - **可安装 PWA**：`manifest.json` + 192/512/maskable/apple-touch 图标；可安装时显示安装横幅（可关闭，安装后隐藏），SW 预缓存 manifest 与图标，断网也能用。
 - **真实行级 diff**：`@codemirror/merge` 的 split 视图（不是 v2 的"左右并排"），变更行/片段高亮、两侧滚动同步、未变更区可折叠；按需加载，不进首屏。
 - **Worker 协议**：请求串行化 + latest-wins（过期请求静默丢弃）、格式化期间捕获 LLVM 诊断、20 s 超时与 fatal 分类；worker 崩溃后自动重建并提示，状态不丢。
@@ -43,11 +43,11 @@ npm run dev              # http://localhost:5173
 - **大输入保护**：>2 MB 源码先提示并需确认才格式化。
 - **会话持久化**：`{version, style, modified, code, theme, editorFontSize, uiFontScale}` 存在 localStorage（带状态版本号），刷新/重开自动恢复；不兼容或损坏的存档会被丢弃并提示，存储不可用/写满只告警不阻塞。
 - **字号**：编辑器字号 12–20 px 与界面字号 90%/100%/115% 各自独立、都持久化；界面字号通过根字号 + rem 缩放全站 UI（设计基准为浏览器默认字号的 130%，即 Standard 100% 在 16px 浏览器下渲染为 20.8px；虚拟列表会重新测量行高），编辑器字号不跟着变。
-- **主题与响应式**：跟随系统 / 浅色 / 深色三档（`data-theme` + 无闪白预置脚本），选择持久化；<768 px 时双栏变为「Options / Code」选项卡，键盘左右方向键可切换；769–1100 px 仍保留选项面板在左，其中 769–900 px 会把源码与结果改为右上/右下排列（避免三栏过窄）。
+- **主题与响应式**：跟随系统 / 浅色 / 深色三档（`data-theme` + 无闪白预置脚本），选择持久化；≤768 px 时双栏变为「Options / Code」选项卡，键盘左右方向键可切换；769–1100 px 仍保留选项面板在左，其中 769–900 px 会把源码与结果改为右上/右下排列（避免三栏过窄）。
 - **离线可用**：手写 Service Worker（`public/sw.js`，子路径安全）缓存 app shell 与已用版本 wasm/schema，断网后刷新仍能格式化；命中新版本时提示重载。
 - **可访问性**：跳过导航链接、控件都有可访问名称、chips `aria-pressed`、文档展开 `aria-expanded`、对话框 `aria-labelledby`、错误 `role="alert"`、格式化结果 polite live region、`prefers-reduced-motion` 生效、控件边框对比度按 WCAG 1.4.11 处理；ConfigDialog/ConfigDrawer 共用焦点陷阱（Tab 循环、Escape、焦点归还），两个 modal 同开时只有顶层响应。
-- **质量闸门**：`npm run check:size` 按 plan §1 检查首屏 JS/wasm/schema gzip 预算；`tests/golden/golden-21.1.8.json` 29 组由 **native clang-format 21.1.8** 生成，e2e 用 wasm 逐字节对拍（CI 再跑 `golden:gen --check` 防漂移），另有一条 p95 ≤ 80 ms 的格式化性能用例。
-- **首屏 JS 224.5 KB gzip**（`check:size` 口径，预算 250 KB；上屏实际还要加 ~8 KB 的语言 chunk），单版本 wasm 902–1072 KB gzip。
+- **质量闸门**：`npm run check:size` 按 plan §1 检查首屏 JS/wasm/schema gzip 预算；`tests/golden/golden-21.1.8.json` 29 组由 **native clang-format 21.1.8** 生成，e2e 用 wasm 逐字节对拍（CI 再跑 `golden:gen --check` 防漂移），另有两项性能用例（format p95 ≤ 80 ms 与版本切换时限）。
+- **首屏 JS 224.6 KB gzip**（`check:size` 口径，预算 250 KB；上屏实际还要加 ~7.5 KB 的语言 chunk），单版本 wasm 902–1072 KB gzip。
 
 ## 脚本
 
@@ -76,12 +76,15 @@ VITE_BASE=/<repo>/ npm run build
 
 ```
 tools/
-  versions.json          版本清单（唯一事实来源，52 行；native dump 的版本带 "dump": "native"）
+  versions.json          版本清单（唯一事实来源，52 条；native dump 的版本带 "dump": "native"）
   fetch-wasm.mjs         从 npm 拉 wasm，校验 sha512，生成统一 entry.js
   gen-schema.mjs         dump_config / native dump + LLVM RST → public/schema/<ver>/（--check 供 nightly）
+  prepare-assets.mjs     依次跑 fetch-wasm + gen-schema（--only=<ver> 只处理单个版本）
   gen-golden.mjs         用 native 21.1.8 生成/校验 tests/golden 的期望输出
   check-size.mjs         按 plan §1 检查 dist 的 gzip 预算（52 个版本，CI 闸门）
+  wasm.lock.json         已提交：52 条 integrity + 178 个文件 sha256
   lib/rst.mjs            RST 解析 + 子集渲染成 HTML
+  lib/tar.mjs            最小 ustar 读取（不引 tar 依赖）
 src/
   App.tsx                版本/风格/文件名 + 选项面板 + 编辑器/diff + 持久化/分享链接/PWA/字号 + 状态栏
   editor/                CodeEditor（受控 CM6）、语言懒加载、示例代码、共享主题与字号变量

@@ -1,4 +1,4 @@
-// The options panel (contract §4): a virtualized, searchable, filterable list of
+// The options panel (plan §5): a virtualized, searchable, filterable list of
 // every clang-format option for the current schema version. It is a pure
 // presentational component — all state lives in App's reducer, the panel only
 // derives display values and reports edits upward.
