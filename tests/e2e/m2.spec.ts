@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import { expect, test, type Page } from "@playwright/test";
 
 import {
@@ -35,6 +37,22 @@ async function readMinimalExport(page: Page): Promise<string> {
   await page.getByTestId("dialog-close").click();
   await expect(page.getByTestId("config-dialog")).toBeHidden();
   return text;
+}
+
+/**
+ * Click the drawer's Download button and return the serialized YAML it wrote.
+ *
+ * CodeMirror only renders the lines in its viewport, so the rendered `.cm-line`
+ * text is not the whole document for large YAML (and how many lines fit depends
+ * on the interface size tier). The download is the deterministic full copy.
+ */
+async function readDownloadedConfig(page: Page): Promise<string> {
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByTestId("config-download").click();
+  const download = await downloadPromise;
+  const path = await download.path();
+  if (path === null) throw new Error("config download did not produce a file");
+  return readFile(path, "utf8");
 }
 
 // ---------------------------------------------------------------------------
@@ -234,9 +252,12 @@ test("config drawer mode radios re-serialize the YAML", async ({ page }) => {
 
   await page.getByTestId("config-mode-full").check();
   await expect(page.getByTestId("config-mode-full")).toBeChecked();
-  await expect.poll(async () => (await readEditorText(page, CONFIG_YAML)).length).toBeGreaterThan(1_000);
-  await expectEditorTextContains(page, CONFIG_YAML, "AccessModifierOffset");
-  await expectEditorTextContains(page, CONFIG_YAML, "BasedOnStyle: LLVM");
+  // Read the downloaded YAML, not the rendered editor: CodeMirror only renders
+  // the visible viewport, so the rendered line count depends on font size.
+  const full = await readDownloadedConfig(page);
+  expect(full.length).toBeGreaterThan(1_000);
+  expect(full).toContain("AccessModifierOffset");
+  expect(full).toContain("BasedOnStyle: LLVM");
 
   await page.getByTestId("config-mode-minimal").check();
   await expect(page.getByTestId("config-mode-minimal")).toBeChecked();

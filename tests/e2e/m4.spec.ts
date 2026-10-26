@@ -245,23 +245,37 @@ function rootFontSize(page: Page): Promise<number> {
 
 test("interface size scales the UI (not the editor) and persists", async ({ page }) => {
   await openApp(page);
-  expect(await rootFontSize(page)).toBe(16);
+  // The design baseline is 130% of the browser default: 16px -> 20.8px.
+  expect(await rootFontSize(page)).toBe(20.8);
   const editorFont = await page.getByTestId("source").evaluate((element) => getComputedStyle(element).fontSize);
 
   await openSettings(page);
   await page.getByTestId("ui-font-scale").selectOption("1.15");
   await page.keyboard.press("Escape");
 
-  await expect.poll(() => rootFontSize(page)).toBeCloseTo(18.4, 1);
+  await expect.poll(() => rootFontSize(page)).toBeCloseTo(23.92, 1);
   // The editor keeps its own --font-size-editor (plan §5 字号解耦).
   expect(await page.getByTestId("source").evaluate((element) => getComputedStyle(element).fontSize)).toBe(editorFont);
 
-  // Text inside the UI really grew (settings toggle is 13px at 100%).
+  // Text inside the UI really grew (the toggle is 0.8125rem: 16.9px at
+  // Standard, 19.435px at Large on the 130% baseline).
   await openSettings(page);
   const toggleFont = await page
     .getByTestId("settings-toggle")
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
-  expect(toggleFont).toBeGreaterThan(13);
+  expect(toggleFont).toBeCloseTo(19.435, 1);
+
+  // Bigger interface sizes make the header wrap; the popover must still be
+  // fully on screen (it is anchored to the toggle, which can wrap near the
+  // left edge).
+  const menuBox = await page.getByTestId("settings-menu").boundingBox();
+  expect(menuBox).not.toBeNull();
+  const viewport = page.viewportSize();
+  expect(viewport).not.toBeNull();
+  expect(menuBox!.x).toBeGreaterThanOrEqual(0);
+  expect(menuBox!.x + menuBox!.width).toBeLessThanOrEqual(viewport!.width);
+  expect(menuBox!.y).toBeGreaterThanOrEqual(0);
+  expect(menuBox!.y + menuBox!.height).toBeLessThanOrEqual(viewport!.height);
   await page.keyboard.press("Escape");
 
   // Virtual list rows still lay out without overlapping after re-measuring.
@@ -295,14 +309,14 @@ test("interface size scales the UI (not the editor) and persists", async ({ page
   await expectStoredField(page, "uiFontScale", 1.15);
   await page.reload();
   await expect(page.getByTestId("options-panel")).toBeVisible({ timeout: APP_READY_TIMEOUT });
-  await expect.poll(() => rootFontSize(page)).toBeCloseTo(18.4, 1);
+  await expect.poll(() => rootFontSize(page)).toBeCloseTo(23.92, 1);
 
   // Back to the standard tier.
   await openSettings(page);
   await expect(page.getByTestId("ui-font-scale")).toHaveValue("1.15");
   await page.getByTestId("ui-font-scale").selectOption("1");
   await page.keyboard.press("Escape");
-  await expect.poll(() => rootFontSize(page)).toBe(16);
+  await expect.poll(() => rootFontSize(page)).toBe(20.8);
 });
 
 // ---------------------------------------------------------------------------

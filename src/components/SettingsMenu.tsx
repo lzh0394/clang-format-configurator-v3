@@ -15,7 +15,7 @@
 // The `editor-font-size` testid predates this component (it lived in the header
 // in M2); it is kept here so the e2e suite only needs to open the menu first.
 
-import { useCallback, useEffect, useId, useRef, useState, type JSX } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type JSX } from "react";
 import { THEME_PREFERENCES, type ThemePreference } from "../lib/theme";
 import styles from "./SettingsMenu.module.css";
 
@@ -33,8 +33,11 @@ const EDITOR_FONT_SIZES = [12, 13, 14, 16, 18, 20] as const;
 
 /**
  * Interface font-size tiers (M4, docs/todo.md). Values mirror
- * `UI_FONT_SCALES` in src/lib/persisted-state.ts; the CSS multiplier lives in
- * src/styles.css (`--ui-scale`).
+ * `UI_FONT_SCALES` in src/lib/persisted-state.ts; they are relative to the
+ * design baseline, which src/styles.css renders at 130% of the browser's
+ * default font size (so Standard shows as 100% while rendering 20.8px on a
+ * default 16px browser). The CSS multiplier lives in src/styles.css
+ * (`--ui-scale`).
  */
 const UI_FONT_SCALE_OPTIONS = [
   { value: 0.9, label: "Compact (90%)" },
@@ -76,6 +79,34 @@ export function SettingsMenu(props: SettingsMenuProps): JSX.Element {
     initial?.focus();
     return () => previous?.focus();
   }, [open]);
+
+  // The panel is absolutely positioned with `right: 0` in CSS, which assumes the
+  // toggle sits near the right edge. The header wraps, though, and at larger
+  // interface sizes the toggle can land on a left-aligned wrapped line; anchoring
+  // the panel to its right edge would then push it off the left of the viewport.
+  // Clamp it horizontally on open (and on resize / size-tier change), preferring
+  // the toggle's right edge like before.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = (): void => {
+      const panel = panelRef.current;
+      const root = rootRef.current;
+      const toggle = toggleRef.current;
+      if (panel === null || root === null || toggle === null) return;
+      const margin = 8;
+      const panelWidth = panel.getBoundingClientRect().width;
+      const maxLeft = Math.max(margin, window.innerWidth - panelWidth - margin);
+      const left = Math.min(
+        Math.max(toggle.getBoundingClientRect().right - panelWidth, margin),
+        maxLeft,
+      );
+      panel.style.left = `${left - root.getBoundingClientRect().left}px`;
+      panel.style.right = "auto";
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [open, uiFontScale]);
 
   // Escape closes. The listener lives on the document because the popover is
   // not modal and the panel itself does not keep a focus trap.

@@ -1,13 +1,13 @@
 # TODO / 待办清单
 
 > 记录尚未排期或跨里程碑的功能想法。设计与取舍的唯一事实来源是 [`plan.md`](../plan.md)，当前状态与交接信息在 [`handoff.md`](handoff.md)；本文件只收"以后要做的事"。
-> 最后更新：2026-10-24（M4 完成后）
+> 最后更新：2026-10-26（界面字号设计基准 125% → 130%）
 
 ## 1. 字体大小调节（已完成，保留设计记录）
 
-- **状态**：M2 完成编辑器字号（12–20 px，`--font-size-editor`），M4 完成**界面字号**（Settings 菜单里的 Interface size：Compact 90% / Standard 100% / Large 115%，`--ui-scale`，随会话持久化；编辑器与界面字号互不影响）。三项验收（即时变化/刷新保持/三种字号下列表行高正确）都有 e2e 覆盖（`tests/e2e/m4.spec.ts` 的 "interface size scales the UI (not the editor) and persists"）。
+- **状态**：M2 完成编辑器字号（12–20 px，`--font-size-editor`），M4 完成**界面字号**（Settings 菜单里的 Interface size：Compact 90% / Standard 100% / Large 115%，三档相对设计基准，`--ui-scale`，随会话持久化；编辑器与界面字号互不影响）。**2026-10-25 把设计基准从浏览器默认的 100% 提到 125%，2026-10-26 按产品要求再上调一档到 130%**：三档数值与持久化值都不变，整体界面比最初大 30%（Standard 100% 在 16px 浏览器下渲染为 20.8px）。三项验收（即时变化/刷新保持/三种字号下列表行高正确）都有 e2e 覆盖（`tests/e2e/m4.spec.ts` 的 "interface size scales the UI (not the editor) and persists"）。
 - **实现要点（改字号前必读）**：
-  - 根字号 `:root { font-size: calc(100% * var(--ui-scale, 1)) }`，组件字号全部 rem；`transform/zoom` 会破坏虚拟列表行高计算，不要用。
+  - 根字号 `:root { font-size: calc(130% * var(--ui-scale, 1)) }`（130% = 设计基准，2026-10-26 从 125% 上调、最初为 100%；整体字号改基准只改这一处，三档 `uiFontScale` 保持相对百分比），组件字号全部 rem；`transform/zoom` 会破坏虚拟列表行高计算，不要用。
   - 改字号后虚拟列表要对已渲染行调 `virtualizer.measureElement(el)` 重测；**不要调 `virtualizer.measure()`**（清 cache 但保留旧 measurementsCache，delta 会算成 0，行按估算高度重叠）。
   - 持久化字段 `uiFontScale` 是向后兼容的增字段，`STATE_VERSION` 仍为 1；旧存档按 1.0 加载。
 - **未做**：连续比例（85%–120%）而不是三档；"恢复默认"目前通过选回 Standard 实现。

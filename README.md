@@ -42,7 +42,7 @@ npm run dev              # http://localhost:5173
 - **wasm 在 Worker 里跑**：主线程不阻塞，一个版本一个实例，换版本 terminate 旧 worker。
 - **大输入保护**：>2 MB 源码先提示并需确认才格式化。
 - **会话持久化**：`{version, style, modified, code, theme, editorFontSize, uiFontScale}` 存在 localStorage（带状态版本号），刷新/重开自动恢复；不兼容或损坏的存档会被丢弃并提示，存储不可用/写满只告警不阻塞。
-- **字号**：编辑器字号 12–20 px 与界面字号 90%/100%/115% 各自独立、都持久化；界面字号通过根字号 + rem 缩放全站 UI（虚拟列表会重新测量行高），编辑器字号不跟着变。
+- **字号**：编辑器字号 12–20 px 与界面字号 90%/100%/115% 各自独立、都持久化；界面字号通过根字号 + rem 缩放全站 UI（设计基准为浏览器默认字号的 130%，即 Standard 100% 在 16px 浏览器下渲染为 20.8px；虚拟列表会重新测量行高），编辑器字号不跟着变。
 - **主题与响应式**：跟随系统 / 浅色 / 深色三档（`data-theme` + 无闪白预置脚本），选择持久化；<768 px 时双栏变为「Options / Code」选项卡，键盘左右方向键可切换；769–1100 px 仍保留选项面板在左，其中 769–900 px 会把源码与结果改为右上/右下排列（避免三栏过窄）。
 - **离线可用**：手写 Service Worker（`public/sw.js`，子路径安全）缓存 app shell 与已用版本 wasm/schema，断网后刷新仍能格式化；命中新版本时提示重载。
 - **可访问性**：跳过导航链接、控件都有可访问名称、chips `aria-pressed`、文档展开 `aria-expanded`、对话框 `aria-labelledby`、错误 `role="alert"`、格式化结果 polite live region、`prefers-reduced-motion` 生效、控件边框对比度按 WCAG 1.4.11 处理；ConfigDialog/ConfigDrawer 共用焦点陷阱（Tab 循环、Escape、焦点归还），两个 modal 同开时只有顶层响应。
