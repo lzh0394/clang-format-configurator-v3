@@ -489,8 +489,19 @@ for (const entry of skipped) {
 }
 
 // The app reads index.json to know which versions exist without importing
-// build tooling. Its first entry is also the default version (21.1.8 today), so
-// versions.json order is meaningful: keep the default row first.
+// build tooling. The list leads with the newest release, and that same newest
+// build is the preselected `default` (so shipping a version makes it the
+// default) and the dropdown row labelled `latest`.
+const compareVersionsDesc = (a, b) => {
+  const left = a.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const right = b.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  for (let i = 0; i < Math.max(left.length, right.length); i += 1) {
+    const diff = (right[i] ?? 0) - (left[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+};
+
 const available = [];
 for (const entry of versions) {
   const generated = index.find((item) => item.version === entry.version);
@@ -510,9 +521,15 @@ for (const entry of versions) {
     continue;
   }
 }
+available.sort((a, b) => compareVersionsDesc(a.version, b.version));
+const newest = available[0]?.version ?? null;
 await writeFile(
   path.join(outRoot, "index.json"),
-  `${JSON.stringify({ default: available[0]?.version ?? null, versions: available }, null, 2)}\n`,
+  `${JSON.stringify(
+    { default: newest, latest: newest, versions: available },
+    null,
+    2,
+  )}\n`,
 );
 
 if (warnings.length) {

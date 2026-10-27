@@ -9,7 +9,7 @@ import {
   rovingTabIndex,
 } from "./roving";
 
-// Pure data transform tests: the options panel virtualizes 189 rows, but the
+// Pure data transform tests: the options panel virtualizes 209 rows, but the
 // "which row is next" rules must work for any list length without a DOM.
 
 describe("isRovingNavigationKey", () => {

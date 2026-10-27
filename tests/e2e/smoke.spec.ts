@@ -25,7 +25,7 @@ test("formats source with the wasm build", async ({ page }) => {
   });
 
   await openApp(page);
-  await expect(page.getByTestId("status")).toContainText("189 options");
+  await expect(page.getByTestId("status")).toContainText("209 options");
   expect(errors).toEqual([]);
   expect(failed).toEqual([]);
 });

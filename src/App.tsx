@@ -23,6 +23,7 @@ import { applyTheme, type ThemePreference } from "./lib/theme";
 import {
   buildStylePayload,
   loadVersionIndex,
+  versionLabel,
   type OptionDef,
   type SchemaCore,
   type StyleName,
@@ -90,6 +91,7 @@ export default function App() {
     typeof window === "undefined" ? null : decodeShareHash(window.location.hash),
   );
   const [versions, setVersions] = useState<VersionInfo[]>([]);
+  const [latest, setLatest] = useState<string | null>(null);
   const [version, setVersion] = useState("");
   const [schema, setSchema] = useState<SchemaCore | null>(null);
   const [config, dispatch] = useReducer(
@@ -147,7 +149,9 @@ export default function App() {
   configRef.current = config;
 
   // Version list comes from the generated schema index, so shipping a new
-  // version never requires touching app code.
+  // version never requires touching app code. The index is newest-first, so the
+  // dropdown leads with the newest release — labelled "latest" and preselected
+  // as the default unless a share link or a saved session names a shipped one.
   useEffect(() => {
     let cancelled = false;
     loadVersionIndex()
@@ -156,6 +160,7 @@ export default function App() {
         const first = index.versions[0];
         if (!first) throw new Error("no schema found — run `npm run prepare:assets` first");
         setVersions(index.versions);
+        setLatest(index.latest);
         // Prefer the share link, then the persisted version, when still shipped
         // (plan §5: hash > storage > default).
         const preferred = shared?.version ?? restored.state?.version;
@@ -591,7 +596,7 @@ export default function App() {
             >
               {versions.map((entry) => (
                 <option key={entry.version} value={entry.version}>
-                  {entry.version}
+                  {versionLabel(entry.version, latest)}
                 </option>
               ))}
             </select>

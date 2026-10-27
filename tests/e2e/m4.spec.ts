@@ -301,7 +301,7 @@ test("interface size scales the UI (not the editor) and persists", async ({ page
   // Search + export still work at the larger size.
   await page.getByTestId("options-search").fill("Indent");
   await expect(page.getByTestId("options-count")).toContainText(/\//u);
-  await expect(page.getByTestId("options-count")).not.toContainText(/169 \/ 169|189 \/ 189/u);
+  await expect(page.getByTestId("options-count")).not.toContainText(/169 \/ 169|189 \/ 189|209 \/ 209/u);
   await page.getByTestId("open-export").click();
   await expect(page.getByTestId("config-dialog")).toBeVisible();
   await page.getByTestId("dialog-close").click();
@@ -459,7 +459,14 @@ test("switching the filename follows with the matching sample snippet", async ({
 test("ships every published wasm version (16.0.6–23.1.1) and formats with the edges", async ({ page }) => {
   await openApp(page);
   await expect(page.getByLabel("Version").locator("option")).toHaveCount(52);
-  await expect(page.getByLabel("Version")).toHaveValue("21.1.8");
+  await expect(page.getByLabel("Version")).toHaveValue("23.1.1");
+
+  // Newest first, and only the newest entry carries the "latest" label.
+  const versionOptions = page.getByLabel("Version").locator("option");
+  await expect(versionOptions.first()).toHaveText("23.1.1 (latest)");
+  await expect(versionOptions.nth(1)).toHaveText("23.1.0");
+  await expect(versionOptions.last()).toHaveText("16.0.6");
+  await expect(page.getByLabel("Version").locator("option", { hasText: "(latest)" })).toHaveCount(1);
 
   // Oldest version: schema comes from a native dump, formatting from wasm.
   await page.getByLabel("Version").selectOption("16.0.6");
@@ -468,16 +475,16 @@ test("ships every published wasm version (16.0.6–23.1.1) and formats with the 
   });
   await expectEditorTextContains(page, "output", "class Widget {");
 
-  // Newest version: same for the 23.x packaging.
-  await page.getByLabel("Version").selectOption("23.1.1");
-  await expect(page.getByTestId("status")).toContainText("clang-format 23.1.1 ready", {
+  // Mid-range version (the long-standing 21.x default): still fully usable.
+  await page.getByLabel("Version").selectOption("21.1.8");
+  await expect(page.getByTestId("status")).toContainText("clang-format 21.1.8 ready", {
     timeout: APP_READY_TIMEOUT,
   });
   await expectEditorTextContains(page, "output", "class Widget {");
 
-  // Back to the latest version: the sample still formats.
-  await page.getByLabel("Version").selectOption("21.1.8");
-  await expect(page.getByTestId("status")).toContainText("clang-format 21.1.8 ready", {
+  // Back to the newest version — the preselected default: the sample still formats.
+  await page.getByLabel("Version").selectOption("23.1.1");
+  await expect(page.getByTestId("status")).toContainText("clang-format 23.1.1 ready", {
     timeout: APP_READY_TIMEOUT,
   });
   await expectEditorTextContains(page, "output", "class Widget {");

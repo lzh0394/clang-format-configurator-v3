@@ -102,9 +102,9 @@ test("version switch meets the cold and cached budgets", async ({ page }) => {
     return Date.now() - started;
   };
 
-  // 21.1.8 is what the page loaded with; 18.1.8 has to be fetched + compiled.
+  // 23.1.1 is what the page loaded with; 18.1.8 has to be fetched + compiled.
   const cold = await switchTo("18.1.8");
-  const back = await switchTo("21.1.8");
+  const back = await switchTo("23.1.1");
   // Switching to a version that has already been loaded is the cached case.
   const cached = await switchTo("18.1.8");
 

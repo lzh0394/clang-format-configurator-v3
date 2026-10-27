@@ -26,7 +26,7 @@ npm run dev              # http://localhost:5173
 
 ## 已实现
 
-- **全部 52 个已发布版本**（16.0.6 – 23.1.1，默认 21.1.8）× **7 种风格**，版本列表由生成的 `schema/index.json` 驱动，加版本不用改代码；16/17/18.1.0–18.1.7/22/23 的 schema 默认值来自同版本 native clang-format 的 dump（运行期格式化仍用 wasm）。
+- **全部 52 个已发布版本**（16.0.6 – 23.1.1，默认即最新 23.1.1）× **7 种风格**，版本列表由生成的 `schema/index.json` 驱动（新→旧排序，最新一条显示 `(latest)` 且被预选，option 的 value 仍是纯版本号），加版本不用改代码；16/17/18.1.0–18.1.7/22/23 的 schema 默认值来自同版本 native clang-format 的 dump（运行期格式化仍用 wasm）。
 - **选项面板**：每个版本 147–209 个选项的虚拟列表（动态行高）、搜索（键名 + 文档全文，120 ms 防抖）、过滤 chips（全部 / 已修改 / 已废弃）、逐项显示「继承值 vs 修改值」与单行 reset；单一 Tab 停靠点 + ↑/↓/Home/End/PageUp/PageDown 的 roving 键盘模型（跨虚拟窗口可达）。
 - **五种控件**：bool / int / uint / string 标量、enum 下拉、map（结构体，稀疏修改）、`List of Strings`、`List of Structs`（增删条目、逐字段编辑）。
 - **只发送改动项**：内部状态是 `{version, style, modified}`，格式化 payload 是 `{BasedOnStyle, ...modified}`；默认值只用于显示，不会再像 v2 那样把 190 个默认值全量物化。
@@ -116,7 +116,7 @@ tests/
                          + m4-pwa + m4-a11y + soft-wrap（软折行）+ golden（wasm vs native）+ perf（p95）
 public/
   schema/<ver>/          core.json（选项 + 默认值）、docs.json（文档），已提交（52 个版本）
-  schema/index.json      版本下拉的数据源
+  schema/index.json      版本下拉的数据源（新→旧；default 与 latest 都指向最新版本，发布新版本即成为默认）
   manifest.json          PWA manifest（相对 start_url/scope，子路径安全）
   icons/                 PWA 图标（192/512/maskable/apple-touch）
   sw.js                  手写的离线 Service Worker（Vite 原样拷进 dist）
@@ -127,8 +127,8 @@ public/
 
 | 版本 | 状态 |
 |---|---|
-| 21.1.8（默认） | ✅ |
-| 16.0.6 – 23.1.1 全部 52 个已发布 wasm 版本 | ✅ 默认值见下 |
+| 23.1.1（默认，也是 latest） | ✅ |
+| 16.0.6 – 23.1.0 其余 51 个已发布 wasm 版本 | ✅ 默认值见下 |
 
 - 18.1.8 – 21.1.8：wasm 自带 `dump_config`，schema 由它生成。
 - 16.0.6、17.0.x、18.1.0–18.1.7、22.x、23.x：wasm 没有可用的 `dump_config`，schema 默认值由**同版本 native clang-format** dump 生成后提交（22.1.6/22.1.7 不在 PyPI，用 LLVM release 二进制）；运行期格式化仍用 wasm。26 个这样的版本做了 312/312 次 native vs wasm 逐字节对拍。

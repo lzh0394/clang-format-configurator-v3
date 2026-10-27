@@ -374,7 +374,7 @@ test("service worker keeps the app and formatter working offline", async ({ page
           }
           return {
             hasShell: entries.some((path) => path.endsWith("/") || path.endsWith("/index.html")),
-            hasWasmEntry: entries.some((path) => path.includes("/wasm/21.1.8/entry.js")),
+            hasWasmEntry: entries.some((path) => path.includes("/wasm/23.1.1/entry.js")),
             hasWasmBinary: entries.some((path) => path.endsWith(".wasm")),
           };
         }),
@@ -391,7 +391,7 @@ test("service worker keeps the app and formatter working offline", async ({ page
     await page.reload();
     await waitForFormatted(page);
     await expect(page.getByTestId("offline-banner")).toBeVisible();
-    await expect(page.getByTestId("status")).toContainText("clang-format 21.1.8 ready");
+    await expect(page.getByTestId("status")).toContainText("clang-format 23.1.1 ready");
   } finally {
     await context.setOffline(false);
   }

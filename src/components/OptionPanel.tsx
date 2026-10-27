@@ -134,7 +134,7 @@ export default function OptionPanel({
   const searchActive = query !== "";
 
   // Lower-cased plain text of every docstring, built lazily and only while a
-  // search is active (189 docs, ~100 KB of HTML). `prepareDocsHtml` makes the
+  // search is active (209 docs, ~100 KB of HTML). `prepareDocsHtml` makes the
   // index match what the row actually renders (no leaked RST directives).
   const docsText = useMemo(() => {
     if (!searchActive || docs === null) return null;
@@ -332,7 +332,7 @@ export default function OptionPanel({
           <span className={styles.count} data-testid="options-count">
             {`${filtered.length} / ${schema.options.length}`}
           </span>
-          {/* The visible count is terse ("12 / 189"); this polite live region
+          {/* The visible count is terse ("12 / 209"); this polite live region
               announces the debounced result set without changing what is drawn. */}
           <span className={styles.srOnly} role="status" aria-atomic="true">
             {`${filtered.length} of ${schema.options.length} options shown`}

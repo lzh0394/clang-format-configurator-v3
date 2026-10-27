@@ -32,6 +32,32 @@ export type SchemaDocs = Record<string, string>;
 
 export type VersionInfo = { version: string; options: number };
 
+/** Version picker data: newest first, plus which version to preselect. */
+export type VersionIndex = {
+  /** Preselected version: the newest shipped build (index.json keeps both in sync). */
+  default: string | null;
+  /** Newest shipped build; its dropdown entry is labelled "latest". */
+  latest: string | null;
+  /** Newest first. */
+  versions: VersionInfo[];
+};
+
+/** Numeric dotted compare, ordered newest first: 23.1.1 < 16.0.6, 22.1.10 < 22.1.9. */
+export function compareVersionsDesc(a: string, b: string): number {
+  const left = a.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const right = b.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  for (let i = 0; i < Math.max(left.length, right.length); i += 1) {
+    const diff = (right[i] ?? 0) - (left[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+/** Dropdown text: the newest shipped version is marked, the value stays bare. */
+export function versionLabel(version: string, latest: string | null): string {
+  return version === latest ? `${version} (latest)` : version;
+}
+
 export const assetUrl = (path: string): string =>
   new URL(`${import.meta.env.BASE_URL}${path}`, window.location.href).href;
 
@@ -41,8 +67,22 @@ async function getJson<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function loadVersionIndex(): Promise<{ default: string | null; versions: VersionInfo[] }> {
-  return getJson("schema/index.json");
+/**
+ * Sorts newest-first client side too: a service worker cache can still hold an
+ * older index.json, and the picker must not fall back to an arbitrary order.
+ */
+export async function loadVersionIndex(): Promise<VersionIndex> {
+  const raw = await getJson<{ default?: string | null; latest?: string | null; versions?: VersionInfo[] }>(
+    "schema/index.json",
+  );
+  const versions = [...(raw.versions ?? [])]
+    .filter((entry) => typeof entry?.version === "string")
+    .sort((a, b) => compareVersionsDesc(a.version, b.version));
+  const known = new Set(versions.map((entry) => entry.version));
+  const latest =
+    typeof raw.latest === "string" && known.has(raw.latest) ? raw.latest : (versions[0]?.version ?? null);
+  const fallback = typeof raw.default === "string" && known.has(raw.default) ? raw.default : latest;
+  return { default: fallback, latest, versions };
 }
 
 export async function loadSchema(version: string): Promise<SchemaCore> {

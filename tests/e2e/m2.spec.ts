@@ -309,8 +309,17 @@ test("structured error panel shows LLVM diagnostics and formatting recovers", as
   await expect(summary).toHaveAttribute("role", "alert");
   await expect(summary).toContainText("Invalid argument");
 
+  // The 22+ packaging only surfaces the exception text (one line), so on the
+  // default version the panel shows the summary and no detail section.
+  await expect(page.getByTestId("error-detail")).toHaveCount(0);
+  await page.getByTestId("error-dismiss").click();
+  await expect(panel).toBeHidden();
+
+  // The 21.x glue forwards LLVM's stderr, so the same bad value arrives with the
+  // parser diagnostics that the panel renders in its expandable detail block.
+  await page.getByLabel("Version").selectOption("21.1.8");
   const detail = page.getByTestId("error-detail");
-  await expect(detail).toBeVisible();
+  await expect(detail).toBeVisible({ timeout: 15_000 });
   await detail.locator("summary").click();
   await expect(detail.locator("pre")).toContainText("invalid number");
   await expect(detail.locator("pre")).toContainText("ColumnLimit");

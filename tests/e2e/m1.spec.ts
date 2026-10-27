@@ -34,7 +34,7 @@ async function warmDocs(page: Page): Promise<void> {
   await docsResponse;
   await page.waitForTimeout(120);
   await page.getByTestId("options-search").fill("");
-  await expect(page.getByTestId("options-count")).toContainText("189 / 189");
+  await expect(page.getByTestId("options-count")).toContainText("209 / 209");
   await expect(page.getByTestId("option-AccessModifierOffset")).toBeVisible();
 }
 
@@ -501,18 +501,21 @@ test("docs expand lazily loads the documentation and colour-codes the toggle", a
 test("enum and boolean controls edit options", async ({ page }) => {
   await openApp(page);
 
-  await searchOption(page, "AlignAfterOpenBracket");
-  await page.getByTestId("value-AlignAfterOpenBracket").selectOption("AlwaysBreak");
+  // BreakBeforeBraces is still a real enum in the newest schema, and
+  // BreakBeforeTernaryOperators is still a plain bool (AlignAfterOpenBracket and
+  // Cpp11BracedListStyle both changed shape in clang-format 22).
+  await searchOption(page, "BreakBeforeBraces");
+  await page.getByTestId("value-BreakBeforeBraces").selectOption("Allman");
 
-  await searchOption(page, "Cpp11BracedListStyle");
-  const bool = page.getByTestId("value-Cpp11BracedListStyle");
+  await searchOption(page, "BreakBeforeTernaryOperators");
+  const bool = page.getByTestId("value-BreakBeforeTernaryOperators");
   await expect(bool).toBeChecked();
   await bool.uncheck();
   await expectModifiedCount(page, 2);
 
   const yaml = await readExportYaml(page);
-  expect(yaml).toContain("AlignAfterOpenBracket: AlwaysBreak");
-  expect(yaml).toContain("Cpp11BracedListStyle: false");
+  expect(yaml).toContain("BreakBeforeBraces: Allman");
+  expect(yaml).toContain("BreakBeforeTernaryOperators: false");
 });
 
 // ---------------------------------------------------------------------------

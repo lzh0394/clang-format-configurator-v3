@@ -5,7 +5,7 @@ import { openApp } from "./helpers";
 // M4 acceptance: the accessibility / interaction leftovers from M3.
 //
 // 1. The virtualized options list is a single Tab stop with a roving model:
-//    arrow keys, Home/End and PageUp/PageDown reach every one of the 189 rows
+//    arrow keys, Home/End and PageUp/PageDown reach every one of the 209 rows
 //    even though only the visible window is in the DOM.
 // 2. Tab enters the controls of the active row and Shift+Tab returns to it.
 // 3. ConfigDialog traps Tab, closes on Escape and returns focus to its trigger
@@ -19,8 +19,8 @@ import { openApp } from "./helpers";
 // suite against a fresh `vite preview` (port 4173 must be free).
 
 const FIRST_OPTION = "AccessModifierOffset";
-/** Index of the last option in clang-format 21.1.8 (189 options, 0-based). */
-const LAST_INDEX = 188;
+/** Index of the last option in clang-format 23.1.1 (209 options, 0-based). */
+const LAST_INDEX = 208;
 
 /** Index of the virtual row that currently has focus, or null when focus is elsewhere. */
 async function activeRowIndex(page: Page): Promise<number | null> {
@@ -70,11 +70,11 @@ test("arrow keys move the roving tab stop across the whole virtualized list", as
   await expect(first).toBeFocused();
 
   // Only the active row is in the tab order, and virtualization keeps the DOM
-  // far smaller than the 189 options.
+  // far smaller than the 209 options.
   expect(await countRovingTabStops(page)).toBe(1);
   const renderedBefore = await countRenderedRows(page);
   expect(renderedBefore).toBeGreaterThan(1);
-  expect(renderedBefore).toBeLessThan(189);
+  expect(renderedBefore).toBeLessThan(209);
 
   // 40 rows down: well past the first virtual window.
   for (let step = 0; step < 40; step += 1) {
@@ -115,7 +115,7 @@ test("arrow keys move the roving tab stop across the whole virtualized list", as
   await page.getByTestId("options-search").fill("IndentWidth");
   await page.waitForTimeout(180);
   await expect(page.getByTestId("option-IndentWidth")).toHaveCount(1);
-  await expect(page.getByTestId("options-count")).not.toContainText("189 / 189");
+  await expect(page.getByTestId("options-count")).not.toContainText("209 / 209");
   expect(await countRovingTabStops(page)).toBe(1);
   const rovingIndex = async (): Promise<number | null> =>
     page.evaluate(() => {
@@ -234,14 +234,16 @@ test("docs code blocks are focusable and leaked RST markers are cleaned", async 
 
   // Enum tables used to show the generator's raw `.. code-block:: c++` marker in
   // the "Meaning" column; the render layer cleans it up (tools/gen-schema.mjs is
-  // owned by another M4 task and is not touched here).
-  await page.getByTestId("options-search").fill("AlignAfterOpenBracket");
+  // owned by another M4 task and is not touched here). BreakBeforeBraces is the
+  // enum that still carries such a marker in the newest schema
+  // (AlignAfterOpenBracket became a bool in clang-format 22).
+  await page.getByTestId("options-search").fill("BreakBeforeBraces");
   await page.waitForTimeout(180);
-  await page.getByTestId("docs-AlignAfterOpenBracket").click();
-  const enumDocs = page.getByTestId("docs-content-AlignAfterOpenBracket");
+  await page.getByTestId("docs-BreakBeforeBraces").click();
+  const enumDocs = page.getByTestId("docs-content-BreakBeforeBraces");
   await expect(enumDocs).toBeVisible({ timeout: 15_000 });
   await expect(enumDocs).not.toContainText("code-block::");
-  await expect(enumDocs).toContainText("Align parameters on the open bracket");
+  await expect(enumDocs).toContainText("Always attach braces to surrounding context");
   expect(await enumDocs.locator("pre").count()).toBe(0);
 });
 

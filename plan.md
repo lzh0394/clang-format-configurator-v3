@@ -89,7 +89,7 @@
 
 ## 3. 资源流水线（替换掉 Docker + 30 分钟编译）
 
-`tools/versions.json` 是唯一事实来源：52 条 `{version, tag, pkg}` 记录（默认 21.1.8；wasm 没有可用 `dump_config` 的版本额外带 `"dump": "native"`）。
+`tools/versions.json` 是唯一事实来源：52 条 `{version, tag, pkg}` 记录（默认即最新 23.1.1；wasm 没有可用 `dump_config` 的版本额外带 `"dump": "native"`）。
 
 - **fetch-wasm.mjs**：查 `registry.npmjs.org` 拿 tarball URL + `dist.integrity`，校验 sha512 后解出运行时文件到 `public/wasm/<ver>/`，并生成统一入口 `entry.js`（见 §3.1）。幂等：`tools/wasm.lock.json` 记录每个文件的 sha256，命中即跳过。
 - **gen-schema.mjs**，对每个版本：

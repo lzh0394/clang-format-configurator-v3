@@ -142,7 +142,7 @@ tests/
   golden/              29 组 native clang-format 21.1.8 黄金输出（提交入库）
   e2e/                 helpers + smoke + m1 + m2 + m3 + m4 + m4-pwa + m4-a11y + soft-wrap + golden + perf
 public/
-  schema/<ver>/        已提交（core.json + docs.json），52 个版本；index.json 驱动版本下拉
+  schema/<ver>/        已提交（core.json + docs.json），52 个版本；index.json 驱动版本下拉（新→旧，带 default/latest）
   manifest.json        PWA manifest（相对 start_url/scope）
   icons/               PWA 图标（192/512/maskable/apple-touch）
   sw.js                手写 Service Worker（Vite 原样拷进 dist）
@@ -159,7 +159,7 @@ NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt�
 ## 6. 已实现的行为与实现细节（读代码前必须知道）
 
 1. **持久化（`persisted-state.ts` + `App.tsx`）**：状态文档 `{stateVersion, version, style, modified, code, theme, editorFontSize, uiFontScale, softWrap}`，`STORAGE_KEY="clang-format-configurator:v3"`，`STATE_VERSION=1`。`loadPersistedState` 同步、不抛异常：`empty/unavailable` 静默，`corrupt/version-mismatch` → 丢弃 + 一次性 notice（"Saved session was discarded"），单字段非法只降级为默认。`savePersistedState` 自身 stamp 版本号，quota/unavailable 返回状态码，App 只提示一次（`persist-banner`）。保存 400 ms 防抖；`pagehide`/卸载用 ref 稳定回调 flush（**不要让 flush effect 依赖每次编辑都变的函数**，否则每敲一个键都会同步写 localStorage）。
-2. **版本恢复**：版本列表加载后优先用存档里的 version（仍在 `schema/index.json` 里才用），否则用默认版本；`reconcileModified` 丢弃目标 schema 不认识/已废弃的键，丢弃时把键名收进 notice（最多列 12 个）。
+2. **版本恢复**：版本列表加载后优先用存档里的 version（仍在 `schema/index.json` 里才用），否则用默认版本（`index.json` 的 `default`，现在与 `latest` 一起指向最新 23.1.1，发布新版本即自动成为默认）；下拉按版本号降序（`compareVersionsDesc`，客户端也会再排一次，防止 SW 缓存里的旧 index.json），最新一条显示 `23.1.1 (latest)`，option 的 value 保持纯版本号；`reconcileModified` 丢弃目标 schema 不认识/已废弃的键，丢弃时把键名收进 notice（最多列 12 个）。
 3. **主题（`theme.ts` + `SettingsMenu` + `styles.css`）**：三档 system/light/dark；显式档设 `html[data-theme=...]` + 内联 `color-scheme`，system 移除两者交给 `prefers-color-scheme`。CSS 词令顺序：`:root` 浅色基色 → `@media dark { :root:not([data-theme=light]) }` → `:root[data-theme=dark]`。`index.html` 预置脚本读 storage 的 `theme` 提前应用（防闪白）。**没有 matchMedia 监听**：system 档完全交给 CSS，切系统主题即时生效。
 4. **响应式（`App.tsx` + `App.module.css`）**：`matchMedia("(max-width: 768px)")` 控制 `isMobile`；移动端渲染 `role="tablist"` 的两个 tab（`tab-options`/`tab-code`，默认 Code），main 上加 `mainOptions`/`mainCode` 类隐藏另一面板；←/→ 切换并转移焦点。CSS 断点：1100px/900px 是布局细化，768px 才是选项卡。
 5. **可访问性**：跳过链接（`#main`）；`live-status` 是 visually-hidden 的 polite 播报（busy/error/formatted，避免每 250 ms 抖动）；OptionPanel 的 "N of M options shown" 是 debounced 的 polite 状态；对话框用 `aria-labelledby` 指可见标题；错误 `role="alert"`；chips `aria-pressed`；docs 展开 `aria-expanded + aria-controls`；可滚动 `<pre>`/warnings 加了 tabIndex；`--border-control` 专用于控件边框（1.4.11），`--border` 保持装饰用途。
