@@ -1,0 +1,69 @@
+name: version-watch
+
+# Watches upstream for a clang-format release newer than the newest entry in
+# tools/versions.json.
+#
+# Only @wasm-fmt/clang-format builds are actionable: the app formats in the
+# browser, so an LLVM tag without a matching wasm package cannot be added.
+# A newer LLVM release on its own is reported in the log and in the issue body,
+# but never opens an issue.
+#
+# Unlike nightly.yml this workflow only tracks *new* versions; schema drift for
+# the pinned ones stays nightly's job. A failed run is left red on purpose: a
+# watch that silently stops working is worse than one that is visibly broken.
+
+on:
+  schedule:
+    # Mondays 04:07 UTC (off the top of the hour to avoid the busy cron window).
+    - cron: "7 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: version-watch
+  cancel-in-progress: false
+
+jobs:
+  upstream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # The check script uses only node builtins (global fetch), no npm ci.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Compare tools/versions.json with upstream
+        id: watch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node tools/check-new-versions.mjs
+
+      - name: Open or update the tracking issue
+        if: steps.watch.outputs.wasm_new != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          WASM_NEW: ${{ steps.watch.outputs.wasm_new }}
+          ADDABLE: ${{ steps.watch.outputs.addable }}
+          REPO_MAX: ${{ steps.watch.outputs.repo_max }}
+          LLVM_MAX: ${{ steps.watch.outputs.llvm_max }}
+        run: |
+          set -euo pipefail
+          title="new clang-format version ${WASM_NEW} available"
+          existing=$(gh issue list --search 'new clang-format version in:title' --state open --limit 50 \
+            --json title,number --jq "first(.[] | select(.title == \"$title\") | .number) // empty")
+          if [ -n "$existing" ]; then
+            echo "issue #$existing already tracks $WASM_NEW; nothing to do"
+            exit 0
+          fi
+
+          body=$(printf 'A newer wasm build of clang-format was published on npm than the newest entry in `tools/versions.json`.\n\n| | version |\n|---|---|\n| newest in `tools/versions.json` | %s |\n| wasm builds to add | %s |\n| newest LLVM release | %s |\n\n- Run: %s\n- Reproduce locally with `npm run check:versions`.\n\nTo add: append the row(s) to `tools/versions.json` (`"dump": "native"` for 16/17/18.1.0-7/22/23), run `npm run prepare:assets -- --only=<ver>`, then commit `public/schema/<ver>` and `tools/wasm.lock.json`. The wasm cache key is `hashFiles('\''tools/versions.json'\'')`, so CI re-downloads on the next push.\n' \
+            "$REPO_MAX" "$ADDABLE" "${LLVM_MAX:-unknown}" "$RUN_URL")
+
+          gh issue create --title "$title" --body "$body"

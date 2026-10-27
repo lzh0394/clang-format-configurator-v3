@@ -13,6 +13,7 @@
     "prepare:assets": "node tools/prepare-assets.mjs",
     "prepare:wasm": "node tools/fetch-wasm.mjs",
     "schema:check": "node tools/gen-schema.mjs --check",
+    "check:versions": "node tools/check-new-versions.mjs",
     "check:size": "node tools/check-size.mjs",
     "golden:gen": "node tools/gen-golden.mjs",
     "verify": "npm run typecheck && npm run test && npm run build"

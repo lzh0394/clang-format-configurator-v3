@@ -3,6 +3,7 @@
 [![ci](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/ci.yml/badge.svg)](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/ci.yml)
 [![deploy](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/deploy.yml/badge.svg)](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/deploy.yml)
 [![nightly](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/nightly.yml/badge.svg)](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/nightly.yml)
+[![version-watch](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/version-watch.yml/badge.svg)](https://github.com/lzh0394/clang-format-configurator-v3/actions/workflows/version-watch.yml)
 [![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
 
 纯静态的 clang-format 配置器：选版本、选风格、在选项面板里改选项，浏览器内 wasm 实时格式化，导入/导出 `.clang-format`。没有后端，可以离线跑。
@@ -60,6 +61,7 @@ npm run dev              # http://localhost:5173
 | `npm run prepare:assets` | fetch-wasm + gen-schema |
 | `npm run prepare:wasm` | 只下载 wasm（CI 用，schema 已入库） |
 | `npm run schema:check` | 把 schema 重新生成到 `.cache/schema-check` 并与已提交内容逐文件比对（`-- --allow-missing-native` 供 nightly 用） |
+| `npm run check:versions` | 对比 `tools/versions.json` 与 npm 上最新的 wasm 构建 / 最新 LLVM release（`-- --json` 输出机器可读结果；version-watch 用） |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | Vitest 单测 |
 | `npm run test:e2e` | Playwright（本地用 Edge：`channel=msedge`；CI 里 `PW_CHANNEL=chromium`） |
@@ -83,6 +85,7 @@ tools/
   prepare-assets.mjs     依次跑 fetch-wasm + gen-schema（--only=<ver> 只处理单个版本）
   gen-golden.mjs         用 native 21.1.8 生成/校验 tests/golden 的期望输出
   check-size.mjs         按 plan §1 检查 dist 的 gzip 预算（52 个版本，CI 闸门）
+  check-new-versions.mjs 对比 versions.json 与 npm/LLVM 最新发布，发现可加的新版本（version-watch 用）
   wasm.lock.json         已提交：52 条 integrity + 178 个文件 sha256
   lib/rst.mjs            RST 解析 + 子集渲染成 HTML
   lib/tar.mjs            最小 ustar 读取（不引 tar 依赖）
@@ -135,7 +138,7 @@ public/
 
 ## 部署
 
-推到 `main` 即自动发布到 GitHub Pages（`Settings → Pages → Source: GitHub Actions`）。工作流分三段：build（含 e2e）→ deploy → smoke（对线上 URL 再跑一遍 Playwright，等 Pages 返回 200 后开始）。子路径与缓存策略见 plan.md 第 8.1 节。`nightly.yml` 每天重新生成 schema 并与已提交内容比对，漂移只开 issue、不阻塞发布。
+推到 `main` 即自动发布到 GitHub Pages（`Settings → Pages → Source: GitHub Actions`）。工作流分三段：build（含 e2e）→ deploy → smoke（对线上 URL 再跑一遍 Playwright，等 Pages 返回 200 后开始）。子路径与缓存策略见 plan.md 第 8.1 节。`nightly.yml` 每天重新生成 schema 并与已提交内容比对，漂移只开 issue、不阻塞发布。`version-watch.yml` 每周一对比 `tools/versions.json` 与 npm 上最新的 wasm 构建，只有出现**可直接加入**的新 wasm 版本时才开 issue（纯 LLVM 新 tag 只写进日志和 issue 正文）；它不判断版本是否值得加，只负责提醒。
 
 ## 致谢
 

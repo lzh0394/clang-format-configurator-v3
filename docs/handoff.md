@@ -8,6 +8,7 @@
 **M0–M4 全部完成，v3 完整交付**：骨架/资源流水线、选项引擎、编辑器与 diff、持久化/主题/响应式/离线、a11y 闸门，以及 M4 的分享链接、PWA（manifest + 安装提示）、C#/Proto 等示例与语言扩展、全部 **52** 个 wasm 版本、界面字号缩放、虚拟列表 roving、ConfigDialog 焦点陷阱、docs `<pre>` 可聚焦、nightly schema 漂移检查；2026-10-26 增补**默认开启的软折行**。
 `npm run verify` 全绿（typecheck + **300 单测 / 18 文件** + build）；Playwright **70 条**（4 smoke + 17 M1 + 12 M2 + 11 M3 + 1 golden + 2 perf + 9 M4 + 5 M4-PWA + 5 M4-a11y + 4 soft-wrap）在 base `/` 与 `/<repo>/` 子路径下各 **70 passed**（perf 在独立 project 里串行跑）；`npm run check:size` **157 项全过**（首屏 JS **224.7 KB gzip** / 250 KB；52 个 wasm 902.4–1071.5 KB / 1.1 MB；core 6.4–8.5 KB、docs 19.3–24.6 KB）；黄金对拍 29/29 与 native 21.1.8 逐字节相同；52/52 版本运行期自检 + 312/312 native vs wasm 对拍；格式化 p95 9–23 ms（预算 80 ms）；dist ≈130 MB。
 **nightly**：`schema:check --allow-missing-native` 每日跑，漂移只开 issue，不阻塞发布。
+**version-watch**：`check:versions` 每周一跑，`tools/versions.json` 落后于 npm 上最新 wasm 构建时开 issue；纯 LLVM 新 tag 只进日志/正文（没有 wasm 构建就加不了什么）。
 
 ## 2. 链接
 
@@ -150,6 +151,7 @@ public/
   ci.yml               verify（typecheck/unit/golden check/size/build/e2e）+ Playwright/wasm 缓存
   deploy.yml           build（含 e2e）→ deploy → 对线上 URL 跑整套 e2e
   nightly.yml          schema 漂移检查（只开 issue）
+  version-watch.yml    上游新版本探测（周一；只对可加入的 wasm 新版本开 issue）
 docs/screenshot.png    线上截图（README 引用）
 NOTICE                 第三方材料与授权说明（LLVM 文档、wasm-fmt、v2 参考）
 ```
